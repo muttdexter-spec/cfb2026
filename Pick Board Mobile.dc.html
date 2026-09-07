@@ -42,7 +42,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 <div style="grid-column:span 2">
 <p style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 3px">Show</p>
 <select value="{{ show }}" onChange="{{ onShow }}" style="font-size:16px;padding:9px 34px 9px 10px;min-height:44px;border:1px solid oklch(0.83 0.008 250);border-radius:7px;background-color:oklch(1 0 0);color:inherit;width:100%">
-<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="ep_c3">Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">BBOC Sixth Gear · 2 Sep</option>
+<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option><option value="ep_c3">Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">BBOC Sixth Gear · 2 Sep</option>
 </select>
 </div>
 <div style="grid-column:span 2">
@@ -293,7 +293,7 @@ const T = {
 const INK = 'oklch(0.23 0.02 258)', SEC = 'oklch(0.44 0.015 255)', MUT = 'oklch(0.505 0.014 255)';
 const FLAG = 'oklch(0.48 0.20 25)', GOOD = 'oklch(0.45 0.13 150)';
 const WXC = { aqua: 'oklch(0.80 0.06 196)', orange: 'oklch(0.80 0.07 62)', blue: 'oklch(0.80 0.06 255)', yellow: 'oklch(0.84 0.07 100)' };
-const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer' };
+const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer', Unnamed: 'unresolved', Ibo: 'guest' };
 const PROBLEM = /STALE|UNGRADEABLE|NO NUMBER|NO PRICE|NOT CITED|NEVER CITED|garbled|OPPONENT WAS NEVER|AMBIGUOUS|IMPLAUSIBLE|unverified|limit risk/i;
 function isProblem(p) { return PROBLEM.test(p[9] || ''); }
 const MONO = "'IBM Plex Mono',ui-monospace,monospace";
@@ -858,7 +858,7 @@ class Component extends DCLogic {
 
   pickerBits() {
     const s = this.state, sel = s.pickers;
-    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Brooks', 'Dentist', 'Producer'];
+    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Portnoy', 'Bosco', 'Hank', 'Brooks', 'Dentist', 'Producer', 'Unnamed', 'Ibo'];
     return {
       label: !sel.length ? 'all' : sel.length === 1 ? sel[0] : sel.length + ' selected',
       clear: () => this.setState({ pickers: [], open: null }),
@@ -886,6 +886,7 @@ class Component extends DCLogic {
     const s = this.state, f = p[9] || '', mk = market(p[1]), d = s.d, src = p[8] || '';
     if (s.show === 'c3' && src.indexOf('Cover 3') !== 0) return false;
     if (s.show === 'bboc' && src.indexOf('BBOC') !== 0) return false;
+    if (s.show === 'pickem' && src.indexOf('Barstool Pick Em') !== 0) return false;
     if (s.show === 'ep_c3' && d && src !== d.C3) return false;
     if (s.show === 'ep_bp' && d && src !== d.BP) return false;
     if (s.show === 'ep_sg' && d && src !== d.SG) return false;

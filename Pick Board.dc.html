@@ -29,13 +29,10 @@ select{font-family:inherit}
 </div>
 
 <h1 style="font:600 20px/1.25 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 6px;letter-spacing:-0.01em">{{ hdrTitle }}</h1>
-<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin:10px 0 6px">
-<select value="{{ week }}" onChange="{{ onWeek }}" style="font-size:12.5px;font-weight:500;padding:5px 8px;border:1px solid oklch(0.72 0.01 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
-<option value="all">All weeks</option>
-<sc-for list="{{ weekOpts }}" as="wo" hint-placeholder-count="2"><option value="{{ wo.v }}">{{ wo.label }}</option></sc-for>
-</select>
+<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 8px;max-width:74ch">{{ hdrSub }}</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin-bottom:6px">
 <select value="{{ show }}" onChange="{{ onShow }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
-<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="ep_c3">— Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">— BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">— BBOC Sixth Gear · 2 Sep</option>
+<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option><option value="ep_c3">— Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">— BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">— BBOC Sixth Gear · 2 Sep</option>
 </select>
 <span data-pk="1" style="position:relative;display:inline-block">
 <button type="button" onClick="{{ onPkOpen }}" aria-expanded="{{ pkExpanded }}" style="font:400 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ pickerLabel }}<span style="font-size:9px;color:oklch(0.505 0.014 255)">▼</span></button>
@@ -79,7 +76,7 @@ select{font-family:inherit}
 <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
 <div style="padding:44px 0;text-align:center;border-top:1px solid oklch(0.895 0.006 250)">
 <p style="font:500 14px/1.4 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 5px">No positions match those filters</p>
-<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:0">{{ emptyNote }}</p>
+<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:0">Widen the tier or market filter to bring rows back.</p>
 </div>
 </sc-if>
 
@@ -95,10 +92,7 @@ select{font-family:inherit}
 <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:7px">
 <span style="font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif">{{ g.title }}</span>
 <sc-if value="{{ g.proj }}" hint-placeholder-val="{{ false }}"><span style="{{ g.projSt }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">model</span>{{ g.proj }}</span></sc-if>
-<sc-if value="{{ g.mkt }}" hint-placeholder-val="{{ false }}"><span style="{{ g.mktSt }}">
-<sc-if value="{{ g.mktDK }}" hint-placeholder-val="{{ true }}"><img src="./assets/draftkings.png" alt="DraftKings" style="flex:none;height:13px;width:auto;display:block;margin:-1px 0"></sc-if>
-<sc-if value="{{ g.mktBook }}" hint-placeholder-val="{{ false }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">{{ g.mktBook }}</span></sc-if>
-{{ g.mkt }}</span></sc-if>
+<sc-if value="{{ g.mkt }}" hint-placeholder-val="{{ false }}"><span style="{{ g.mktSt }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">market</span>{{ g.mkt }}</span></sc-if>
 <sc-if value="{{ g.status }}" hint-placeholder-val="{{ false }}"><span style="{{ g.statusSt }}"><sc-if value="{{ g.liveDot }}" hint-placeholder-val="{{ false }}"><span style="{{ g.dotSt }}"></span></sc-if>{{ g.status }}</span></sc-if>
 <sc-for list="{{ g.cond }}" as="wc" hint-placeholder-count="2"><span style="{{ wc.st }}"><sc-if value="{{ wc.dome }}" hint-placeholder-val="{{ false }}"><span style="{{ wc.domeSt }}"></span></sc-if>{{ wc.text }}</span></sc-for>
 </div>
@@ -112,7 +106,6 @@ select{font-family:inherit}
 <sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3">
 <button type="button" onClick="{{ c.click }}" aria-expanded="{{ c.expanded }}" style="{{ c.st }}">
 <sc-if value="{{ c.star }}" hint-placeholder-val="{{ false }}"><span aria-label="Tier 3" style="font-size:11px;line-height:1;margin-right:-1px">★</span></sc-if>
-<sc-if value="{{ c.res }}" hint-placeholder-val="{{ false }}"><span style="{{ c.resSt }}">{{ c.res }}</span></sc-if>
 <span style="{{ c.nameSt }}">{{ c.name }}</span><span>{{ c.pick }}</span>
 <sc-if value="{{ c.delta }}" hint-placeholder-val="{{ false }}"><span style="{{ c.deltaSt }}">{{ c.delta }}</span></sc-if>
 <sc-if value="{{ c.edge }}" hint-placeholder-val="{{ false }}"><span style="{{ c.edgeSt }}">{{ c.edge }}</span></sc-if>
@@ -125,7 +118,6 @@ select{font-family:inherit}
 <div style="display:flex;gap:12px;align-items:baseline;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid oklch(0.895 0.006 250)">
 <div style="flex:1 1 auto;display:flex;flex-wrap:wrap;gap:3px 10px;align-items:baseline">
 <span style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif">{{ g.det.head }}</span>
-<sc-if value="{{ g.det.resLabel }}" hint-placeholder-val="{{ false }}"><span style="{{ g.det.resSt }}">{{ g.det.resLabel }}</span></sc-if>
 <sc-if value="{{ g.det.tag }}" hint-placeholder-val="{{ false }}"><span style="font:500 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;padding:3px 6px;border-radius:3px;background:oklch(0.90 0.01 250);color:oklch(0.44 0.015 255)">{{ g.det.tag }}</span></sc-if>
 <span style="font:400 11.5px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ g.det.meta }}</span>
 </div>
@@ -284,7 +276,7 @@ const T = {
 const INK = 'oklch(0.23 0.02 258)', SEC = 'oklch(0.44 0.015 255)', MUT = 'oklch(0.505 0.014 255)';
 const FLAG = 'oklch(0.48 0.20 25)', GOOD = 'oklch(0.45 0.13 150)';
 const WXC = { aqua: 'oklch(0.80 0.06 196)', orange: 'oklch(0.80 0.07 62)', blue: 'oklch(0.80 0.06 255)', yellow: 'oklch(0.84 0.07 100)' };
-const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer' };
+const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer', Unnamed: 'unresolved', Ibo: 'guest' };
 const PROBLEM = /STALE|UNGRADEABLE|NO NUMBER|NO PRICE|NOT CITED|NEVER CITED|garbled|OPPONENT WAS NEVER|AMBIGUOUS|IMPLAUSIBLE|unverified|limit risk/i;
 function isProblem(p) { return PROBLEM.test(p[9] || ''); }
 const MONO = "'IBM Plex Mono',ui-monospace,monospace";
@@ -594,66 +586,22 @@ function reasonIndex(reasonRows, ledgerRows) {
     if (!host) return;
     const sig = ((r.market_type || 'SPREAD').toUpperCase()) + '|' + ((r.ext_period || 'FG').toUpperCase() || 'FG');
     const k = host + '|' + gameKey(r.matchup);
-    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null, led: r });
+    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null });
   });
   return _rmap;
 }
-// resolve a board pick to its single ledger entry; null when the match is ambiguous
-function matchEntry(p, matchup, reasonRows, ledgerRows) {
-  if (!ledgerRows || !ledgerRows.length) return null;
-  const ix = reasonIndex(reasonRows || [], ledgerRows);
-  const list = ix[p[0] + '|' + gameKey(matchup)];
-  if (!list || !list.length) return null;
-  if (list.length === 1) return list[0];
-  const sig = pickSig(p[1]);
-  const exact = list.filter(x => x.sig === sig);
-  if (exact.length === 1) return exact[0];
-  const mt = sig.split('|')[0];
-  const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
-  return byMt.length === 1 ? byMt[0] : null;
-}
 function reasonFor(p, matchup, reasonRows, ledgerRows) {
   if (!reasonRows || !reasonRows.length) return null;
-  const e = matchEntry(p, matchup, reasonRows, ledgerRows);
-  return e ? e.row : null;
-}
-// graded outcome of a single pick, straight from the grader's `result`
-const RES = {
-  W: { mark: 'W', label: 'Won', bg: 'oklch(0.90 0.085 150)', fg: 'oklch(0.34 0.12 150)' },
-  L: { mark: 'L', label: 'Lost', bg: 'oklch(0.905 0.075 25)', fg: 'oklch(0.42 0.19 25)' },
-  P: { mark: 'P', label: 'Push', bg: 'oklch(0.90 0.006 250)', fg: 'oklch(0.40 0.012 255)' }
-};
-function resultFor(p, matchup, reasonRows, ledgerRows) {
-  const e = matchEntry(p, matchup, reasonRows, ledgerRows);
-  if (!e || !e.led) return null;
-  const c = String(e.led.result || '').toUpperCase().charAt(0);
-  const r = RES[c];
-  if (!r) return null;
-  return { mark: r.mark, label: r.label, bg: r.bg, fg: r.fg, disputed: String(e.led.disputed || '').toUpperCase() === 'TRUE' };
-}
-
-// --- week ---------------------------------------------------------------
-// Week comes from the schedule the game sits on, not from the pipeline's
-// current_week: a Week 1 grid must stay labelled Week 1 after the config rolls over.
-function weekMins() {
-  const R = window.REF;
-  if (!R) return {};
-  const m = {};
-  R.GAMES.forEach(g => {
-    const t = Date.parse(g.ko);
-    if (isNaN(t) || !g.wk) return;
-    if (!m[g.wk] || t < m[g.wk]) m[g.wk] = t;
-  });
-  return m;
-}
-// the week the board should open on: rolls over on the Monday before its first kickoff
-function currentWeek(now) {
-  const m = weekMins();
-  let cur = null;
-  Object.keys(m).map(Number).sort((a, b) => a - b).forEach(w => {
-    if (m[w] - 3 * 86400000 <= now) cur = w;
-  });
-  return cur;
+  const ix = reasonIndex(reasonRows, ledgerRows);
+  const list = ix[p[0] + '|' + gameKey(matchup)];
+  if (!list || !list.length) return null;
+  if (list.length === 1) return list[0].row;
+  const sig = pickSig(p[1]);
+  const exact = list.filter(x => x.sig === sig);
+  if (exact.length === 1) return exact[0].row;
+  const mt = sig.split('|')[0];
+  const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
+  return byMt.length === 1 ? byMt[0].row : null;
 }
 function reasonBlock(r) {
   if (!r) return null;
@@ -810,21 +758,11 @@ function mktText(lines, sg) {
   const m = lines[String(sg.id)];
   if (!m) return null;
   const bits = [];
-  // the feed's spread is home-relative; show it against the favourite, the way the model chip does
-  if (m.spread !== null && !isNaN(m.spread)) {
-    bits.push(m.spread === 0
-      ? 'pick \u2019em'
-      : teamShort(m.spread < 0 ? sg.h : sg.a) + ' ' + (-Math.abs(m.spread)).toString());
-  }
+  if (m.spread !== null && !isNaN(m.spread)) bits.push(sgn(m.spread));
   if (m.total !== null && !isNaN(m.total)) bits.push('o' + m.total);
   if (!bits.length) return null;
-  const dk = m.book === 'DraftKings' || m.book === 'DraftKings_Alt';
-  return {
-    // the logo stands in for the book name; DraftKings_Alt is a second DK feed, not a typo, so it keeps a label
-    dk: dk,
-    book: m.book === 'DraftKings' ? '' : m.book === 'DraftKings_Alt' ? 'alt' : 'BOV',
-    txt: bits.join(' · ') + (m.snap === 'CURRENT' ? '' : ' ' + (m.snap === 'OPEN' ? 'open' : 'close~'))
-  };
+  const book = m.book === 'DraftKings' ? 'DK' : m.book === 'DraftKings_Alt' ? 'DK2' : 'BOV';
+  return book + ' ' + bits.join(' · ') + (m.snap === 'CURRENT' ? '' : ' ' + (m.snap === 'OPEN' ? 'open' : 'close~'));
 }
 
 // ---- results ------------------------------------------------------------
@@ -850,7 +788,7 @@ function finalText(results, sg) {
 }
 
 class Component extends DCLogic {
-  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), week: 'all', tier: '0', market: 'all', flag: 'all', show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0 };
+  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), tier: '0', market: 'all', flag: 'all', show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0 };
 
   componentDidMount() {
     const load = n => {
@@ -862,8 +800,7 @@ class Component extends DCLogic {
       csvParse(B.COND_CSV || '').forEach(r => { if (r.matchup) cond[r.matchup] = r; });
       const lines = buildLines(B.LINES_CSV || '');
       const results = buildResults(B.RESULTS_CSV || '');
-      const cw = currentWeek(Date.now());
-      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results, week: cw ? String(cw) : 'all' });
+      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results });
       this.fetchForecast(cond);
     };
     load(0);
@@ -886,7 +823,7 @@ class Component extends DCLogic {
 
   pickerBits() {
     const s = this.state, sel = s.pickers;
-    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Brooks', 'Dentist', 'Producer'];
+    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Portnoy', 'Bosco', 'Hank', 'Brooks', 'Dentist', 'Producer', 'Unnamed', 'Ibo'];
     const tally = {};
     if (s.d) s.d.G.forEach(day => day[1].forEach(g => g[4].forEach(p => { tally[p[0]] = (tally[p[0]] || 0) + 1; })));
     return {
@@ -917,6 +854,7 @@ class Component extends DCLogic {
     const s = this.state, f = p[9] || '', mk = market(p[1]), d = s.d, src = p[8] || '';
     if (s.show === 'c3' && src.indexOf('Cover 3') !== 0) return false;
     if (s.show === 'bboc' && src.indexOf('BBOC') !== 0) return false;
+    if (s.show === 'pickem' && src.indexOf('Barstool Pick Em') !== 0) return false;
     if (s.show === 'ep_c3' && d && src !== d.C3) return false;
     if (s.show === 'ep_bp' && d && src !== d.BP) return false;
     if (s.show === 'ep_sg' && d && src !== d.SG) return false;
@@ -997,10 +935,7 @@ class Component extends DCLogic {
     const legend = [0, 1, 2, 3].map(i => ({
       label: T[i].key.charAt(0).toUpperCase() + T[i].key.slice(1),
       st: { width: '10px', height: '10px', borderRadius: '2px', background: T[i].bg, boxShadow: 'inset 0 0 0 1px ' + T[i].line + ', inset 0 -3px 0 0 ' + T[i].tick, display: 'inline-block' }
-    })).concat(['W', 'L', 'P'].map(c => ({
-      label: RES[c].label + ' (' + c + ')',
-      st: { width: '10px', height: '10px', borderRadius: '2px', background: RES[c].bg, boxShadow: 'inset 0 0 0 1px ' + RES[c].fg, display: 'inline-block' }
-    })));
+    }));
     const halfTabs = [['both', 'Both'], ['h1', '1H'], ['h2', '2H']].map(v => ({
       label: v[1],
       click: () => this.setState({ half: v[0] }),
@@ -1013,24 +948,7 @@ class Component extends DCLogic {
       }
     }));
     const pk = this.pickerBits();
-    if (!d) return { hdrTitle: 'Pick board', legend: legend, days: [], empty: false, emptyNote: '', week: s.week, weekOpts: [], onWeek: () => {}, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear };
-
-    // Weeks come from the schedule, not from the weeks the pick grid happens to cover:
-    // a week with a market but no extracted picks still has to be selectable.
-    const cw = currentWeek(s.now);
-    const wkSet = {};
-    (window.REF ? window.REF.GAMES : []).forEach(g => { if (g.wk && (!cw || g.wk <= cw + 1)) wkSet[g.wk] = 1; });
-    d.G.forEach(day => day[1].forEach(g => { const sg = refGame(g[1]); if (sg && sg.wk) wkSet[sg.wk] = 1; }));
-    if (cw) wkSet[cw] = 1;
-    const wkPicks = {};
-    d.G.forEach(day => day[1].forEach(g => {
-      const sg = refGame(g[1]);
-      if (sg && sg.wk) wkPicks[sg.wk] = (wkPicks[sg.wk] || 0) + g[4].length;
-    }));
-    const weekOpts = Object.keys(wkSet).map(Number).sort((a, b) => a - b).map(w => ({
-      v: String(w),
-      label: 'Week ' + w + (wkPicks[w] ? '' : ' · no picks yet')
-    }));
+    if (!d) return { hdrTitle: 'Pick board', hdrSub: '', legend: legend, days: [], empty: false, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear };
 
     let count = 0;
     const days = [], postDays = [];
@@ -1046,12 +964,11 @@ class Component extends DCLogic {
         if (s.win !== 'all' && slotWindow(time) !== s.win) return;
         const rows = [], frows = [];
         games.forEach(g => {
-          const sg = refGame(g[1]);
-          if (s.week !== 'all' && String((sg && sg.wk) || '') !== s.week) return;
           const all = g[4];
           const idx = all.map((p, i) => i).filter(i => this.keep(all[i]));
           if (!idx.length) return;
           const gid = g[1] + '|' + g[0];
+          const sg = refGame(g[1]);
           const mm = modelMargin(sg);
           const ko = sg && sg.ko ? Date.parse(sg.ko) : NaN;
           const mins = isNaN(ko) ? null : (s.now - ko) / 60000;
@@ -1064,16 +981,8 @@ class Component extends DCLogic {
             const dl = delta(p);
             const eg = modelEdge(p, sg);
             const twoCond = eg && k >= 2 && eg.pts >= 1;
-            const rs = resultFor(p, g[1], reasonRows, ledgerRows);
             return {
               name: p[0], pick: p[1], flagged: isProblem(p), star: k === 3,
-              res: rs ? rs.mark : null,
-              resSt: rs ? {
-                flex: 'none', width: '15px', height: '15px', borderRadius: '3px',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                font: '600 10px/1 ' + MONO, background: rs.bg, color: rs.fg,
-                border: rs.disputed ? '1px dashed ' + rs.fg : '1px solid ' + rs.bg
-              } : null,
               edge: eg ? (twoCond ? '\u2713\u2713 ' : '') + (eg.pts >= 0 ? '+' : '') + eg.pts.toFixed(1) : null,
               edgeSt: eg ? { font: '500 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: twoCond ? 'oklch(0.90 0.09 150)' : 'oklch(1 0 0 / 0.62)', color: eg.pts >= 1 ? GOOD : eg.pts <= -1 ? FLAG : MUT } : null,
               expanded: isOpen ? 'true' : 'false',
@@ -1113,14 +1022,7 @@ class Component extends DCLogic {
             const p = open, dl = delta(p), rl = recLine(rec[p[0]]);
             const eDet = modelEdge(p, sg);
             const why = reasonBlock(reasonFor(p, g[1], reasonRows, ledgerRows));
-            const rsD = resultFor(p, g[1], reasonRows, ledgerRows);
             det = {
-              resLabel: rsD ? rsD.label + (rsD.disputed ? ' · disputed' : '') : null,
-              resSt: rsD ? {
-                font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em',
-                padding: '3px 6px', borderRadius: '3px', background: rsD.bg, color: rsD.fg,
-                border: rsD.disputed ? '1px dashed ' + rsD.fg : '1px solid transparent'
-              } : null,
               why: why, whyMissing: !why,
               model: mm === null
                 ? (sg ? 'No rating — FCS opponent' : 'Game not on the schedule')
@@ -1181,7 +1083,6 @@ class Component extends DCLogic {
             if (!det.others.length) det.others = [{ text: 'nobody else on this game', st: { font: '400 12px/1.3 ' + MONO, color: MUT } }];
           }
           const finalTxt = finalText(s.results, sg);
-          const mi = mktText(s.lines, sg);
           const statusTxt = phase === 'live' ? 'in progress'
             : phase === 'post' ? (finalTxt || 'final pending') : null;
           const row = {
@@ -1198,9 +1099,7 @@ class Component extends DCLogic {
             slot: g[0], phase: phase,
             title: g[1], venue: venueTxt, det: det,
             proj: projSpread(sg),
-            mkt: mi ? mi.txt : null,
-            mktDK: mi ? mi.dk : false,
-            mktBook: mi ? mi.book : null,
+            mkt: mktText(s.lines, sg),
             mktSt: {
               display: 'inline-flex', alignItems: 'center', gap: '5px',
               font: '500 11px/1.4 ' + MONO, padding: '2px 7px', borderRadius: '4px',
@@ -1226,9 +1125,11 @@ class Component extends DCLogic {
       fslots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
       if (slots.length) days.push({ label: day[0], slots: slots, note: null, wrapSt: { marginBottom: '26px' }, headSt: DAYHEAD });
       if (fslots.length) {
+        let n = 0;
+        fslots.forEach(sl => { n += sl.games.length; });
         postDays.push({
           label: day[0], slots: fslots,
-          note: 'finished',
+          note: 'finished · ' + n + (n === 1 ? ' game' : ' games') + ' past kickoff + 3h30',
           wrapSt: { marginBottom: '26px', opacity: 0.74 },
           headSt: Object.assign({}, DAYHEAD, { borderBottom: '1.5px dashed oklch(0.78 0.01 250)' })
         });
@@ -1236,17 +1137,10 @@ class Component extends DCLogic {
     });
 
     postDays.forEach(pd => days.push(pd));
-    const onlyWeek = s.week !== 'all';
-    const noPicksThisWeek = onlyWeek && count === 0
-      && !s.pickers.length && s.tier === '0' && s.market === 'all' && s.flag === 'all' && s.date === 'all' && s.win === 'all';
     return {
-      hdrTitle: onlyWeek ? 'Week ' + s.week + ' pick board' : 'Pick board',
+      hdrTitle: (window.BOARD && window.BOARD.META && window.BOARD.META.title) || 'Pick board',
+      hdrSub: (window.BOARD && window.BOARD.META && window.BOARD.META.subtitle) || '',
       legend: legend, days: days, empty: count === 0,
-      week: s.week, weekOpts: weekOpts,
-      onWeek: e => this.setState({ week: e.target.value, open: null }),
-      emptyNote: noPicksThisWeek
-        ? 'Week ' + s.week + ' has a market but no extracted picks yet. Switch weeks to look back.'
-        : 'Widen the tier or market filter to bring rows back.',
       countLabel: !s.pickers.length && s.tier === '0' && s.market === 'all' && s.flag === 'all'
         ? count + ' positions · tap a chip'
         : count + (count === 1 ? ' position shown' : ' positions shown'),

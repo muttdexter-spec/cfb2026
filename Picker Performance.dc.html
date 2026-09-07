@@ -24,12 +24,12 @@ select{font-family:inherit}
 <div style="max-width:1180px;margin:0 auto;padding:26px 24px 80px;font-family:'IBM Plex Sans',system-ui,sans-serif">
 
 <div style="display:flex;gap:2px;margin:0 0 18px;padding:3px;border:1px solid oklch(0.895 0.006 250);border-radius:7px;background:oklch(1 0 0);width:fit-content">
-<a href="./Week 1 Pick Board.dc.html" style="font:500 12.5px/1 'IBM Plex Sans',system-ui,sans-serif;padding:8px 13px;border-radius:5px;color:oklch(0.44 0.015 255)">Pick board</a>
+<a href="./Pick Board.dc.html" style="font:500 12.5px/1 'IBM Plex Sans',system-ui,sans-serif;padding:8px 13px;border-radius:5px;color:oklch(0.44 0.015 255)">Pick board</a>
 <span style="font:500 12.5px/1 'IBM Plex Sans',system-ui,sans-serif;padding:8px 13px;border-radius:5px;background:oklch(0.23 0.02 258);color:oklch(0.99 0 0)">Picker performance</span>
 </div>
 
 <h1 style="font:600 20px/1.25 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 6px;letter-spacing:-0.01em">Picker performance</h1>
-<p style="font:400 13px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 4px;max-width:66ch">Who to follow, and on what. Model edge, volume, market fingerprint and tier discipline read from the ledger today; win%, units and CLV fill in as <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px">result</span> and <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px">clv_points</span> are graded.</p>
+<p style="font:400 13px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 4px;max-width:66ch">{{ hdrSub }}</p>
 
 <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin-bottom:18px">
 
@@ -288,9 +288,11 @@ const SHORT = {
   'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli',
   'Kinsey Brooks': 'Brooks', 'The Dentist': 'The Dentist', 'Producer (Taft/Stryker)': 'Producer',
   'Cover 3 (show-level)': 'Cover 3 (show)', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson',
-  'Mike Calabrese': 'Calabrese', 'Duck': 'Duck'
+  'Mike Calabrese': 'Calabrese', 'Duck': 'Duck',
+  'Dave Portnoy': 'Portnoy', 'Rico Bosco': 'Bosco', 'Hank': 'Hank',
+  'Unnamed Picker (Pick Em)': 'Unnamed (Pick Em)', 'Ibo': 'Ibo'
 };
-const TAG = { 'Kinsey Brooks': 'guest', 'The Dentist': 'unresolved', 'Producer (Taft/Stryker)': 'producer', 'Cover 3 (show-level)': 'show-level' };
+const TAG = { 'Kinsey Brooks': 'guest', 'The Dentist': 'unresolved', 'Producer (Taft/Stryker)': 'producer', 'Cover 3 (show-level)': 'show-level', 'Unnamed Picker (Pick Em)': 'unresolved', 'Ibo': 'guest' };
 const PRESETS = {
   edge: { label: 'Model-led', w: { clv: 0.1, win: 0.1, units: 0.1, edge: 0.7 }, note: 'model edge 70 — price quality, on the largest sample' },
   clv: { label: 'CLV-led', w: { clv: 0.5, win: 0.15, units: 0.15, edge: 0.2 }, note: 'CLV 50 · edge 20 · win% 15 · units 15' },
@@ -298,6 +300,13 @@ const PRESETS = {
   res: { label: 'Results-led', w: { clv: 0.15, win: 0.35, units: 0.35, edge: 0.15 }, note: 'win% 35 · units 35 — rewards banked profit' }
 };
 const SHRINK_K = 20, EDGE_K = 10, EDGE_CAP = 3;
+// An "edge" only counts once it clears the model's own measured noise against the
+// market. calibrate_model.py reports that residual sd; 1.0 was the old placeholder
+// and, at a residual near 7 points, counted essentially every pick as an edge.
+function edgeFloor() {
+  const M = modelCfg();
+  return M.fitted && M.resid_sd ? M.resid_sd : 1;
+}
 
 function csvParse(t) {
   const lines = String(t || '').split(/\r?\n/).filter(l => l.trim().length);
@@ -366,7 +375,16 @@ function fairMargin(price) {
   return z === null ? null : MARGIN_SD * z;
 }
 const RK = s => String(s || '').toUpperCase().replace(/&/g, 'AND').replace(/[^A-Z0-9]/g, '');
-const HFA = 2.0;
+// Model constants. Fitted to the market by calibrate_model.py and carried in
+// BOARD.META.model; the 2.0 / 1.0 fallback is the original assumed pair, which
+// measurably tilts every game toward the away team. Read lazily - the bundle is
+// loaded in the helmet but the page must not hard-fail if it is not there yet.
+const MODEL_FALLBACK = { hfa: 2.0, scale: 1.0, fitted: false };
+function modelCfg() {
+  const B = window.BOARD;
+  return (B && B.META && B.META.model) || MODEL_FALLBACK;
+}
+
 function tokenMatches(tok, name) {
   const a = RK(tok), b = RK(name);
   if (!a || !b) return false;
@@ -411,7 +429,8 @@ function modelMargin(g) {
   if (!R || !g) return null;
   const ph = R.RATINGS[g.h], pa = R.RATINGS[g.a];
   if (!ph || !pa || ph.pr === null || pa.pr === null) return null;
-  return ph.pr - pa.pr + (g.nz ? 0 : HFA);
+  const M = modelCfg();
+  return M.scale * (ph.pr - pa.pr) + (g.nz ? 0 : M.hfa);
 }
 // signed model edge in points for a ledger row; null when unmodelable
 function rowEdge(r) {
@@ -469,6 +488,14 @@ function boxSt(on) {
 }
 function valSt(tone, weight) {
   return { font: (weight || 400) + ' 12.5px/1.3 ' + MONO, color: tone === 'good' ? GOOD : tone === 'bad' ? BAD : tone === 'mute' ? MUT : INK };
+}
+
+// Live counts for the standfirst. Hard-coding them in the template is how the page
+// came to claim "78 of 105 resolved ... 3 where the team never resolved" after a fix
+// had taken those to 81 and zero.
+function perfSubtitle() {
+  const M = window.BOARD && window.BOARD.META;
+  return (M && M.perf_subtitle) || '';
 }
 
 class Component extends DCLogic {
@@ -533,7 +560,7 @@ class Component extends DCLogic {
       const c = num(r.clv_points);
       if (c !== null) { o.clvN++; o.clvSum += c; }
       const eg = rowEdge(r);
-      if (eg !== null) { o.edgeN++; o.edgeSum += eg; if (eg >= 1) o.edgePos++; }
+      if (eg !== null) { o.edgeN++; o.edgeSum += eg; if (eg >= edgeFloor()) o.edgePos++; }
       const res = (r.result || '').toUpperCase().charAt(0);
       o.hist.push({ date: r.game_date || r.episode_date || '', res: res });
       if (res === 'W' || res === 'L' || res === 'P' || res === 'T') {
@@ -606,6 +633,7 @@ class Component extends DCLogic {
       st: { width: '9px', height: '9px', borderRadius: '2px', background: MKT[k].c, display: 'inline-block' }
     }));
     const shell = {
+      hdrSub: perfSubtitle(),
       presetTabs: presetTabs, presetNote: preset.note, grainTabs: grainTabs, spanTabs: spanTabs,
       metricTabs: metricTabs, cols: cols, mixLegend: mixLegend,
       metricDefault: s.metric,
@@ -618,7 +646,7 @@ class Component extends DCLogic {
       onBtOpen: () => this.setState(st => ({ btOpen: !st.btOpen, pkOpen: false })),
       onPickerAll: () => this.setState({ pickers: [] }),
       onBetAll: () => this.setState({ bets: [] }),
-      footnote: 'Model edge is in points, from the preseason power ratings in ncaa-power-ratings.csv (home-field advantage ' + HFA.toFixed(1) + ', zero at neutral sites). On a spread it is the model margin minus the number cited. On a moneyline the cited price is converted to a fair margin (normal margin model, sd ' + MARGIN_SD + ') and edge is the model margin minus that — so a big underdog at a long price is judged on the price, not punished for being an underdog; a moneyline with no price cited is n/a. Totals and team totals stay unmodelable: the ratings carry no pace number. The small number under each Edge value is modelable picks with a point or more of edge, over modelable picks. Score blends model edge with CLV, win% and units per pick, then shrinks each toward neutral by sample size (n / (n + ' + SHRINK_K + ')) so a 3-pick hot streak cannot outrank a graded body of work. Edge is a price test, not a results test: it says the number was good, not that the pick won. Units are 1u flat at the cited price; where no price is cited a spread or total is graded at -110 and a moneyline is excluded, since its return is unknowable without a number. Win% is decisions only — pushes removed.'
+      footnote: 'Model edge is in points, from the preseason power ratings in ncaa-power-ratings.csv (home-field advantage ' + modelCfg().hfa.toFixed(2) + ', zero at neutral sites, ratings scaled by ' + modelCfg().scale.toFixed(3) + '\u2014both fitted to the market, not assumed). On a spread it is the model margin minus the number cited. On a moneyline the cited price is converted to a fair margin (normal margin model, sd ' + MARGIN_SD + ') and edge is the model margin minus that — so a big underdog at a long price is judged on the price, not punished for being an underdog; a moneyline with no price cited is n/a. Totals and team totals stay unmodelable: the ratings carry no pace number. The small number under each Edge value is modelable picks clearing the model\'s measured noise floor, over modelable picks. That floor is not a round number: it is the standard deviation of the model against the market, reported by calibrate_model.py. Read the whole Edge column against it. Where the model\'s error on real margins is larger than the market\'s, an apparent edge is more likely to be the model being wrong than the number being wrong, and Edge is a sanity check on the price rather than a source of edge. Score blends model edge with CLV, win% and units per pick, then shrinks each toward neutral by sample size (n / (n + ' + SHRINK_K + ')) so a 3-pick hot streak cannot outrank a graded body of work. Edge is a price test, not a results test: it says the number was good, not that the pick won. Units are 1u flat at the cited price; where no price is cited a spread or total is graded at -110 and a moneyline is excluded, since its return is unknowable without a number. Win% is decisions only — pushes removed.'
     };
 
     if (!all) {
