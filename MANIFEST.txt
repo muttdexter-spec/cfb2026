@@ -1,0 +1,18 @@
+cfb2026 — complete site. Delete everything in the repo root, then upload all of these.
+
+  index.html                        2,637 bytes
+  support.js                        69,134 bytes
+  board-bundle.js                   127,873 bytes
+  ref-data.js                       289,767 bytes
+  Week 1 Pick Board.dc.html         64,629 bytes
+  Week 1 Pick Board Mobile.dc.html  67,492 bytes
+  Picker Performance.dc.html        53,076 bytes
+  host_pick_ledger.csv              29,249 bytes
+  game_conditions.csv               3,764 bytes
+  reasoning.csv                     60,210 bytes
+  README.md                          (documentation, optional)
+
+11 files total (10 + README). Vercel serves the repo root as-is; no build step.
+
+Sanity check after pushing — board-bundle.js must read 127,873 bytes on GitHub.
+If it reads 67,467 the upload did not replace it.
