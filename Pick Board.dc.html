@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./board-bundle.js"></script>
+<script src="./ref-data.js"></script>
+<style>
+html,body{margin:0;background:oklch(0.985 0.003 250);color:oklch(0.23 0.02 258);-webkit-font-smoothing:antialiased;color-scheme:light}
+a{color:oklch(0.42 0.16 258);text-decoration:none}
+a:hover{color:oklch(0.30 0.15 258);text-decoration:underline}
+select{font-family:inherit}
+</style>
+</helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:26px 24px 80px;font-family:'IBM Plex Sans',system-ui,sans-serif">
+
+<div style="display:flex;gap:2px;margin:0 0 18px;padding:3px;border:1px solid oklch(0.895 0.006 250);border-radius:7px;background:oklch(1 0 0);width:fit-content">
+<span style="font:500 12.5px/1 'IBM Plex Sans',system-ui,sans-serif;padding:8px 13px;border-radius:5px;background:oklch(0.23 0.02 258);color:oklch(0.99 0 0)">Pick board</span>
+<a href="./Picker Performance.dc.html" style="font:500 12.5px/1 'IBM Plex Sans',system-ui,sans-serif;padding:8px 13px;border-radius:5px;color:oklch(0.44 0.015 255)">Picker performance</a>
+</div>
+
+<h1 style="font:600 20px/1.25 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 6px;letter-spacing:-0.01em">{{ hdrTitle }}</h1>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin:10px 0 6px">
+<select value="{{ week }}" onChange="{{ onWeek }}" style="font-size:12.5px;font-weight:500;padding:5px 8px;border:1px solid oklch(0.72 0.01 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">All weeks</option>
+<sc-for list="{{ weekOpts }}" as="wo" hint-placeholder-count="2"><option value="{{ wo.v }}">{{ wo.label }}</option></sc-for>
+</select>
+<select value="{{ show }}" onChange="{{ onShow }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="ep_c3">— Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">— BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">— BBOC Sixth Gear · 2 Sep</option>
+</select>
+<span data-pk="1" style="position:relative;display:inline-block">
+<button type="button" onClick="{{ onPkOpen }}" aria-expanded="{{ pkExpanded }}" style="font:400 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ pickerLabel }}<span style="font-size:9px;color:oklch(0.505 0.014 255)">▼</span></button>
+<sc-if value="{{ pkOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:calc(100% + 5px);left:0;z-index:20;min-width:186px;padding:5px;border:1px solid oklch(0.86 0.008 250);border-radius:7px;background:oklch(1 0 0);box-shadow:0 8px 22px oklch(0.23 0.02 258 / 0.16);display:flex;flex-direction:column;gap:1px;max-height:340px;overflow:auto">
+<button type="button" onClick="{{ onPickerAll }}" style="display:flex;align-items:center;gap:8px;width:100%;cursor:pointer;border:0;background:transparent;padding:6px 7px;border-radius:4px;font:500 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.23 0.02 258);text-align:left">Clear · all pickers</button>
+<span style="height:1px;background:oklch(0.91 0.006 250);margin:3px 0"></span>
+<sc-for list="{{ pickerOpts }}" as="pk" hint-placeholder-count="6">
+<button type="button" onClick="{{ pk.click }}" style="display:flex;align-items:center;gap:8px;width:100%;cursor:pointer;border:0;background:transparent;padding:6px 7px;border-radius:4px;font:400 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.23 0.02 258);text-align:left">
+<span style="{{ pk.boxSt }}">{{ pk.mark }}</span><span>{{ pk.label }}</span><span style="flex:1 1 auto"></span><span style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ pk.n }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</span>
+<select value="{{ tier }}" onChange="{{ onTier }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="0">All tiers</option><option value="3">Tier 3 only</option><option value="23">Tier 2 and 3</option>
+</select>
+<select value="{{ date }}" onChange="{{ onDate }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">All dates</option>
+<sc-for list="{{ dateOpts }}" as="dp" hint-placeholder-count="4"><option value="{{ dp }}">{{ dp }}</option></sc-for>
+</select>
+<select value="{{ win }}" onChange="{{ onWin }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">All kickoffs</option><option value="early">Early · before 3p</option><option value="afternoon">Afternoon · 3–6p</option><option value="evening">Evening · 6p and later</option>
+</select>
+<select value="{{ market }}" onChange="{{ onMarket }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">All markets</option><option value="side">Sides</option><option value="total">Full-game totals</option><option value="deriv">Derivatives (1H, TT, 4Q)</option><option value="ml">Moneylines</option><option value="core">Exclude ML + derivatives</option>
+</select>
+<select value="{{ flag }}" onChange="{{ onFlag }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">Any data quality</option><option value="flagged">Flagged only</option><option value="ungrade">Ungradeable</option><option value="stale">Stale numbers</option><option value="nonhost">Guest / non-host</option><option value="opposed">Opposed / head-to-head</option>
+</select>
+<span style="font:500 12px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin-left:2px">{{ countLabel }}</span>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);padding-bottom:14px">
+<sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+<span style="display:inline-flex;align-items:center;gap:5px"><span style="{{ l.st }}"></span>{{ l.label }}</span>
+</sc-for>
+</div>
+
+<sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:44px 0;text-align:center;border-top:1px solid oklch(0.895 0.006 250)">
+<p style="font:500 14px/1.4 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 5px">No positions match those filters</p>
+<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:0">{{ emptyNote }}</p>
+</div>
+</sc-if>
+
+<sc-for list="{{ days }}" as="d" hint-placeholder-count="3">
+<div style="{{ d.wrapSt }}">
+<p style="{{ d.headSt }}">{{ d.label }}<sc-if value="{{ d.note }}" hint-placeholder-val="{{ false }}"><span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin-left:10px">{{ d.note }}</span></sc-if></p>
+<sc-for list="{{ d.slots }}" as="s" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;padding:10px 0 2px;border-bottom:1px solid oklch(0.895 0.006 250)">
+<p style="font:500 12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255);margin:0;position:sticky;top:44px;align-self:start">{{ s.time }}</p>
+<div>
+<sc-for list="{{ s.games }}" as="g" hint-placeholder-count="2">
+<div style="padding:0 0 12px">
+<div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:7px">
+<span style="font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif">{{ g.title }}</span>
+<sc-if value="{{ g.proj }}" hint-placeholder-val="{{ false }}"><span style="{{ g.projSt }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">model</span>{{ g.proj }}</span></sc-if>
+<sc-if value="{{ g.mkt }}" hint-placeholder-val="{{ false }}"><span style="{{ g.mktSt }}">
+<sc-if value="{{ g.mktDK }}" hint-placeholder-val="{{ true }}"><img src="./assets/draftkings.png" alt="DraftKings" style="flex:none;height:13px;width:auto;display:block;margin:-1px 0"></sc-if>
+<sc-if value="{{ g.mktBook }}" hint-placeholder-val="{{ false }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">{{ g.mktBook }}</span></sc-if>
+{{ g.mkt }}</span></sc-if>
+<sc-if value="{{ g.status }}" hint-placeholder-val="{{ false }}"><span style="{{ g.statusSt }}"><sc-if value="{{ g.liveDot }}" hint-placeholder-val="{{ false }}"><span style="{{ g.dotSt }}"></span></sc-if>{{ g.status }}</span></sc-if>
+<sc-for list="{{ g.cond }}" as="wc" hint-placeholder-count="2"><span style="{{ wc.st }}"><sc-if value="{{ wc.dome }}" hint-placeholder-val="{{ false }}"><span style="{{ wc.domeSt }}"></span></sc-if>{{ wc.text }}</span></sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:3px 7px;align-items:center;margin-bottom:7px">
+<span style="display:inline-flex;gap:2px;align-items:center;flex:none">
+<sc-for list="{{ g.ticks }}" as="t" hint-placeholder-count="3"><span style="{{ t.st }}"></span></sc-for>
+</span>
+<span style="{{ g.consSt }}">{{ g.cons }}</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3">
+<button type="button" onClick="{{ c.click }}" aria-expanded="{{ c.expanded }}" style="{{ c.st }}">
+<sc-if value="{{ c.star }}" hint-placeholder-val="{{ false }}"><span aria-label="Tier 3" style="font-size:11px;line-height:1;margin-right:-1px">★</span></sc-if>
+<sc-if value="{{ c.res }}" hint-placeholder-val="{{ false }}"><span style="{{ c.resSt }}">{{ c.res }}</span></sc-if>
+<span style="{{ c.nameSt }}">{{ c.name }}</span><span>{{ c.pick }}</span>
+<sc-if value="{{ c.delta }}" hint-placeholder-val="{{ false }}"><span style="{{ c.deltaSt }}">{{ c.delta }}</span></sc-if>
+<sc-if value="{{ c.edge }}" hint-placeholder-val="{{ false }}"><span style="{{ c.edgeSt }}">{{ c.edge }}</span></sc-if>
+<sc-if value="{{ c.flagged }}" hint-placeholder-val="{{ false }}"><span style="color:oklch(0.48 0.20 25);font-size:10px;line-height:1">⚑</span></sc-if>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ g.det }}" hint-placeholder-val="{{ false }}">
+<div style="margin:11px 0 4px;padding:15px 18px 14px;background:oklch(0.962 0.008 250);border-left:2px solid oklch(0.23 0.02 258);border-radius:0 6px 6px 0">
+<div style="display:flex;gap:12px;align-items:baseline;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid oklch(0.895 0.006 250)">
+<div style="flex:1 1 auto;display:flex;flex-wrap:wrap;gap:3px 10px;align-items:baseline">
+<span style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif">{{ g.det.head }}</span>
+<sc-if value="{{ g.det.resLabel }}" hint-placeholder-val="{{ false }}"><span style="{{ g.det.resSt }}">{{ g.det.resLabel }}</span></sc-if>
+<sc-if value="{{ g.det.tag }}" hint-placeholder-val="{{ false }}"><span style="font:500 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;padding:3px 6px;border-radius:3px;background:oklch(0.90 0.01 250);color:oklch(0.44 0.015 255)">{{ g.det.tag }}</span></sc-if>
+<span style="font:400 11.5px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ g.det.meta }}</span>
+</div>
+<button type="button" onClick="{{ g.det.close }}" aria-label="Close detail" style="flex:none;cursor:pointer;font:400 15px/1 'IBM Plex Sans',system-ui,sans-serif;width:24px;height:24px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:oklch(0.44 0.015 255)">×</button>
+</div>
+<sc-if value="{{ g.det.model }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 13px;margin:-3px 0 13px;padding:11px 14px;border:1px solid oklch(0.86 0.012 250);border-radius:7px;background:oklch(1 0 0)">
+<span style="flex:none;font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.07em;color:oklch(0.505 0.014 255)">Model line</span>
+<span style="font:600 18px/1.15 'IBM Plex Sans',system-ui,sans-serif;letter-spacing:-0.01em">{{ g.det.model }}</span>
+<sc-if value="{{ g.det.edgeTxt }}" hint-placeholder-val="{{ false }}"><span style="{{ g.det.edgeChipSt }}">{{ g.det.edgeTxt }}</span></sc-if>
+<span style="flex:1 1 10px"></span>
+<span style="font:400 11px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ g.det.modelNote }}</span>
+</div>
+</sc-if>
+
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px">
+
+<div style="flex:1 1 290px;min-width:0;padding:9px 11px;border:1px solid oklch(0.895 0.006 250);border-radius:7px;background:oklch(0.972 0.006 250)">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;margin:0 0 7px">
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">{{ g.det.statLabel }}</span>
+<span style="flex:1 1 6px"></span>
+<span style="display:flex;flex-wrap:wrap;gap:3px">
+<sc-for list="{{ lensTabs }}" as="lt" hint-placeholder-count="6">
+<button type="button" onClick="{{ lt.click }}" style="{{ lt.st }}">{{ lt.label }}</button>
+</sc-for>
+</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:3px 14px">
+<sc-for list="{{ g.det.stats }}" as="sv" hint-placeholder-count="4">
+<span style="display:inline-flex;gap:5px;align-items:baseline">
+<span style="font:400 10px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ sv.label }}</span>
+<span style="{{ sv.st }}">{{ sv.value }}</span>
+</span>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ g.det.halves }}" hint-placeholder-val="{{ false }}">
+<div style="flex:0 1 268px;min-width:0;padding:9px 11px;border:1px solid oklch(0.895 0.006 250);border-radius:7px;background:oklch(0.972 0.006 250)">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;margin:0 0 7px">
+<p style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0">Forecast</p>
+<span style="flex:1 1 6px"></span>
+<span style="display:flex;gap:3px">
+<sc-for list="{{ halfTabs }}" as="ht" hint-placeholder-count="3">
+<button type="button" onClick="{{ ht.click }}" style="{{ ht.st }}">{{ ht.label }}</button>
+</sc-for>
+</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px 14px">
+<sc-for list="{{ g.det.halves }}" as="hv" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 108px">
+<span style="font:500 10px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);letter-spacing:0.03em;text-transform:uppercase">{{ hv.label }}</span>
+<span style="font:500 13px/1.25 'IBM Plex Sans',system-ui,sans-serif">{{ hv.temp }}</span>
+<span style="font:400 10.5px/1.35 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255)">{{ hv.wind }}</span>
+<span style="{{ hv.rainSt }}">{{ hv.rain }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px 30px">
+<div style="flex:1 1 380px;max-width:66ch">
+<sc-if value="{{ g.det.why }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ g.det.why.thesis }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">The claim</p>
+<p style="font:500 14.5px/1.45 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 12px;text-wrap:pretty">{{ g.det.why.thesis }}</p>
+</sc-if>
+<sc-if value="{{ g.det.why.mechanism }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">Why it should happen</p>
+<p style="font:400 13.5px/1.6 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 12px;text-wrap:pretty">{{ g.det.why.mechanism }}</p>
+</sc-if>
+<sc-if value="{{ g.det.why.projection }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 12px/1.5 'IBM Plex Mono',ui-monospace,monospace;margin:0 0 12px;padding:7px 10px;border-left:2px solid oklch(0.72 0.01 250);background:oklch(0.972 0.006 250);border-radius:0 4px 4px 0;color:oklch(0.30 0.02 258)">{{ g.det.why.projection }}</p>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;margin:0 0 4px">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0">Evidence</p>
+<span style="{{ g.det.why.gradeSt }}">{{ g.det.why.gradeLabel }}</span>
+</div>
+<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 12px;text-wrap:pretty">{{ g.det.why.evidence }}</p>
+<sc-if value="{{ g.det.why.instrument }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">Why this market</p>
+<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 12px;text-wrap:pretty">{{ g.det.why.instrument }}</p>
+</sc-if>
+<sc-if value="{{ g.det.why.counter }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:5px 8px;margin:0 0 4px">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0">The case against</p>
+<span style="{{ g.det.why.counterTagSt }}">{{ g.det.why.counterTag }}</span>
+</div>
+<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 12px;text-wrap:pretty">{{ g.det.why.counter }}</p>
+</sc-if>
+<sc-if value="{{ g.det.why.falsifier }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">Kills the thesis</p>
+<p style="font:400 12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.30 0.02 258);margin:0;text-wrap:pretty">{{ g.det.why.falsifier }}</p>
+</sc-if>
+<sc-if value="{{ g.det.why.madeNote }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 10.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:10px 0 0">{{ g.det.why.madeNote }}</p>
+</sc-if>
+</sc-if>
+<sc-if value="{{ g.det.whyMissing }}" hint-placeholder-val="{{ true }}">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">The argument</p>
+<p style="font:400 13.5px/1.62 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 12px;text-wrap:pretty">{{ g.det.argument }}</p>
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">Evidence cited</p>
+<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0;text-wrap:pretty">{{ g.det.evidence }}</p>
+</sc-if>
+</div>
+<div style="flex:1 1 250px;min-width:0;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ g.det.fields }}" as="f" hint-placeholder-count="3">
+<div>
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 3px">{{ f.label }}</p>
+<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;margin:0">{{ f.value }}</p>
+<sc-if value="{{ f.delta }}" hint-placeholder-val="{{ false }}"><p style="{{ f.deltaSt }}">{{ f.delta }}</p></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ g.det.flag }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;margin:14px 0 0;padding:9px 12px;border-radius:5px;background:oklch(0.945 0.05 25);color:oklch(0.40 0.18 25)">
+<span style="flex:none;font-size:11px;line-height:1.55">⚑</span>
+<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;margin:0;text-wrap:pretty">{{ g.det.flag }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ g.det.annotation }}" hint-placeholder-val="{{ false }}">
+<div style="margin:14px 0 0;padding:9px 12px;border-radius:5px;border-left:2px solid oklch(0.72 0.01 250);background:oklch(0.972 0.006 250)">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 4px">Annotation</p>
+<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0;text-wrap:pretty">{{ g.det.annotation }}</p>
+</div>
+</sc-if>
+<div style="margin-top:13px;padding-top:11px;border-top:1px solid oklch(0.895 0.006 250)">
+<p style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 5px">Also on this game (⇄ opposed)</p>
+<div style="display:flex;flex-wrap:wrap;gap:5px 8px">
+<sc-for list="{{ g.det.others }}" as="o" hint-placeholder-count="2"><span style="{{ o.st }}">{{ o.text }}</span></sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const T = {
+  0: { key: 'laying', bg: 'oklch(0.905 0.055 258)', fg: 'oklch(0.34 0.16 258)', line: 'oklch(0.60 0.15 258)', tick: 'oklch(0.38 0.17 258)' },
+  1: { key: 'taking', bg: 'oklch(0.915 0.062 25)', fg: 'oklch(0.42 0.19 25)', line: 'oklch(0.63 0.18 25)', tick: 'oklch(0.47 0.20 25)' },
+  2: { key: 'under', bg: 'oklch(0.925 0.042 212)', fg: 'oklch(0.39 0.11 212)', line: 'oklch(0.64 0.10 212)', tick: 'oklch(0.51 0.12 212)' },
+  3: { key: 'over', bg: 'oklch(0.935 0.078 78)', fg: 'oklch(0.41 0.13 62)', line: 'oklch(0.70 0.13 72)', tick: 'oklch(0.57 0.14 68)' }
+};
+const INK = 'oklch(0.23 0.02 258)', SEC = 'oklch(0.44 0.015 255)', MUT = 'oklch(0.505 0.014 255)';
+const FLAG = 'oklch(0.48 0.20 25)', GOOD = 'oklch(0.45 0.13 150)';
+const WXC = { aqua: 'oklch(0.80 0.06 196)', orange: 'oklch(0.80 0.07 62)', blue: 'oklch(0.80 0.06 255)', yellow: 'oklch(0.84 0.07 100)' };
+const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer' };
+const PROBLEM = /STALE|UNGRADEABLE|NO NUMBER|NO PRICE|NOT CITED|NEVER CITED|garbled|OPPONENT WAS NEVER|AMBIGUOUS|IMPLAUSIBLE|unverified|limit risk/i;
+function isProblem(p) { return PROBLEM.test(p[9] || ''); }
+const MONO = "'IBM Plex Mono',ui-monospace,monospace";
+const HOSTMAP = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck' };
+const CONDC = { plain: 'oklch(0.505 0.014 255)', warn: 'oklch(0.40 0.10 220)', hot: 'oklch(0.46 0.17 32)', cold: 'oklch(0.42 0.11 240)', storm: 'oklch(0.42 0.16 300)', roof: 'oklch(0.42 0.008 250)' };
+const PILL = { warn: 'oklch(0.945 0.035 220)', hot: 'oklch(0.952 0.05 32)', cold: 'oklch(0.955 0.035 240)', storm: 'oklch(0.955 0.04 300)', roof: 'oklch(0.928 0.005 250)' };
+
+function csvParse(text) {
+  const rows = []; let f = '', r = [], q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ',') { r.push(f); f = ''; }
+    else if (ch === '\n') { r.push(f); f = ''; if (r.length > 1 || r[0] !== '') rows.push(r); r = []; }
+    else if (ch !== '\r') f += ch;
+  }
+  if (f !== '' || r.length) { r.push(f); rows.push(r); }
+  const head = rows.shift() || [];
+  return rows.map(row => { const o = {}; head.forEach((h, i) => { o[h.trim()] = (row[i] || '').trim(); }); return o; });
+}
+
+function buildRecords(rows) {
+  const m = {};
+  rows.forEach(r => {
+    const k = HOSTMAP[r.host]; if (!k) return;
+    const o = m[k] || (m[k] = { host: k, n: 0, w: 0, l: 0, p: 0, graded: 0, t3: 0, ung: 0, clvN: 0, clvSum: 0, rows: [] });
+    o.n++;
+    o.rows.push({ mt: (r.market_type || '').toUpperCase(), period: (r.ext_period || '').toUpperCase(), res: (r.result || '').toUpperCase().charAt(0), clv: r.clv_points, tier: r.confidence_tier, price: r.price_cited, notes: r.notes });
+    if (String(r.confidence_tier) === '3') o.t3++;
+    if (/UNGRADEABLE|NOT CITED|AMBIGUOUS|NOT BE VERIFIED/i.test(r.notes || '')) o.ung++;
+    const res = (r.result || '').toUpperCase();
+    if (res) { o.graded++; if (res[0] === 'W') o.w++; else if (res[0] === 'L') o.l++; else o.p++; }
+    const c = parseFloat(r.clv_points);
+    if (!isNaN(c)) { o.clvN++; o.clvSum += c; }
+  });
+  return m;
+}
+
+const LENS = [['all', 'All'], ['spread', 'Spread'], ['total', 'Total'], ['tt', 'Team tot'], ['h1', '1H'], ['ml', 'ML']];
+
+function rowIn(r, lens) {
+  if (lens === 'h1') return r.period === '1H';
+  if (lens === 'spread') return r.mt === 'SPREAD';
+  if (lens === 'total') return r.mt === 'TOTAL';
+  if (lens === 'tt') return r.mt === 'TEAM_TOTAL';
+  if (lens === 'ml') return r.mt === 'ML';
+  return true;
+}
+
+// american price -> units won on a 1-unit stake
+function amUnits(price, res) {
+  const m = /([+\-]?\d+)/.exec(price || '');
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  if (!n) return null;
+  if (res === 'W') return n > 0 ? n / 100 : 100 / Math.abs(n);
+  if (res === 'L') return -1;
+  return 0;
+}
+
+function lensStats(o, lens) {
+  const rows = ((o && o.rows) || []).filter(r => rowIn(r, lens));
+  let w = 0, l = 0, p = 0, graded = 0, t3 = 0, clvN = 0, clvSum = 0, priced = 0, units = 0, staked = 0;
+  rows.forEach(r => {
+    if (String(r.tier) === '3') t3++;
+    const hasPrice = /([+\-]?\d+)/.test(r.price || '');
+    if (hasPrice) priced++;
+    if (r.res) {
+      graded++;
+      if (r.res === 'W') w++; else if (r.res === 'L') l++; else p++;
+      const u = amUnits(r.price, r.res);
+      if (u !== null) { units += u; staked++; }
+    }
+    const c = parseFloat(r.clv);
+    if (!isNaN(c)) { clvN++; clvSum += c; }
+  });
+  const avg = clvN ? clvSum / clvN : null;
+  const dec = w + l;
+  const out = [
+    { label: 'record', value: graded ? w + '-' + l + (p ? '-' + p : '') : '—', strong: true },
+    { label: 'win%', value: dec ? (100 * w / dec).toFixed(1) + '%' : '—', tone: dec ? (w / dec >= 0.5 ? 'good' : 'bad') : null, strong: true },
+    { label: 'logged', value: String(rows.length) }
+  ];
+  if (lens === 'ml') {
+    out.push({ label: 'priced', value: priced + '/' + rows.length });
+    out.push({ label: 'units', value: staked ? (units >= 0 ? '+' : '') + units.toFixed(2) : '—', tone: staked ? (units >= 0 ? 'good' : 'bad') : null, strong: true });
+    out.push({ label: 'roi', value: staked ? (units / staked >= 0 ? '+' : '') + (100 * units / staked).toFixed(1) + '%' : '—', tone: staked ? (units >= 0 ? 'good' : 'bad') : null });
+  } else {
+    out.push({ label: 'clv', value: avg === null ? '—' : (avg >= 0 ? '+' : '') + avg.toFixed(2), tone: avg === null ? null : (avg >= 0 ? 'good' : 'bad') });
+    if (t3) out.push({ label: 'tier 3', value: String(t3) });
+  }
+  return out;
+}
+
+function recLine(o) {
+  if (!o) return null;
+  const avg = o.clvN ? o.clvSum / o.clvN : null;
+  return {
+    rec: o.graded ? o.w + '-' + o.l + (o.p ? '-' + o.p : '') : '—',
+    clv: avg === null ? '—' : (avg >= 0 ? '+' : '') + avg.toFixed(2),
+    n: o.n, graded: o.graded, ung: o.ung, t3: o.t3
+  };
+}
+
+const WMO_SNOW = [71,73,75,77,85,86], WMO_STORM = [95,96,99], WMO_MIX = [56,57,66,67];
+function codeRank(c) { return WMO_STORM.indexOf(c) >= 0 ? 4 : WMO_SNOW.indexOf(c) >= 0 ? 3 : WMO_MIX.indexOf(c) >= 0 ? 2 : (c >= 51 ? 1 : 0); }
+function typeRank(t) { return t === 'thunder' ? 4 : t === 'snow' ? 3 : t === 'mix' ? 2 : t === 'rain' ? 1 : 0; }
+function inches(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+function halfCard(label, o) {
+  if (!o) return null;
+  const amt = o.precip_in || 0;
+  const ty = o.precip_type === 'snow' ? 'snow' : o.precip_type === 'thunder' ? 'thunder' : o.precip_type === 'mix' ? 'wintry mix' : 'rain';
+  return {
+    label: label,
+    temp: Math.round(o.temp_f) + '\u00b0F',
+    wind: 'wind ' + Math.round(o.wind_mph) + ' g' + Math.round(o.wind_gust_mph) + ' mph' + (o.wind_dir ? ' ' + o.wind_dir : ''),
+    rain: ty + ' ' + Math.round(o.precip_pct) + '%' + (amt >= 0.01 ? ' \u00b7 ' + amt.toFixed(2) + '"' : '')
+  };
+}
+
+function codeType(c) {
+  if (c === null || c === undefined) return '';
+  if (WMO_STORM.indexOf(c) >= 0) return 'thunder';
+  if (WMO_SNOW.indexOf(c) >= 0) return 'snow';
+  if (WMO_MIX.indexOf(c) >= 0) return 'mix';
+  if (c >= 51) return 'rain';
+  return '';
+}
+function degToCompass(d) {
+  if (d === null || d === undefined) return '';
+  return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d / 22.5) % 16];
+}
+function pick(a, b) { return (a !== undefined && a !== null && a !== '') ? a : b; }
+
+// --- schedule + power-rating reference (ref-data.js) ---
+const MARGIN_SD = 16;
+// inverse normal CDF (Acklam)
+function probit(p) {
+  if (!(p > 0) || !(p < 1)) return null;
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const dd = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425;
+  let q, r;
+  if (p < pl) { q = Math.sqrt(-2 * Math.log(p)); return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((dd[0] * q + dd[1]) * q + dd[2]) * q + dd[3]) * q + 1); }
+  if (p <= 1 - pl) { q = p - 0.5; r = q * q; return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1); }
+  q = Math.sqrt(-2 * Math.log(1 - p));
+  return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((dd[0] * q + dd[1]) * q + dd[2]) * q + dd[3]) * q + 1);
+}
+function impliedProb(price) {
+  const p = parseFloat(price);
+  if (isNaN(p) || p === 0) return null;
+  return p > 0 ? 100 / (p + 100) : Math.abs(p) / (Math.abs(p) + 100);
+}
+// a cited moneyline price implies a fair margin; edge is then in the same points unit as a spread
+function fairMargin(price) {
+  const ip = impliedProb(price);
+  if (ip === null) return null;
+  const z = probit(ip);
+  return z === null ? null : MARGIN_SD * z;
+}
+const RK = s => String(s || '').toUpperCase().replace(/&/g, 'AND').replace(/[^A-Z0-9]/g, '');
+function refTeam(s) {
+  const R = window.REF;
+  if (!R) return null;
+  const raw = String(s || '').replace(/\s*\([^)]*\)/g, '').trim();
+  return R.ALIAS[RK(raw)] || null;
+}
+let _gidx = null;
+function gameIndex() {
+  const R = window.REF;
+  if (!R) return {};
+  if (_gidx) return _gidx;
+  _gidx = {};
+  R.GAMES.forEach(g => { _gidx[RK(g.a) + '@' + RK(g.h)] = g; });
+  return _gidx;
+}
+function refGame(matchup) {
+  const parts = String(matchup || '').split(/ at | vs\.? /i).map(x => x.trim());
+  if (parts.length !== 2) return null;
+  const a = refTeam(parts[0]), h = refTeam(parts[1]);
+  if (!a || !h) return null;
+  const ix = gameIndex();
+  return ix[RK(a) + '@' + RK(h)] || ix[RK(h) + '@' + RK(a)] || null;
+}
+// Model constants. Fitted to the market by calibrate_model.py and carried in
+// BOARD.META.model; the 2.0 / 1.0 fallback is the original assumed pair, which
+// measurably tilts every game toward the away team. Read lazily - the bundle is
+// loaded in the helmet but the page must not hard-fail if it is not there yet.
+const MODEL_FALLBACK = { hfa: 2.0, scale: 1.0, fitted: false };
+function modelCfg() {
+  const B = window.BOARD;
+  return (B && B.META && B.META.model) || MODEL_FALLBACK;
+}
+
+// kickoff time from the schedule (ET), formatted like the board's own slot labels
+function schedTime(g) {
+  if (!g || !g.ko || g.tbd) return null;
+  const t = Date.parse(g.ko);
+  if (isNaN(t)) return null;
+  const s = new Date(t).toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
+  return s.replace(' AM', 'a').replace(' PM', 'p');
+}
+function slotMinutes(label) {
+  const m = /^(\d{1,2}):(\d{2})\s*([ap])/.exec(String(label).trim());
+  if (!m) return 99999;
+  let h = parseInt(m[1], 10) % 12;
+  if (m[3] === 'p') h += 12;
+  return h * 60 + parseInt(m[2], 10);
+}
+function tokenMatches(tok, name) {
+  const a = RK(tok), b = RK(name);
+  if (!a || !b) return false;
+  if (a === b || b.indexOf(a) >= 0) return true;
+  let i = 0;
+  for (let j = 0; j < b.length && i < a.length; j++) if (b[j] === a[i]) i++;
+  return i === a.length;
+}
+// board copy uses house shorthand (BAMA, SCAR, JVST) — resolve against the game, not a global alias table
+function sideTeam(tok, g) {
+  if (!g) return null;
+  const direct = refTeam(tok);
+  if (direct && (RK(direct) === RK(g.a) || RK(direct) === RK(g.h))) return direct;
+  if (tokenMatches(tok, g.h)) return g.h;
+  if (tokenMatches(tok, g.a)) return g.a;
+  return null;
+}
+// points the home team is expected to win by
+function modelMargin(g) {
+  const R = window.REF;
+  if (!R || !g) return null;
+  const ph = R.RATINGS[g.h], pa = R.RATINGS[g.a];
+  if (!ph || !pa || ph.pr === null || pa.pr === null) return null;
+  const M = modelCfg();
+  return M.scale * (ph.pr - pa.pr) + (g.nz ? 0 : M.hfa);
+}
+// edge in points for a cited pick; null when unmodelable
+function teamShort(name) {
+  const R = window.REF;
+  const t = R && R.FBS[name];
+  return (t && t.ab) ? t.ab : String(name || '');
+}
+function projSpread(g) {
+  const m = modelMargin(g);
+  if (m === null) return null;
+  const fav = m >= 0 ? g.h : g.a;
+  return teamShort(fav) + ' ' + (-Math.abs(m)).toFixed(1);
+}
+function modelEdge(p, g) {
+  const m = modelMargin(g);
+  if (m === null) return null;
+  const txt = String(p[1] || '');
+  if (/\b(over|under|o\d|u\d|TT)\b/i.test(txt) || /total/i.test(txt)) return null;
+  // a full-game power rating cannot price a half or a quarter
+  if (/\b(1H|2H|1Q|2Q|3Q|4Q)\b/i.test(txt)) return null;
+  const mt = /\bML\b|plus money|moneyline/i.test(txt);
+  const team = sideTeam(txt.replace(/[-+]?\d.*$/, '').replace(/\bML\b|plus money|moneyline/gi, '').replace(/\([^)]*\)/g, '').trim(), g);
+  if (!team) return null;
+  const isHome = RK(team) === RK(g.h);
+  if (!isHome && RK(team) !== RK(g.a)) return null;
+  const teamModel = isHome ? m : -m;
+  const signed = /([+-]\d+(?:\.\d+)?)/.exec(txt);
+  if (mt) {
+    // on a moneyline the signed number IS the price
+    const fm = signed ? fairMargin(signed[1]) : null;
+    if (fm === null) return null;
+    return { pts: teamModel - fm, kind: 'ml', fair: fm, price: signed[1] };
+  }
+  if (!signed) return null;
+  return { pts: teamModel + parseFloat(signed[1]), kind: 'spread' };
+}
+
+// --- reasoning layer (reasoning.csv, keyed by pick_id) ---
+const LHOST = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck' };
+const GRADE = {
+  CHARTED: { label: 'charted', tone: 'strong' }, STAT_CITED: { label: 'stat cited', tone: 'strong' },
+  BASE_RATE: { label: 'base rate', tone: 'ok' }, SCHEME: { label: 'scheme', tone: 'ok' },
+  ROSTER: { label: 'roster', tone: 'ok' }, MOTIVATION: { label: 'motivation', tone: 'weak' },
+  ASSERTION: { label: 'assertion', tone: 'weak' }, NONE: { label: 'no evidence', tone: 'weak' }
+};
+// board pick text -> the market signature used in the ledger
+function pickSig(txt) {
+  const t = String(txt || '');
+  const per = /\b1H\b/i.test(t) ? '1H' : /\b2H\b/i.test(t) ? '2H' : /\b4Q\b/i.test(t) ? '4Q' : 'FG';
+  let mt = 'SPREAD';
+  if (/\bML\b|plus money|moneyline/i.test(t)) mt = 'ML';
+  else if (/\bTT\b/i.test(t)) mt = 'TEAM_TOTAL';
+  else if (/^[uo]\d|\bunder\b|\bover\b|\b[uo]\d/i.test(t)) mt = 'TOTAL';
+  return mt + '|' + per;
+}
+function gameKey(matchup) {
+  const g = refGame(matchup);
+  if (g) return RK(g.a) + '@' + RK(g.h);
+  const parts = String(matchup || '').split(/ at | vs\.? /i).map(x => RK(x.replace(/\s*\([^)]*\)/g, '')));
+  return parts.slice().sort().join('@');
+}
+let _rmap = null;
+function reasonIndex(reasonRows, ledgerRows) {
+  if (_rmap) return _rmap;
+  const byId = {};
+  reasonRows.forEach(r => { if (r.pick_id) byId[r.pick_id] = r; });
+  _rmap = {};
+  ledgerRows.forEach(r => {
+    const host = LHOST[r.host];
+    if (!host) return;
+    const sig = ((r.market_type || 'SPREAD').toUpperCase()) + '|' + ((r.ext_period || 'FG').toUpperCase() || 'FG');
+    const k = host + '|' + gameKey(r.matchup);
+    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null, led: r });
+  });
+  return _rmap;
+}
+// resolve a board pick to its single ledger entry; null when the match is ambiguous
+function matchEntry(p, matchup, reasonRows, ledgerRows) {
+  if (!ledgerRows || !ledgerRows.length) return null;
+  const ix = reasonIndex(reasonRows || [], ledgerRows);
+  const list = ix[p[0] + '|' + gameKey(matchup)];
+  if (!list || !list.length) return null;
+  if (list.length === 1) return list[0];
+  const sig = pickSig(p[1]);
+  const exact = list.filter(x => x.sig === sig);
+  if (exact.length === 1) return exact[0];
+  const mt = sig.split('|')[0];
+  const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
+  return byMt.length === 1 ? byMt[0] : null;
+}
+function reasonFor(p, matchup, reasonRows, ledgerRows) {
+  if (!reasonRows || !reasonRows.length) return null;
+  const e = matchEntry(p, matchup, reasonRows, ledgerRows);
+  return e ? e.row : null;
+}
+// graded outcome of a single pick, straight from the grader's `result`
+const RES = {
+  W: { mark: 'W', label: 'Won', bg: 'oklch(0.90 0.085 150)', fg: 'oklch(0.34 0.12 150)' },
+  L: { mark: 'L', label: 'Lost', bg: 'oklch(0.905 0.075 25)', fg: 'oklch(0.42 0.19 25)' },
+  P: { mark: 'P', label: 'Push', bg: 'oklch(0.90 0.006 250)', fg: 'oklch(0.40 0.012 255)' }
+};
+function resultFor(p, matchup, reasonRows, ledgerRows) {
+  const e = matchEntry(p, matchup, reasonRows, ledgerRows);
+  if (!e || !e.led) return null;
+  const c = String(e.led.result || '').toUpperCase().charAt(0);
+  const r = RES[c];
+  if (!r) return null;
+  return { mark: r.mark, label: r.label, bg: r.bg, fg: r.fg, disputed: String(e.led.disputed || '').toUpperCase() === 'TRUE' };
+}
+
+// --- week ---------------------------------------------------------------
+// Week comes from the schedule the game sits on, not from the pipeline's
+// current_week: a Week 1 grid must stay labelled Week 1 after the config rolls over.
+function weekMins() {
+  const R = window.REF;
+  if (!R) return {};
+  const m = {};
+  R.GAMES.forEach(g => {
+    const t = Date.parse(g.ko);
+    if (isNaN(t) || !g.wk) return;
+    if (!m[g.wk] || t < m[g.wk]) m[g.wk] = t;
+  });
+  return m;
+}
+// the week the board should open on: rolls over on the Monday before its first kickoff
+function currentWeek(now) {
+  const m = weekMins();
+  let cur = null;
+  Object.keys(m).map(Number).sort((a, b) => a - b).forEach(w => {
+    if (m[w] - 3 * 86400000 <= now) cur = w;
+  });
+  return cur;
+}
+function reasonBlock(r) {
+  if (!r) return null;
+  const made = String(r.constructed_fields || '').split('|').filter(Boolean);
+  const g = GRADE[(r.evidence_grade || '').toUpperCase()] || { label: (r.evidence_grade || '').toLowerCase(), tone: 'weak' };
+  const tone = g.tone === 'strong' ? GOOD : g.tone === 'weak' ? FLAG : SEC;
+  const bg = g.tone === 'strong' ? 'oklch(0.955 0.05 150)' : g.tone === 'weak' ? 'oklch(0.945 0.05 25)' : 'oklch(0.93 0.006 250)';
+  return {
+    thesis: r.thesis || null,
+    mechanism: r.mechanism || null,
+    projection: r.projection || null,
+    evidence: r.evidence || null,
+    gradeLabel: g.label,
+    gradeSt: { font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '3px 6px', borderRadius: '3px', background: bg, color: tone },
+    instrument: r.instrument_rationale || null,
+    counter: r.counter_case || null,
+    counterTag: (r.counter_case_type || '').toUpperCase() === 'OBSERVED' ? 'said on air' : (r.counter_case_type ? 'not raised — constructed' : null),
+    counterTagSt: {
+      font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '3px 6px', borderRadius: '3px',
+      background: (r.counter_case_type || '').toUpperCase() === 'OBSERVED' ? 'oklch(0.93 0.006 250)' : 'oklch(0.955 0.05 78)',
+      color: (r.counter_case_type || '').toUpperCase() === 'OBSERVED' ? SEC : 'oklch(0.44 0.14 62)'
+    },
+    falsifier: r.falsifier || null,
+    checkable: String(r.checkable_pre_kick || '').toUpperCase() === 'TRUE',
+    compressed: String(r.depth || '').toUpperCase() === 'COMPRESSED',
+    madeNote: made.length ? 'Constructed, not stated: ' + made.join(', ').replace(/_/g, ' ') : null
+  };
+}
+
+function mergeCond(row, live) {
+  if (!row && !live) return null;
+  row = row || {}; live = live || {};
+  return {
+    roof: row.roof || (live && live._dome ? 'dome' : ''),
+    temp_f: pick(row.temp_f, live.temp_f),
+    wind_mph: pick(row.wind_mph, live.wind_mph),
+    wind_gust_mph: pick(row.wind_gust_mph, live.wind_gust_mph),
+    wind_dir: pick(row.wind_dir, live.wind_dir),
+    precip_type: pick(row.precip_type, live.precip_type),
+    precip_pct: pick(row.precip_pct, live.precip_pct),
+    precip_in: pick(row.precip_in, live.precip_in)
+  };
+}
+
+function condChips(row, wx) {
+  const out = [], mk = (text, tone) => ({
+    text: text,
+    st: tone === 'plain'
+      ? { font: '400 11px/1.4 ' + MONO, color: CONDC.plain }
+      : { font: '500 11px/1.4 ' + MONO, color: CONDC[tone], padding: '2px 6px', borderRadius: '4px', background: PILL[tone] }
+  });
+  if (row) {
+    if (/indoor|dome|closed|retract/i.test(row.roof || '')) {
+      out.push({
+        text: 'dome',
+        dome: true,
+        st: { display: 'inline-flex', alignItems: 'center', gap: '5px', font: '500 11px/1.4 ' + MONO, color: CONDC.roof, padding: '2px 7px 2px 6px', borderRadius: '4px', background: PILL.roof },
+        domeSt: { flex: 'none', width: '11px', height: '6px', borderTop: '1.5px solid currentColor', borderLeft: '1.5px solid currentColor', borderRight: '1.5px solid currentColor', borderRadius: '11px 11px 0 0', display: 'inline-block', boxSizing: 'border-box', marginBottom: '-1px' }
+      });
+      return out;
+    }
+    const t = parseFloat(row.temp_f);
+    if (!isNaN(t)) out.push(mk(Math.round(t) + '\u00b0F', t >= 95 ? 'hot' : t <= 35 ? 'cold' : 'plain'));
+    const w = parseFloat(row.wind_mph), gu = parseFloat(row.wind_gust_mph);
+    const dir = row.wind_dir ? ' ' + row.wind_dir : '';
+    if (!isNaN(w)) {
+      out.push(mk('wind ' + Math.round(w) + (!isNaN(gu) ? ' g' + Math.round(gu) : '') + ' mph' + dir,
+        w > 15 ? 'hot' : (!isNaN(gu) && gu >= 25) ? 'warn' : 'plain'));
+    } else if (!isNaN(gu)) {
+      out.push(mk('gusts ' + Math.round(gu) + ' mph' + dir, gu >= 25 ? 'warn' : 'plain'));
+    }
+    const p = parseFloat(row.precip_pct), ty = (row.precip_type || '').toLowerCase();
+    if ((!isNaN(p) && p >= 15) || ty) {
+      const snow = /snow/.test(ty), storm = /thunder|storm/.test(ty), mix = /mix|sleet|ice|freez/.test(ty);
+      const label = snow ? 'snow' : storm ? 'thunder' : mix ? 'wintry mix' : 'rain';
+      const amt = inches(row.precip_in);
+      const pct = (isNaN(p) ? '' : ' ' + Math.round(p) + '%') + (amt !== null && amt >= 0.01 ? ' ' + amt.toFixed(2) + '"' : '');
+      const loud = (!isNaN(p) && p >= 40) || snow || storm || mix;
+      const tone = !loud ? 'plain' : storm ? 'storm' : (snow || mix) ? 'cold' : 'warn';
+      out.push(mk(label + pct, tone));
+    }
+  }
+  if (!out.length && wx) out.push(mk(wx[0], 'plain'));
+  return out;
+}
+
+function slotWindow(t) {
+  const m = /^(\d{1,2}):(\d{2})([ap])$/.exec(String(t).trim());
+  if (!m) return 'unknown';
+  let h = parseInt(m[1], 10) % 12;
+  if (m[3] === 'p') h += 12;
+  const mins = h * 60 + parseInt(m[2], 10);
+  if (mins < 15 * 60) return 'early';
+  if (mins < 18 * 60) return 'afternoon';
+  return 'evening';
+}
+
+function market(t) {
+  if (/\bML\b|plus money/.test(t)) return 'ml';
+  if (/1H|4Q|TT/.test(t)) return 'deriv';
+  if (/^[uo]\d|under|over/i.test(t)) return 'total';
+  return 'side';
+}
+function num(s) { const m = /Cited\s*([+\-]?[\d.]+)/i.exec(s || ''); return m ? m[1] : null; }
+function delta(p) {
+  const f = p[6] || '', flag = p[9] || '', from = num(f);
+  let to = null, tone = 'flat';
+  let m = /market now ([+\-]?[\d.]+)/i.exec(f) || /board was ([+\-]?[\d.]+)/i.exec(f);
+  if (m) to = m[1];
+  if (!to) { m = /was ([+\-]?[\d.]+) (?:earlier|elsewhere)/i.exec(f); if (m) { to = from; return mkDelta(m[1], to, /favour|favor|better/i.test(flag) ? 'good' : 'flat'); } }
+  if (!to) { m = /shopped up from ([+\-]?[\d.]+)/i.exec(f); if (m) return mkDelta(m[1], from, 'good'); }
+  if (!to || !from) return null;
+  if (/\bSTALE\b/.test(flag)) tone = /favour|favor|better/i.test(flag) ? 'good' : 'bad';
+  return mkDelta(from, to, tone);
+}
+function mkDelta(a, b, tone) { return a && b && a !== b ? { text: a + ' → ' + b, tone: tone } : null; }
+function dSt(tone, sz) {
+  const c = tone === 'bad' ? FLAG : tone === 'good' ? GOOD : MUT;
+  return { font: '500 ' + sz + 'px/1.35 ' + MONO, color: c, margin: 0 };
+}
+function opp(a, b) { return (a === 0 && b === 1) || (a === 1 && b === 0) || (a === 2 && b === 3) || (a === 3 && b === 2); }
+function mrank(m) { return m === 'ml' ? 3 : m === 'deriv' ? 2 : m === 'total' ? 1 : 0; }
+
+// ---- market layer -------------------------------------------------------
+// One number per game from LINES_CSV, book-preferred and snapshot-preferred.
+// Blank is a real answer: no book in the CFBD feed carried that market at pull time.
+const BOOK_RANK = { DraftKings: 0, DraftKings_Alt: 1, Bovada: 2 };
+const SNAP_RANK = { CURRENT: 0, CLOSE_PROXY: 1, OPEN: 2 };
+function buildLines(csv) {
+  const idx = {};
+  csvParse(csv || '').forEach(r => {
+    const id = String(r.cfbd_game_id || '').trim();
+    if (!id) return;
+    const br = BOOK_RANK[r.book], sr = SNAP_RANK[r.snapshot_type];
+    if (br === undefined || sr === undefined) return;
+    const cur = idx[id];
+    const rank = br * 10 + sr;
+    if (cur && cur._rank <= rank) return;
+    idx[id] = {
+      _rank: rank, book: r.book, snap: r.snapshot_type,
+      spread: r.spread_home === '' ? null : parseFloat(r.spread_home),
+      total: r.total === '' ? null : parseFloat(r.total),
+      mlHome: r.ml_home === '' ? null : parseFloat(r.ml_home),
+      mlAway: r.ml_away === '' ? null : parseFloat(r.ml_away),
+      n: r.n_observations || ''
+    };
+  });
+  return idx;
+}
+function sgn(n) { return n > 0 ? '+' + n : String(n); }
+// market chip text for a REF game; null when the feed has nothing
+function mktText(lines, sg) {
+  if (!sg || !lines) return null;
+  const m = lines[String(sg.id)];
+  if (!m) return null;
+  const bits = [];
+  // the feed's spread is home-relative; show it against the favourite, the way the model chip does
+  if (m.spread !== null && !isNaN(m.spread)) {
+    bits.push(m.spread === 0
+      ? 'pick \u2019em'
+      : teamShort(m.spread < 0 ? sg.h : sg.a) + ' ' + (-Math.abs(m.spread)).toString());
+  }
+  if (m.total !== null && !isNaN(m.total)) bits.push('o' + m.total);
+  if (!bits.length) return null;
+  const dk = m.book === 'DraftKings' || m.book === 'DraftKings_Alt';
+  return {
+    // the logo stands in for the book name; DraftKings_Alt is a second DK feed, not a typo, so it keeps a label
+    dk: dk,
+    book: m.book === 'DraftKings' ? '' : m.book === 'DraftKings_Alt' ? 'alt' : 'BOV',
+    txt: bits.join(' · ') + (m.snap === 'CURRENT' ? '' : ' ' + (m.snap === 'OPEN' ? 'open' : 'close~'))
+  };
+}
+
+// ---- results ------------------------------------------------------------
+// Finals from results.csv, keyed on cfbd_game_id. Before this existed the board had
+// no score source at all: anything past kickoff + 3h30 sat on "final pending" for
+// good, because REF.GAMES carries the schedule and no points.
+function buildResults(csv) {
+  const idx = {};
+  csvParse(csv || '').forEach(r => {
+    const id = String(r.cfbd_game_id || '').trim();
+    if (!id || r.home_points === '' || r.away_points === '') return;
+    idx[id] = { h: Number(r.home_points), a: Number(r.away_points),
+                ot: r.h_OT !== '' && r.h_OT !== undefined };
+  });
+  return idx;
+}
+// "MICH 31 OU 24" style, away first to match how the matchup reads
+function finalText(results, sg) {
+  if (!sg || !results) return null;
+  const f = results[String(sg.id)];
+  if (!f) return null;
+  return sg.a + ' ' + f.a + ' \u00b7 ' + sg.h + ' ' + f.h + (f.ot ? ' (OT)' : '');
+}
+
+class Component extends DCLogic {
+  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), week: 'all', tier: '0', market: 'all', flag: 'all', show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0 };
+
+  componentDidMount() {
+    const load = n => {
+      const B = window.BOARD;
+      if (!B) { if (n < 200) setTimeout(() => load(n + 1), 40); return; }
+      const rows = csvParse(B.LEDGER_CSV || '');
+      const reasonRows = csvParse(B.REASON_CSV || '');
+      const cond = {};
+      csvParse(B.COND_CSV || '').forEach(r => { if (r.matchup) cond[r.matchup] = r; });
+      const lines = buildLines(B.LINES_CSV || '');
+      const results = buildResults(B.RESULTS_CSV || '');
+      const cw = currentWeek(Date.now());
+      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results, week: cw ? String(cw) : 'all' });
+      this.fetchForecast(cond);
+    };
+    load(0);
+    this._tick = setInterval(() => this.setState({ now: Date.now() }), 60000);
+    this._esc = e => {
+      if (e.key !== 'Escape') return;
+      if (this.state.pkOpen) this.setState({ pkOpen: false });
+      else if (this.state.open) this.setState({ open: null });
+    };
+    window.addEventListener('keydown', this._esc);
+    this._away = e => {
+      if (!this.state.pkOpen) return;
+      const n = e.target;
+      if (n && n.closest && n.closest('[data-pk]')) return;
+      this.setState({ pkOpen: false });
+    };
+    document.addEventListener('mousedown', this._away);
+  }
+  componentWillUnmount() { clearInterval(this._tick); window.removeEventListener('keydown', this._esc); document.removeEventListener('mousedown', this._away); }
+
+  pickerBits() {
+    const s = this.state, sel = s.pickers;
+    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Brooks', 'Dentist', 'Producer'];
+    const tally = {};
+    if (s.d) s.d.G.forEach(day => day[1].forEach(g => g[4].forEach(p => { tally[p[0]] = (tally[p[0]] || 0) + 1; })));
+    return {
+      label: !sel.length ? 'All pickers' : sel.length === 1 ? sel[0] : sel.length + ' pickers',
+      toggle: () => this.setState(st => ({ pkOpen: !st.pkOpen })),
+      clear: () => this.setState({ pickers: [], open: null }),
+      opts: names.map(n => {
+        const on = sel.indexOf(n) >= 0;
+        return {
+          label: n, mark: on ? '\u2713' : '', n: tally[n] ? String(tally[n]) : '',
+          boxSt: {
+            flex: 'none', width: '14px', height: '14px', borderRadius: '3px',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            font: '600 10px/1 ' + MONO, color: 'oklch(0.99 0 0)',
+            border: '1px solid ' + (on ? INK : 'oklch(0.80 0.008 250)'),
+            background: on ? INK : 'oklch(1 0 0)'
+          },
+          click: () => this.setState(st => ({
+            pickers: st.pickers.indexOf(n) >= 0 ? st.pickers.filter(x => x !== n) : st.pickers.concat([n]),
+            open: null
+          }))
+        };
+      })
+    };
+  }
+
+  keep(p) {
+    const s = this.state, f = p[9] || '', mk = market(p[1]), d = s.d, src = p[8] || '';
+    if (s.show === 'c3' && src.indexOf('Cover 3') !== 0) return false;
+    if (s.show === 'bboc' && src.indexOf('BBOC') !== 0) return false;
+    if (s.show === 'ep_c3' && d && src !== d.C3) return false;
+    if (s.show === 'ep_bp' && d && src !== d.BP) return false;
+    if (s.show === 'ep_sg' && d && src !== d.SG) return false;
+    if (s.pickers.length && s.pickers.indexOf(p[0]) < 0) return false;
+    if (s.tier !== '0' && s.tier.indexOf(String(p[3])) < 0) return false;
+    if (s.market === 'core') { if (mk === 'ml' || mk === 'deriv') return false; }
+    else if (s.market !== 'all' && s.market !== mk) return false;
+    if (s.flag === 'flagged' && !isProblem(p)) return false;
+    if (s.flag === 'ungrade' && !/ungradeable|NO NUMBER|NO PRICE/i.test(f)) return false;
+    if (s.flag === 'stale' && !/stale|days stale|line shopped/i.test(f)) return false;
+    if (s.flag === 'nonhost' && !NONHOST[p[0]]) return false;
+    if (s.flag === 'opposed' && !/head-to-head|opposed|opposes|other side|other team/i.test(f)) return false;
+    return true;
+  }
+
+  fetchForecast(cond) {
+    const rows = Object.keys(cond).map(k => cond[k]).filter(r => r.lat && r.lon && r.kickoff_iso);
+    if (!rows.length) return;
+    const url = 'https://api.open-meteo.com/v1/forecast'
+      + '?latitude=' + rows.map(r => r.lat).join(',')
+      + '&longitude=' + rows.map(r => r.lon).join(',')
+      + '&hourly=temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code'
+      + '&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch'
+      + '&timezone=America%2FNew_York&past_days=5&forecast_days=5';
+    fetch(url).then(r => r.json()).then(j => {
+      const arr = Array.isArray(j) ? j : [j], wx = {};
+      rows.forEach((r, i) => {
+        const h = arr[i] && arr[i].hourly;
+        if (!h || !h.time) return;
+        const k = h.time.indexOf(r.kickoff_iso);
+        if (k < 0) return;
+        // a game runs roughly 3.5 hours: first half ~kickoff to +1.5h, second half ~+1.5 to +3.5h
+        const span = (a, b) => {
+          const t = [], pr = [], wd = [], gu = [], po = [], cd = [];
+          for (let n = a; n <= b; n++) {
+            if (h.temperature_2m[n] === undefined) continue;
+            t.push(h.temperature_2m[n]); pr.push(h.precipitation[n] || 0);
+            wd.push(h.wind_speed_10m[n]); gu.push(h.wind_gusts_10m[n]);
+            po.push(h.precipitation_probability[n] || 0); cd.push(h.weather_code[n]);
+          }
+          if (!t.length) return null;
+          return {
+            temp_f: t.reduce((x, y) => x + y, 0) / t.length,
+            precip_in: pr.reduce((x, y) => x + y, 0),
+            wind_mph: Math.max.apply(null, wd), wind_gust_mph: Math.max.apply(null, gu),
+            precip_pct: Math.max.apply(null, po),
+            wind_dir: degToCompass(h.wind_direction_10m[a]),
+            precip_type: codeType(cd.slice().sort((x, y) => codeRank(y) - codeRank(x))[0])
+          };
+        };
+        const h1 = span(k, k + 1), h2 = span(k + 2, k + 3);
+        wx[r.matchup] = {
+          temp_f: h.temperature_2m[k], precip_pct: Math.max(h1 ? h1.precip_pct : 0, h2 ? h2.precip_pct : 0),
+          precip_in: (h1 ? h1.precip_in : 0) + (h2 ? h2.precip_in : 0),
+          wind_mph: h.wind_speed_10m[k], wind_gust_mph: h.wind_gusts_10m[k],
+          wind_dir: degToCompass(h.wind_direction_10m[k]),
+          precip_type: codeType([h1, h2].filter(Boolean).map(x => x.precip_type).sort((a, b) => typeRank(b) - typeRank(a))[0] === 'thunder' ? 95 : h.weather_code[k]),
+          h1: h1, h2: h2
+        };
+      });
+      this.setState({ wx: wx });
+    }).catch(() => {});
+  }
+
+  renderVals() {
+    const s = this.state, d = s.d, rec = s.rec || {}, cond = s.cond || {}, live = s.wx || {};
+    const reasonRows = s.reasonRows || [], ledgerRows = s.ledgerRows || [];
+    const lensTabs = LENS.map(pair => ({
+      label: pair[1],
+      st: {
+        cursor: 'pointer', font: '500 10.5px/1 ' + MONO, letterSpacing: '0.02em',
+        padding: '4px 7px', borderRadius: '4px', border: 0,
+        background: s.lens === pair[0] ? 'oklch(0.30 0.09 258)' : 'oklch(0.94 0.005 250)',
+        color: s.lens === pair[0] ? 'oklch(0.99 0.008 250)' : MUT
+      },
+      click: () => this.setState({ lens: pair[0] })
+    }));
+    const legend = [0, 1, 2, 3].map(i => ({
+      label: T[i].key.charAt(0).toUpperCase() + T[i].key.slice(1),
+      st: { width: '10px', height: '10px', borderRadius: '2px', background: T[i].bg, boxShadow: 'inset 0 0 0 1px ' + T[i].line + ', inset 0 -3px 0 0 ' + T[i].tick, display: 'inline-block' }
+    })).concat(['W', 'L', 'P'].map(c => ({
+      label: RES[c].label + ' (' + c + ')',
+      st: { width: '10px', height: '10px', borderRadius: '2px', background: RES[c].bg, boxShadow: 'inset 0 0 0 1px ' + RES[c].fg, display: 'inline-block' }
+    })));
+    const halfTabs = [['both', 'Both'], ['h1', '1H'], ['h2', '2H']].map(v => ({
+      label: v[1],
+      click: () => this.setState({ half: v[0] }),
+      st: {
+        cursor: 'pointer', font: '500 10.5px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.05em',
+        padding: '4px 8px', borderRadius: '4px',
+        border: '1px solid ' + ((s.half || 'both') === v[0] ? INK : 'oklch(0.86 0.008 250)'),
+        background: (s.half || 'both') === v[0] ? INK : 'oklch(1 0 0)',
+        color: (s.half || 'both') === v[0] ? 'oklch(0.99 0 0)' : SEC
+      }
+    }));
+    const pk = this.pickerBits();
+    if (!d) return { hdrTitle: 'Pick board', legend: legend, days: [], empty: false, emptyNote: '', week: s.week, weekOpts: [], onWeek: () => {}, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear };
+
+    // Weeks come from the schedule, not from the weeks the pick grid happens to cover:
+    // a week with a market but no extracted picks still has to be selectable.
+    const cw = currentWeek(s.now);
+    const wkSet = {};
+    (window.REF ? window.REF.GAMES : []).forEach(g => { if (g.wk && (!cw || g.wk <= cw + 1)) wkSet[g.wk] = 1; });
+    d.G.forEach(day => day[1].forEach(g => { const sg = refGame(g[1]); if (sg && sg.wk) wkSet[sg.wk] = 1; }));
+    if (cw) wkSet[cw] = 1;
+    const wkPicks = {};
+    d.G.forEach(day => day[1].forEach(g => {
+      const sg = refGame(g[1]);
+      if (sg && sg.wk) wkPicks[sg.wk] = (wkPicks[sg.wk] || 0) + g[4].length;
+    }));
+    const weekOpts = Object.keys(wkSet).map(Number).sort((a, b) => a - b).map(w => ({
+      v: String(w),
+      label: 'Week ' + w + (wkPicks[w] ? '' : ' · no picks yet')
+    }));
+
+    let count = 0;
+    const days = [], postDays = [];
+    d.G.forEach(day => {
+      if (s.date !== 'all' && day[0] !== s.date) return;
+      const slots = [], fslots = [], byTime = new Map();
+      day[1].forEach(g => {
+        const tm = schedTime(refGame(g[1])) || g[0];
+        if (!byTime.has(tm)) byTime.set(tm, []);
+        byTime.get(tm).push(g);
+      });
+      byTime.forEach((games, time) => {
+        if (s.win !== 'all' && slotWindow(time) !== s.win) return;
+        const rows = [], frows = [];
+        games.forEach(g => {
+          const sg = refGame(g[1]);
+          if (s.week !== 'all' && String((sg && sg.wk) || '') !== s.week) return;
+          const all = g[4];
+          const idx = all.map((p, i) => i).filter(i => this.keep(all[i]));
+          if (!idx.length) return;
+          const gid = g[1] + '|' + g[0];
+          const mm = modelMargin(sg);
+          const ko = sg && sg.ko ? Date.parse(sg.ko) : NaN;
+          const mins = isNaN(ko) ? null : (s.now - ko) / 60000;
+          const phase = (mins === null || (sg && sg.tbd)) ? 'pre' : mins < 0 ? 'pre' : mins <= 210 ? 'live' : 'post';
+          count += idx.length;
+          const venueTxt = sg && sg.vn ? (String(sg.vn).replace(/\s*\([^)]*\)\s*$/, '') + ' · ' + sg.vc + (sg.vs ? ', ' + sg.vs : '') + (sg.nz ? ' · neutral' : '') + (sg.el !== null && sg.el >= 3000 ? ' · ' + sg.el.toLocaleString() + ' ft' : '')) : g[2];
+          const chips = idx.slice().sort((a, b) => (all[b][3] - all[a][3]) || (mrank(market(all[a][1])) - mrank(market(all[b][1])))).map(i => {
+            const p = all[i], mk = market(p[1]), t = T[p[2]], k = p[3];
+            const isOpen = s.open && s.open.g === gid && s.open.i === i;
+            const dl = delta(p);
+            const eg = modelEdge(p, sg);
+            const twoCond = eg && k >= 2 && eg.pts >= 1;
+            const rs = resultFor(p, g[1], reasonRows, ledgerRows);
+            return {
+              name: p[0], pick: p[1], flagged: isProblem(p), star: k === 3,
+              res: rs ? rs.mark : null,
+              resSt: rs ? {
+                flex: 'none', width: '15px', height: '15px', borderRadius: '3px',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                font: '600 10px/1 ' + MONO, background: rs.bg, color: rs.fg,
+                border: rs.disputed ? '1px dashed ' + rs.fg : '1px solid ' + rs.bg
+              } : null,
+              edge: eg ? (twoCond ? '\u2713\u2713 ' : '') + (eg.pts >= 0 ? '+' : '') + eg.pts.toFixed(1) : null,
+              edgeSt: eg ? { font: '500 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: twoCond ? 'oklch(0.90 0.09 150)' : 'oklch(1 0 0 / 0.62)', color: eg.pts >= 1 ? GOOD : eg.pts <= -1 ? FLAG : MUT } : null,
+              expanded: isOpen ? 'true' : 'false',
+              delta: dl ? dl.text : null,
+              deltaSt: dl ? { font: '500 10px/1 ' + MONO, color: dl.tone === 'bad' ? FLAG : dl.tone === 'good' ? GOOD : MUT, padding: '2px 4px', borderRadius: '3px', background: 'oklch(1 0 0 / 0.62)' } : null,
+              nameSt: NONHOST[p[0]]
+                ? { fontWeight: 500, fontStyle: 'italic', borderBottom: '1px dotted currentColor' }
+                : { fontWeight: 500 },
+              st: {
+                display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer',
+                fontFamily: 'inherit', font: (k === 3 ? 600 : mk === 'ml' ? 400 : 500) + ' ' + (mk === 'ml' ? 11.5 : 12.5) + "px/1.25 'IBM Plex Sans',system-ui,sans-serif",
+                border: 0, borderLeft: (k === 3 ? '4px' : k === 2 ? '2px' : '1px') + ' solid ' + t.fg,
+                borderRadius: '2px 5px 5px 2px', padding: mk === 'ml' ? '4px 8px' : '5px 10px',
+                background: mk === 'ml' ? 'oklch(1 0 0)' : t.bg,
+                boxShadow: (mk === 'ml' ? 'inset 0 0 0 1px ' + t.line : 'none') + (isOpen ? ', 0 0 0 2px ' + INK : ''),
+                color: t.fg
+              },
+              click: () => this.setState(st => ({ open: st.open && st.open.g === gid && st.open.i === i ? null : { g: gid, i: i } }))
+            };
+          });
+          const dirs = [0, 1, 2, 3].map(c => all.filter(p => p[2] === c).length);
+          const ticks = [];
+          [0, 1, 2, 3].forEach(c => { for (let n = 0; n < dirs[c]; n++) ticks.push({ st: { width: '5px', height: '11px', borderRadius: '1px', background: T[c].tick, opacity: 1, display: 'inline-block' } }); });
+          let opposed = 0;
+          for (let a = 0; a < all.length; a++) for (let b = a + 1; b < all.length; b++) if (opp(all[a][2], all[b][2])) opposed++;
+          const lead = [0, 1, 2, 3].slice().sort((x, y) => dirs[y] - dirs[x])[0];
+          let split = '';
+          if (dirs[0] && dirs[1]) split = dirs[0] + '–' + dirs[1] + ' split on the side';
+          else if (dirs[2] && dirs[3]) split = dirs[2] + '–' + dirs[3] + ' split on the total';
+          const cons = (all.length === 1 ? '1 on this game' : all.length + ' on this game')
+            + (dirs[lead] > 1 ? ' · ' + dirs[lead] + '× ' + T[lead].key : '')
+            + (split ? ' · ' + split : '');
+          const w = d.WX[g[3]];
+          const open = s.open && s.open.g === gid ? all[s.open.i] : null;
+          let det = null;
+          if (open) {
+            const p = open, dl = delta(p), rl = recLine(rec[p[0]]);
+            const eDet = modelEdge(p, sg);
+            const why = reasonBlock(reasonFor(p, g[1], reasonRows, ledgerRows));
+            const rsD = resultFor(p, g[1], reasonRows, ledgerRows);
+            det = {
+              resLabel: rsD ? rsD.label + (rsD.disputed ? ' · disputed' : '') : null,
+              resSt: rsD ? {
+                font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em',
+                padding: '3px 6px', borderRadius: '3px', background: rsD.bg, color: rsD.fg,
+                border: rsD.disputed ? '1px dashed ' + rsD.fg : '1px solid transparent'
+              } : null,
+              why: why, whyMissing: !why,
+              model: mm === null
+                ? (sg ? 'No rating — FCS opponent' : 'Game not on the schedule')
+                : (mm >= 0 ? sg.h + ' by ' + mm.toFixed(1) : sg.a + ' by ' + (-mm).toFixed(1)),
+              modelNote: mm === null ? 'unmodelable' : 'power ratings · scale ' + modelCfg().scale.toFixed(2) + ' · HFA ' + (sg.nz ? '0 (neutral)' : modelCfg().hfa.toFixed(2)) + (eDet && eDet.kind === 'ml' ? ' · price implies ' + eDet.fair.toFixed(1) : ''),
+              edgeTxt: eDet ? ((eDet.pts >= 1 && p[3] >= 2 ? '\u2713\u2713  ' : '') + (eDet.pts >= 0 ? '+' : '') + eDet.pts.toFixed(1) + ' pt edge') : (mm === null ? null : 'no edge on this market'),
+              edgeChipSt: {
+                font: '500 11.5px/1 ' + MONO, padding: '5px 8px', borderRadius: '4px',
+                background: !eDet ? 'oklch(0.94 0.006 250)' : (eDet.pts >= 1 && p[3] >= 2) ? 'oklch(0.90 0.09 150)' : eDet.pts >= 1 ? 'oklch(0.955 0.05 150)' : eDet.pts <= -1 ? 'oklch(0.945 0.05 25)' : 'oklch(0.94 0.006 250)',
+                color: !eDet ? MUT : eDet.pts >= 1 ? GOOD : eDet.pts <= -1 ? FLAG : SEC
+              },
+              halves: (function () {
+                const lw = live[g[1]] || {};
+                const want = s.half || 'both';
+                const cards = [
+                  want === 'h2' ? null : halfCard('1st half', lw.h1),
+                  want === 'h1' ? null : halfCard('2nd half', lw.h2)
+                ].filter(Boolean);
+                return cards.length ? cards.map(c => Object.assign(c, {
+                  rainSt: {
+                    font: '400 10.5px/1.35 ' + MONO,
+                    color: /thunder/.test(c.rain) ? CONDC.storm
+                      : /snow|wintry/.test(c.rain) ? CONDC.cold
+                      : parseInt(c.rain.replace(/\D+/, ''), 10) >= 40 ? CONDC.warn : CONDC.plain
+                  }
+                })) : null;
+              })(),
+              statLabel: rl ? p[0] + ' — ledger' : p[0] + ' — not in ledger',
+              stats: rl ? lensStats(rec[p[0]], s.lens).map(v => ({
+                label: v.label, value: v.value,
+                st: {
+                  font: (v.strong ? 500 : 400) + ' ' + (v.strong ? 12.5 : 12) + 'px/1.35 ' + MONO,
+                  color: v.tone === 'good' ? GOOD : v.tone === 'bad' ? FLAG : 'oklch(0.23 0.02 258)'
+                }
+              })) : [{ label: '', value: 'no ledger rows for this picker', st: { font: '400 12px/1.35 ' + MONO, color: MUT } }],
+              head: p[0] + ' — ' + p[1],
+              tag: NONHOST[p[0]] || null,
+              meta: g[0] + ' · ' + venueTxt,
+              argument: p[4], evidence: p[5],
+              flag: isProblem(p) ? p[9] : null,
+              annotation: isProblem(p) ? null : (p[9] || null),
+              close: () => this.setState({ open: null }),
+              fields: [
+                { label: 'Number', value: p[6], delta: dl ? dl.text : null, deltaSt: dl ? dSt(dl.tone, 11.5) : null },
+                { label: 'Stated confidence', value: p[7], delta: null, deltaSt: null },
+                { label: 'Source', value: p[8], delta: null, deltaSt: null },
+                { label: 'Market', value: { ml: 'Moneyline sprinkle', deriv: 'Derivative (half / quarter / team total)', total: 'Full-game total', side: 'Side' }[market(p[1])] + ' · tier ' + p[3], delta: null, deltaSt: null }
+              ],
+              others: all.map((x, i) => {
+                if (x === p) return null;
+                const o = opp(p[2], x[2]);
+                return {
+                  text: x[0] + ' ' + x[1] + (o ? '  ⇄' : ''),
+                  st: { font: '400 12px/1.3 ' + MONO, padding: '3px 7px', borderRadius: '4px', background: o ? 'oklch(0.945 0.05 25)' : 'oklch(0.925 0.006 250)', color: o ? FLAG : SEC }
+                };
+              }).filter(Boolean)
+            };
+            if (!det.others.length) det.others = [{ text: 'nobody else on this game', st: { font: '400 12px/1.3 ' + MONO, color: MUT } }];
+          }
+          const finalTxt = finalText(s.results, sg);
+          const mi = mktText(s.lines, sg);
+          const statusTxt = phase === 'live' ? 'in progress'
+            : phase === 'post' ? (finalTxt || 'final pending') : null;
+          const row = {
+            status: statusTxt,
+            liveDot: phase === 'live',
+            dotSt: { flex: 'none', width: '5px', height: '5px', borderRadius: '50%', background: FLAG, display: 'inline-block' },
+            statusSt: {
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em',
+              padding: '3px 7px', borderRadius: '3px',
+              background: 'oklch(0.928 0.005 250)',
+              color: phase === 'live' ? SEC : MUT
+            },
+            slot: g[0], phase: phase,
+            title: g[1], venue: venueTxt, det: det,
+            proj: projSpread(sg),
+            mkt: mi ? mi.txt : null,
+            mktDK: mi ? mi.dk : false,
+            mktBook: mi ? mi.book : null,
+            mktSt: {
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              font: '500 11px/1.4 ' + MONO, padding: '2px 7px', borderRadius: '4px',
+              background: 'oklch(0.955 0.02 250)', color: SEC
+            },
+            projSt: {
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              font: '500 11px/1.4 ' + MONO, padding: '2px 7px', borderRadius: '4px',
+              background: 'oklch(0.94 0.006 250)', color: SEC
+            },
+            cond: condChips(mergeCond(cond[g[1]], Object.assign({ _dome: sg && sg.dome ? 1 : 0 }, live[g[1]])), w),
+            ticks: ticks, cons: cons,
+            consSt: { font: '400 11px/1.4 ' + MONO, color: MUT, minWidth: 0, overflowWrap: 'break-word' },
+            chips: chips
+          };
+          if (phase === 'post') frows.push(row); else rows.push(row);
+        });
+        if (rows.length) slots.push({ time: time, games: rows });
+        if (frows.length) fslots.push({ time: time, games: frows });
+      });
+      const DAYHEAD = { position: 'sticky', top: 0, zIndex: 3, font: "600 13px/1 'IBM Plex Sans',system-ui,sans-serif", color: INK, margin: 0, padding: '9px 0 8px', background: 'oklch(0.985 0.003 250)', borderBottom: '1.5px solid oklch(0.72 0.01 250)', letterSpacing: '0.01em', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline' };
+      slots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
+      fslots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
+      if (slots.length) days.push({ label: day[0], slots: slots, note: null, wrapSt: { marginBottom: '26px' }, headSt: DAYHEAD });
+      if (fslots.length) {
+        postDays.push({
+          label: day[0], slots: fslots,
+          note: 'finished',
+          wrapSt: { marginBottom: '26px', opacity: 0.74 },
+          headSt: Object.assign({}, DAYHEAD, { borderBottom: '1.5px dashed oklch(0.78 0.01 250)' })
+        });
+      }
+    });
+
+    postDays.forEach(pd => days.push(pd));
+    const onlyWeek = s.week !== 'all';
+    const noPicksThisWeek = onlyWeek && count === 0
+      && !s.pickers.length && s.tier === '0' && s.market === 'all' && s.flag === 'all' && s.date === 'all' && s.win === 'all';
+    return {
+      hdrTitle: onlyWeek ? 'Week ' + s.week + ' pick board' : 'Pick board',
+      legend: legend, days: days, empty: count === 0,
+      week: s.week, weekOpts: weekOpts,
+      onWeek: e => this.setState({ week: e.target.value, open: null }),
+      emptyNote: noPicksThisWeek
+        ? 'Week ' + s.week + ' has a market but no extracted picks yet. Switch weeks to look back.'
+        : 'Widen the tier or market filter to bring rows back.',
+      countLabel: !s.pickers.length && s.tier === '0' && s.market === 'all' && s.flag === 'all'
+        ? count + ' positions · tap a chip'
+        : count + (count === 1 ? ' position shown' : ' positions shown'),
+      tier: s.tier, market: s.market, flag: s.flag, show: s.show,
+      lensTabs: lensTabs, date: s.date, win: s.win, halfTabs: halfTabs,
+      pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false',
+      pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear,
+      dateOpts: d.G.map(day => day[0]),
+      onDate: e => this.setState({ date: e.target.value, open: null }),
+      onWin: e => this.setState({ win: e.target.value, open: null }),
+      onShow: e => this.setState({ show: e.target.value, open: null }),
+      onTier: e => this.setState({ tier: e.target.value, open: null }),
+      onMarket: e => this.setState({ market: e.target.value, open: null }),
+      onFlag: e => this.setState({ flag: e.target.value, open: null })
+    };
+  }
+}
+
+</script>
+</body>
+</html>
