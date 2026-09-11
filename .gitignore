@@ -1,0 +1,13 @@
+# Local-only build inputs (see MANIFEST.txt). Never push these.
+model_calibration.json
+MANIFEST.txt
+
+# Safety net: secrets and account logs must never reach GitHub
+.env*
+*.env
+usage_*.json
+
+# OS / editor junk
+Thumbs.db
+desktop.ini
+.DS_Store

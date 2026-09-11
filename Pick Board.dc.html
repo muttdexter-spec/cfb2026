@@ -13,6 +13,9 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="./board-bundle.js"></script>
 <script src="./ref-data.js"></script>
+<script src="./odds-data.js"></script>
+<script src="./model-data.js"></script>
+<script src="./odds-view.js"></script>
 <style>
 html,body{margin:0;background:oklch(0.985 0.003 250);color:oklch(0.23 0.02 258);-webkit-font-smoothing:antialiased;color-scheme:light}
 a{color:oklch(0.42 0.16 258);text-decoration:none}
@@ -29,13 +32,16 @@ select{font-family:inherit}
 </div>
 
 <h1 style="font:600 20px/1.25 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 6px;letter-spacing:-0.01em">{{ hdrTitle }}</h1>
-<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin:10px 0 6px">
+<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 8px;max-width:74ch">{{ hdrSub }}</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin-bottom:6px">
 <select value="{{ week }}" onChange="{{ onWeek }}" style="font-size:12.5px;font-weight:500;padding:5px 8px;border:1px solid oklch(0.72 0.01 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
-<option value="all">All weeks</option>
-<sc-for list="{{ weekOpts }}" as="wo" hint-placeholder-count="2"><option value="{{ wo.v }}">{{ wo.label }}</option></sc-for>
+<sc-for list="{{ weekOpts }}" as="wo" hint-placeholder-count="3"><option value="{{ wo.value }}">{{ wo.label }}</option></sc-for>
+</select>
+<select value="{{ gameFilter }}" onChange="{{ onGameFilter }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">All games</option><option value="picks">With a host pick</option><option value="nopicks">No host pick</option><option value="odds">Priced games only</option>
 </select>
 <select value="{{ show }}" onChange="{{ onShow }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
-<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="ep_c3">— Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">— BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">— BBOC Sixth Gear · 2 Sep</option>
+<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option><option value="ep_c3">— Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">— BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">— BBOC Sixth Gear · 2 Sep</option>
 </select>
 <span data-pk="1" style="position:relative;display:inline-block">
 <button type="button" onClick="{{ onPkOpen }}" aria-expanded="{{ pkExpanded }}" style="font:400 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ pickerLabel }}<span style="font-size:9px;color:oklch(0.505 0.014 255)">▼</span></button>
@@ -78,8 +84,8 @@ select{font-family:inherit}
 
 <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
 <div style="padding:44px 0;text-align:center;border-top:1px solid oklch(0.895 0.006 250)">
-<p style="font:500 14px/1.4 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 5px">No positions match those filters</p>
-<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:0">{{ emptyNote }}</p>
+<p style="font:500 14px/1.4 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 5px">No games match those filters</p>
+<p style="font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:0">Widen the game, kickoff or date filter to bring rows back.</p>
 </div>
 </sc-if>
 
@@ -95,12 +101,14 @@ select{font-family:inherit}
 <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:7px">
 <span style="font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif">{{ g.title }}</span>
 <sc-if value="{{ g.proj }}" hint-placeholder-val="{{ false }}"><span style="{{ g.projSt }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">model</span>{{ g.proj }}</span></sc-if>
-<sc-if value="{{ g.mkt }}" hint-placeholder-val="{{ false }}"><span style="{{ g.mktSt }}">
-<sc-if value="{{ g.mktDK }}" hint-placeholder-val="{{ true }}"><img src="./assets/draftkings.png" alt="DraftKings" style="flex:none;height:13px;width:auto;display:block;margin:-1px 0"></sc-if>
-<sc-if value="{{ g.mktBook }}" hint-placeholder-val="{{ false }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">{{ g.mktBook }}</span></sc-if>
-{{ g.mkt }}</span></sc-if>
+<sc-if value="{{ g.mkt }}" hint-placeholder-val="{{ false }}"><span style="{{ g.mktSt }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">{{ g.mktTag }}</span>{{ g.mkt }}</span></sc-if>
+<sc-if value="{{ g.mktOpen }}" hint-placeholder-val="{{ false }}"><span style="{{ g.mktOpenSt }}"><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;opacity:0.75">open</span>{{ g.mktOpen }}</span></sc-if>
 <sc-if value="{{ g.status }}" hint-placeholder-val="{{ false }}"><span style="{{ g.statusSt }}"><sc-if value="{{ g.liveDot }}" hint-placeholder-val="{{ false }}"><span style="{{ g.dotSt }}"></span></sc-if>{{ g.status }}</span></sc-if>
 <sc-for list="{{ g.cond }}" as="wc" hint-placeholder-count="2"><span style="{{ wc.st }}"><sc-if value="{{ wc.dome }}" hint-placeholder-val="{{ false }}"><span style="{{ wc.domeSt }}"></span></sc-if>{{ wc.text }}</span></sc-for>
+<span style="flex:1 1 8px"></span>
+<sc-if value="{{ g.oddsBtn }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ g.oddsBtn.click }}" aria-expanded="{{ g.oddsBtn.expanded }}" style="{{ g.oddsBtn.st }}">{{ g.oddsBtn.label }}<span style="font-size:8px;line-height:1">{{ g.oddsBtn.caret }}</span></button>
+</sc-if>
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:3px 7px;align-items:center;margin-bottom:7px">
 <span style="display:inline-flex;gap:2px;align-items:center;flex:none">
@@ -112,7 +120,6 @@ select{font-family:inherit}
 <sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3">
 <button type="button" onClick="{{ c.click }}" aria-expanded="{{ c.expanded }}" style="{{ c.st }}">
 <sc-if value="{{ c.star }}" hint-placeholder-val="{{ false }}"><span aria-label="Tier 3" style="font-size:11px;line-height:1;margin-right:-1px">★</span></sc-if>
-<sc-if value="{{ c.res }}" hint-placeholder-val="{{ false }}"><span style="{{ c.resSt }}">{{ c.res }}</span></sc-if>
 <span style="{{ c.nameSt }}">{{ c.name }}</span><span>{{ c.pick }}</span>
 <sc-if value="{{ c.delta }}" hint-placeholder-val="{{ false }}"><span style="{{ c.deltaSt }}">{{ c.delta }}</span></sc-if>
 <sc-if value="{{ c.edge }}" hint-placeholder-val="{{ false }}"><span style="{{ c.edgeSt }}">{{ c.edge }}</span></sc-if>
@@ -120,12 +127,126 @@ select{font-family:inherit}
 </button>
 </sc-for>
 </div>
+
+<sc-if value="{{ g.odds }}" hint-placeholder-val="{{ false }}">
+<div style="margin:10px 0 4px;border:1px solid oklch(0.87 0.01 250);border-radius:8px;background:oklch(1 0 0);overflow-x:auto;overflow-y:hidden">
+<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:7px 10px;border-bottom:1px solid oklch(0.91 0.006 250);background:oklch(0.972 0.006 250)">
+<sc-for list="{{ g.odds.tabs }}" as="tb" hint-placeholder-count="5">
+<button type="button" onClick="{{ tb.click }}" style="{{ tb.st }}">{{ tb.label }}<sc-if value="{{ tb.count }}" hint-placeholder-val="{{ false }}"><span style="{{ tb.countSt }}">{{ tb.count }}</span></sc-if></button>
+</sc-for>
+<span style="flex:1 1 8px"></span>
+<sc-if value="{{ g.odds.sortBtn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ g.odds.sortBtn.click }}" style="{{ g.odds.sortBtn.st }}">{{ g.odds.sortBtn.label }}</button></sc-if>
+<button type="button" onClick="{{ g.odds.booksBtn.click }}" style="{{ g.odds.booksBtn.st }}">{{ g.odds.booksBtn.label }}</button>
+<button type="button" onClick="{{ g.odds.close }}" aria-label="Close markets" style="flex:none;cursor:pointer;font:400 14px/1 'IBM Plex Sans',system-ui,sans-serif;width:22px;height:22px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:oklch(0.44 0.015 255)">×</button>
+</div>
+
+<sc-if value="{{ g.odds.books }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ g.odds.books.sections }}" as="sec" hint-placeholder-count="2">
+<sc-if value="{{ sec.label }}" hint-placeholder-val="{{ false }}"><p style="{{ sec.labelSt }}">{{ sec.label }}</p></sc-if>
+<div style="{{ sec.headSt }}">
+<span style="{{ sec.nameHeadSt }}">Book</span>
+<sc-for list="{{ sec.cols }}" as="hc" hint-placeholder-count="5">
+<span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+<span style="{{ hc.st }}">{{ hc.label }}</span>
+<span style="{{ hc.pairSt }}">{{ hc.pair }}</span>
+</span>
+</sc-for>
+</div>
+<sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="6">
+<div style="{{ r.wrapSt }}">
+<span style="{{ r.nameSt }}"><sc-if value="{{ r.badge }}" hint-placeholder-val="{{ false }}"><span style="{{ r.badgeSt }}">{{ r.badge }}</span></sc-if>{{ r.label }}</span>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5">
+<span style="{{ c.wrapSt }}">
+<span style="{{ c.mainSt }}"><sc-if value="{{ c.line }}" hint-placeholder-val="{{ false }}"><span style="{{ c.lineSt }}">{{ c.line }}</span></sc-if><span style="{{ c.paSt }}">{{ c.pa }}</span><span style="{{ c.sepSt }}">/</span><span style="{{ c.pbSt }}">{{ c.pb }}</span></span>
+<sc-if value="{{ c.delta }}" hint-placeholder-val="{{ false }}"><span style="{{ c.deltaSt }}">{{ c.delta }}</span></sc-if>
+</span>
+</sc-for>
+</div>
+</sc-for>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{ g.odds.grid }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ g.odds.grid.sections }}" as="sec" hint-placeholder-count="2">
+<sc-if value="{{ sec.label }}" hint-placeholder-val="{{ false }}"><p style="{{ sec.labelSt }}">{{ sec.label }}</p></sc-if>
+<div style="{{ sec.headSt }}">
+<span style="{{ sec.nameHeadSt }}">{{ sec.nameHead }}</span>
+<sc-for list="{{ sec.cols }}" as="hc" hint-placeholder-count="4"><span style="{{ hc.st }}">{{ hc.label }}</span></sc-for>
+</div>
+<sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
+<div style="{{ r.wrapSt }}">
+<span style="{{ r.nameSt }}">{{ r.label }}<sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}"><span style="{{ r.subSt }}">{{ r.sub }}</span></sc-if></span>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4">
+<span style="{{ c.wrapSt }}">
+<span style="{{ c.mainSt }}">{{ c.main }}<sc-if value="{{ c.cost }}" hint-placeholder-val="{{ false }}"><span style="{{ c.costSt }}">{{ c.cost }}</span></sc-if></span>
+<sc-if value="{{ c.was }}" hint-placeholder-val="{{ false }}"><span style="{{ c.wasSt }}">{{ c.was }}</span></sc-if>
+<sc-if value="{{ c.model }}" hint-placeholder-val="{{ false }}"><span style="{{ c.modelSt }}">{{ c.model }}<sc-if value="{{ c.edge }}" hint-placeholder-val="{{ false }}"><span style="{{ c.edgeSt }}">{{ c.edge }}</span></sc-if></span></sc-if>
+</span>
+</sc-for>
+</div>
+</sc-for>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{ g.odds.head }}" hint-placeholder-val="{{ false }}">
+<div style="{{ g.odds.headSt }}">
+<sc-for list="{{ g.odds.head }}" as="hc" hint-placeholder-count="6"><span style="{{ hc.st }}">{{ hc.text }}</span></sc-for>
+</div>
+</sc-if>
+
+<sc-for list="{{ g.odds.rows }}" as="r" hint-placeholder-count="4">
+<div style="{{ r.wrapSt }}">
+<div style="{{ r.gridSt }}">
+<sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="6">
+<span style="{{ cl.wrapSt }}"><span style="{{ cl.st }}">{{ cl.text }}</span><sc-if value="{{ cl.sub }}" hint-placeholder-val="{{ false }}"><span style="{{ cl.subSt }}">{{ cl.sub }}</span></sc-if></span>
+</sc-for>
+</div>
+<sc-if value="{{ r.note }}" hint-placeholder-val="{{ false }}"><p style="{{ r.noteSt }}">{{ r.note }}</p></sc-if>
+<sc-if value="{{ r.books }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:5px;padding:7px 0 1px">
+<sc-for list="{{ r.books }}" as="bk" hint-placeholder-count="4">
+<span style="{{ bk.wrapSt }}"><span style="{{ bk.badgeSt }}">{{ bk.mono }}</span><sc-for list="{{ bk.cells }}" as="bc" hint-placeholder-count="2"><span style="{{ bc.st }}">{{ bc.text }}</span></sc-for></span>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+
+<sc-if value="{{ g.odds.env }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;padding:11px 12px 12px">
+<sc-for list="{{ g.odds.env }}" as="ev" hint-placeholder-count="2">
+<div style="flex:1 1 250px;min-width:0;padding:10px 12px;border:1px solid oklch(0.895 0.006 250);border-radius:7px;background:oklch(0.972 0.006 250)">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 0 8px">
+<span style="font:600 13px/1.25 'IBM Plex Sans',system-ui,sans-serif">{{ ev.team }}</span>
+<span style="font:400 10.5px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ ev.meta }}</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px 16px">
+<sc-for list="{{ ev.rows }}" as="er" hint-placeholder-count="6">
+<span style="display:inline-flex;flex-direction:column;gap:1px;min-width:52px">
+<span style="font:400 9.5px/1.3 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">{{ er.label }}</span>
+<span style="font:500 13px/1.2 'IBM Plex Sans',system-ui,sans-serif">{{ er.value }}<sc-if value="{{ er.sd }}" hint-placeholder-val="{{ false }}"><span style="font:400 10px/1.2 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin-left:3px">{{ er.sd }}</span></sc-if></span>
+</span>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ g.odds.empty }}" hint-placeholder-val="{{ false }}">
+<p style="font:400 12px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:0;padding:18px 12px;text-align:center">{{ g.odds.empty }}</p>
+</sc-if>
+<sc-if value="{{ g.odds.note }}" hint-placeholder-val="{{ false }}">
+<p style="{{ g.odds.noteSt }}">{{ g.odds.note }}</p>
+</sc-if>
+</div>
+</sc-if>
+
 <sc-if value="{{ g.det }}" hint-placeholder-val="{{ false }}">
 <div style="margin:11px 0 4px;padding:15px 18px 14px;background:oklch(0.962 0.008 250);border-left:2px solid oklch(0.23 0.02 258);border-radius:0 6px 6px 0">
 <div style="display:flex;gap:12px;align-items:baseline;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid oklch(0.895 0.006 250)">
 <div style="flex:1 1 auto;display:flex;flex-wrap:wrap;gap:3px 10px;align-items:baseline">
 <span style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif">{{ g.det.head }}</span>
-<sc-if value="{{ g.det.resLabel }}" hint-placeholder-val="{{ false }}"><span style="{{ g.det.resSt }}">{{ g.det.resLabel }}</span></sc-if>
 <sc-if value="{{ g.det.tag }}" hint-placeholder-val="{{ false }}"><span style="font:500 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;padding:3px 6px;border-radius:3px;background:oklch(0.90 0.01 250);color:oklch(0.44 0.015 255)">{{ g.det.tag }}</span></sc-if>
 <span style="font:400 11.5px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ g.det.meta }}</span>
 </div>
@@ -284,11 +405,11 @@ const T = {
 const INK = 'oklch(0.23 0.02 258)', SEC = 'oklch(0.44 0.015 255)', MUT = 'oklch(0.505 0.014 255)';
 const FLAG = 'oklch(0.48 0.20 25)', GOOD = 'oklch(0.45 0.13 150)';
 const WXC = { aqua: 'oklch(0.80 0.06 196)', orange: 'oklch(0.80 0.07 62)', blue: 'oklch(0.80 0.06 255)', yellow: 'oklch(0.84 0.07 100)' };
-const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer' };
+const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer', Unnamed: 'unresolved', Ibo: 'guest', Zuppi: 'unresolved' };
 const PROBLEM = /STALE|UNGRADEABLE|NO NUMBER|NO PRICE|NOT CITED|NEVER CITED|garbled|OPPONENT WAS NEVER|AMBIGUOUS|IMPLAUSIBLE|unverified|limit risk/i;
 function isProblem(p) { return PROBLEM.test(p[9] || ''); }
 const MONO = "'IBM Plex Mono',ui-monospace,monospace";
-const HOSTMAP = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck' };
+const HOSTMAP = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck', 'Rico Bosco': 'Bosco', 'Dave Portnoy': 'Portnoy', 'Big Cat': 'Big Cat', 'Hank': 'Hank', 'Unnamed Picker (Pick Em)': 'Unnamed', 'Ibo': 'Ibo', 'Zuppi': 'Zuppi' };
 const CONDC = { plain: 'oklch(0.505 0.014 255)', warn: 'oklch(0.40 0.10 220)', hot: 'oklch(0.46 0.17 32)', cold: 'oklch(0.42 0.11 240)', storm: 'oklch(0.42 0.16 300)', roof: 'oklch(0.42 0.008 250)' };
 const PILL = { warn: 'oklch(0.945 0.035 220)', hot: 'oklch(0.952 0.05 32)', cold: 'oklch(0.955 0.035 240)', storm: 'oklch(0.955 0.04 300)', roof: 'oklch(0.928 0.005 250)' };
 
@@ -472,6 +593,26 @@ function refGame(matchup) {
   const ix = gameIndex();
   return ix[RK(a) + '@' + RK(h)] || ix[RK(h) + '@' + RK(a)] || null;
 }
+
+// The week a pick-grid game belongs to: the schedule's week when the matchup
+// resolves, otherwise the week whose slate is closest to the day block's date.
+// Lets G carry more than one week without a Week 1 row leaking onto the Week 2
+// slate (added 2026-09-10 with the Week 2 ingest).
+function gridWeek(dayLabel, matchup, fallback) {
+  const g = refGame(matchup);
+  if (g) return g.wk;
+  const R = window.REF;
+  const m = /(\d{1,2})\s+([A-Za-z]{3})/.exec(String(dayLabel || ''));
+  const MON = { Jan: 0, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+  if (!R || !m || MON[m[2]] === undefined) return fallback;
+  const t = Date.UTC((R.season || 2026) + (MON[m[2]] === 0 ? 1 : 0), MON[m[2]], +m[1], 16);
+  let best = null, bd = Infinity;
+  (R.GAMES || []).forEach(x => {
+    const k = Date.parse(x.ko || '');
+    if (!isNaN(k) && Math.abs(k - t) < bd) { bd = Math.abs(k - t); best = x.wk; }
+  });
+  return best === null ? fallback : best;
+}
 // Model constants. Fitted to the market by calibrate_model.py and carried in
 // BOARD.META.model; the 2.0 / 1.0 fallback is the original assumed pair, which
 // measurably tilts every game toward the away team. Read lazily - the bundle is
@@ -489,6 +630,18 @@ function schedTime(g) {
   if (isNaN(t)) return null;
   const s = new Date(t).toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
   return s.replace(' AM', 'a').replace(' PM', 'p');
+}
+// ET calendar day for a kickoff: a sort key and the label the day header shows.
+// en-CA gives YYYY-MM-DD, which sorts as a string.
+function etParts(ko) {
+  const t = Date.parse(ko || '');
+  if (isNaN(t)) return null;
+  const d = new Date(t), z = { timeZone: 'America/New_York' };
+  const f = o => d.toLocaleDateString('en-US', Object.assign({}, z, o));
+  return {
+    key: d.toLocaleDateString('en-CA', z),
+    label: f({ weekday: 'long' }) + ' ' + f({ day: 'numeric' }) + ' ' + f({ month: 'short' })
+  };
 }
 function slotMinutes(label) {
   const m = /^(\d{1,2}):(\d{2})\s*([ap])/.exec(String(label).trim());
@@ -560,7 +713,7 @@ function modelEdge(p, g) {
 }
 
 // --- reasoning layer (reasoning.csv, keyed by pick_id) ---
-const LHOST = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck' };
+const LHOST = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck', 'Rico Bosco': 'Bosco', 'Dave Portnoy': 'Portnoy', 'Big Cat': 'Big Cat', 'Hank': 'Hank', 'Unnamed Picker (Pick Em)': 'Unnamed', 'Ibo': 'Ibo', 'Zuppi': 'Zuppi' };
 const GRADE = {
   CHARTED: { label: 'charted', tone: 'strong' }, STAT_CITED: { label: 'stat cited', tone: 'strong' },
   BASE_RATE: { label: 'base rate', tone: 'ok' }, SCHEME: { label: 'scheme', tone: 'ok' },
@@ -594,66 +747,22 @@ function reasonIndex(reasonRows, ledgerRows) {
     if (!host) return;
     const sig = ((r.market_type || 'SPREAD').toUpperCase()) + '|' + ((r.ext_period || 'FG').toUpperCase() || 'FG');
     const k = host + '|' + gameKey(r.matchup);
-    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null, led: r });
+    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null });
   });
   return _rmap;
 }
-// resolve a board pick to its single ledger entry; null when the match is ambiguous
-function matchEntry(p, matchup, reasonRows, ledgerRows) {
-  if (!ledgerRows || !ledgerRows.length) return null;
-  const ix = reasonIndex(reasonRows || [], ledgerRows);
-  const list = ix[p[0] + '|' + gameKey(matchup)];
-  if (!list || !list.length) return null;
-  if (list.length === 1) return list[0];
-  const sig = pickSig(p[1]);
-  const exact = list.filter(x => x.sig === sig);
-  if (exact.length === 1) return exact[0];
-  const mt = sig.split('|')[0];
-  const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
-  return byMt.length === 1 ? byMt[0] : null;
-}
 function reasonFor(p, matchup, reasonRows, ledgerRows) {
   if (!reasonRows || !reasonRows.length) return null;
-  const e = matchEntry(p, matchup, reasonRows, ledgerRows);
-  return e ? e.row : null;
-}
-// graded outcome of a single pick, straight from the grader's `result`
-const RES = {
-  W: { mark: 'W', label: 'Won', bg: 'oklch(0.90 0.085 150)', fg: 'oklch(0.34 0.12 150)' },
-  L: { mark: 'L', label: 'Lost', bg: 'oklch(0.905 0.075 25)', fg: 'oklch(0.42 0.19 25)' },
-  P: { mark: 'P', label: 'Push', bg: 'oklch(0.90 0.006 250)', fg: 'oklch(0.40 0.012 255)' }
-};
-function resultFor(p, matchup, reasonRows, ledgerRows) {
-  const e = matchEntry(p, matchup, reasonRows, ledgerRows);
-  if (!e || !e.led) return null;
-  const c = String(e.led.result || '').toUpperCase().charAt(0);
-  const r = RES[c];
-  if (!r) return null;
-  return { mark: r.mark, label: r.label, bg: r.bg, fg: r.fg, disputed: String(e.led.disputed || '').toUpperCase() === 'TRUE' };
-}
-
-// --- week ---------------------------------------------------------------
-// Week comes from the schedule the game sits on, not from the pipeline's
-// current_week: a Week 1 grid must stay labelled Week 1 after the config rolls over.
-function weekMins() {
-  const R = window.REF;
-  if (!R) return {};
-  const m = {};
-  R.GAMES.forEach(g => {
-    const t = Date.parse(g.ko);
-    if (isNaN(t) || !g.wk) return;
-    if (!m[g.wk] || t < m[g.wk]) m[g.wk] = t;
-  });
-  return m;
-}
-// the week the board should open on: rolls over on the Monday before its first kickoff
-function currentWeek(now) {
-  const m = weekMins();
-  let cur = null;
-  Object.keys(m).map(Number).sort((a, b) => a - b).forEach(w => {
-    if (m[w] - 3 * 86400000 <= now) cur = w;
-  });
-  return cur;
+  const ix = reasonIndex(reasonRows, ledgerRows);
+  const list = ix[p[0] + '|' + gameKey(matchup)];
+  if (!list || !list.length) return null;
+  if (list.length === 1) return list[0].row;
+  const sig = pickSig(p[1]);
+  const exact = list.filter(x => x.sig === sig);
+  if (exact.length === 1) return exact[0].row;
+  const mt = sig.split('|')[0];
+  const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
+  return byMt.length === 1 ? byMt[0].row : null;
 }
 function reasonBlock(r) {
   if (!r) return null;
@@ -810,21 +919,11 @@ function mktText(lines, sg) {
   const m = lines[String(sg.id)];
   if (!m) return null;
   const bits = [];
-  // the feed's spread is home-relative; show it against the favourite, the way the model chip does
-  if (m.spread !== null && !isNaN(m.spread)) {
-    bits.push(m.spread === 0
-      ? 'pick \u2019em'
-      : teamShort(m.spread < 0 ? sg.h : sg.a) + ' ' + (-Math.abs(m.spread)).toString());
-  }
+  if (m.spread !== null && !isNaN(m.spread)) bits.push(sgn(m.spread));
   if (m.total !== null && !isNaN(m.total)) bits.push('o' + m.total);
   if (!bits.length) return null;
-  const dk = m.book === 'DraftKings' || m.book === 'DraftKings_Alt';
-  return {
-    // the logo stands in for the book name; DraftKings_Alt is a second DK feed, not a typo, so it keeps a label
-    dk: dk,
-    book: m.book === 'DraftKings' ? '' : m.book === 'DraftKings_Alt' ? 'alt' : 'BOV',
-    txt: bits.join(' · ') + (m.snap === 'CURRENT' ? '' : ' ' + (m.snap === 'OPEN' ? 'open' : 'close~'))
-  };
+  const book = m.book === 'DraftKings' ? 'DK' : m.book === 'DraftKings_Alt' ? 'DK2' : 'BOV';
+  return book + ' ' + bits.join(' · ') + (m.snap === 'CURRENT' ? '' : ' ' + (m.snap === 'OPEN' ? 'open' : 'close~'));
 }
 
 // ---- results ------------------------------------------------------------
@@ -849,8 +948,97 @@ function finalText(results, sg) {
   return sg.a + ' ' + f.a + ' \u00b7 ' + sg.h + ' ' + f.h + (f.ot ? ' (OT)' : '');
 }
 
+// ---- sportsbook panel ---------------------------------------------------
+// All of the number work lives in odds-view.js (window.OV) so the desktop and the
+// mobile page compute an edge, a de-vig and a line move exactly once. What follows
+// is only chrome: it turns OV's view models into the cell/row shapes the template
+// iterates over.
+const SHADE = 'oklch(0.935 0.012 250)';   // the "opening line" wash
+const GOODBG = 'oklch(0.90 0.09 150)', BADBG = 'oklch(0.945 0.05 25)';
+
+function tabSt(on) {
+  return { cursor: 'pointer', font: '500 11px/1 ' + MONO, letterSpacing: '0.02em',
+    padding: '5px 9px', borderRadius: '5px', display: 'inline-flex', alignItems: 'center', gap: '5px',
+    border: '1px solid ' + (on ? INK : 'oklch(0.87 0.01 250)'),
+    background: on ? INK : 'oklch(1 0 0)', color: on ? 'oklch(0.99 0 0)' : SEC };
+}
+function miniSt(on) {
+  return { cursor: 'pointer', font: '500 10px/1 ' + MONO, textTransform: 'uppercase',
+    letterSpacing: '0.05em', padding: '5px 8px', borderRadius: '5px',
+    border: '1px solid ' + (on ? INK : 'oklch(0.87 0.01 250)'),
+    background: on ? INK : 'oklch(1 0 0)', color: on ? 'oklch(0.99 0 0)' : MUT };
+}
+function badgeSt(bk) {
+  return { flex: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+    minWidth: '32px', padding: '3px 5px', borderRadius: '3px',
+    font: '600 9px/1.3 ' + MONO, letterSpacing: '0.03em', background: bk.bg, color: bk.fg };
+}
+function cell(text, opt) {
+  opt = opt || {};
+  return {
+    text: opt.blank ? '' : (text === null || text === undefined || text === '' ? '\u2014' : text),
+    sub: opt.sub || null,
+    wrapSt: Object.assign({ display: 'inline-flex', alignItems: 'baseline', gap: '4px',
+      minWidth: 0, overflow: 'hidden' }, opt.wrapSt || {}),
+    st: Object.assign({
+      font: (opt.strong ? 500 : 400) + ' ' + (opt.size || 12) + 'px/1.35 ' +
+            (opt.sans ? "'IBM Plex Sans',system-ui,sans-serif" : MONO),
+      color: opt.tone === 'good' ? GOOD : opt.tone === 'bad' ? FLAG
+           : opt.tone === 'mute' ? MUT : INK,
+      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+    }, opt.shade ? { background: SHADE, color: SEC, padding: '1px 5px', borderRadius: '3px' } : {},
+       opt.chip ? { background: opt.chip, padding: '1px 5px', borderRadius: '3px' } : {},
+       opt.st || {}),
+    subSt: { font: '400 9.5px/1.3 ' + MONO, color: MUT, whiteSpace: 'nowrap' }
+  };
+}
+const GAME_GRID = '100px 124px 62px 58px 104px 58px';
+// the compact grid sizes its own columns: a name column plus one per market
+// A floor of 104px per market column, so a narrow window scrolls the panel
+// (it is overflow-x:auto) instead of crushing the prices into each other.
+function gridCols(n, nameW) { return (nameW || 132) + 'px repeat(' + n + ',minmax(104px,1fr))'; }
+const HEADCELL = { font: '400 9.5px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em', color: MUT, whiteSpace: 'nowrap' };
+const PROP_GRID = '150px 92px 46px 54px 54px 88px 72px 74px';
+function headRow(cols, grid) {
+  return {
+    st: { display: 'grid', gridTemplateColumns: grid, gap: '8px', alignItems: 'center',
+      padding: '7px 12px 6px', borderBottom: '1px solid oklch(0.93 0.006 250)' },
+    cells: cols.map(function (c) {
+      return { text: c, st: { font: '400 9.5px/1 ' + MONO, textTransform: 'uppercase',
+        letterSpacing: '0.06em', color: MUT, whiteSpace: 'nowrap' } };
+    })
+  };
+}
+function rowWrap(i) {
+  return { padding: '7px 12px', borderBottom: '1px solid oklch(0.955 0.004 250)',
+    background: i % 2 ? 'oklch(0.988 0.003 250)' : 'oklch(1 0 0)' };
+}
+function bookChips(list) {
+  if (!list || !list.length) return null;
+  return list.map(function (b) {
+    var mine = b.book.id === OV.primaryBook();
+    return {
+      mono: b.book.mono, badgeSt: badgeSt(b.book),
+      wrapSt: { display: 'inline-flex', alignItems: 'center', gap: '5px',
+        padding: '3px 7px 3px 4px',
+        border: '1px solid ' + (mine ? b.book.bg : 'oklch(0.90 0.008 250)'),
+        borderRadius: '5px',
+        background: mine ? 'oklch(0.975 0.035 145)' : 'oklch(1 0 0)' },
+      cells: b.cells.map(function (c) {
+        var txt = c.has ? ((c.line ? c.line + ' ' : '') + (c.price || '')).trim() : '\u2014';
+        return { text: txt, st: { font: (c.best ? 600 : 400) + ' 10.5px/1.3 ' + MONO,
+          color: c.has ? (c.best ? GOOD : SEC) : 'oklch(0.78 0.01 250)',
+          whiteSpace: 'nowrap',
+          background: c.best ? 'oklch(0.955 0.05 150)' : 'transparent',
+          padding: c.best ? '1px 4px' : '1px 0', borderRadius: '3px' } };
+      })
+    };
+  });
+}
+
 class Component extends DCLogic {
-  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), week: 'all', tier: '0', market: 'all', flag: 'all', show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0 };
+  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), tier: '0', market: 'all', flag: 'all', show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0,
+    week: null, gameFilter: 'all', oddsOpen: null, oddsTab: 'GAME', allBooks: false, propSort: 'odds' };
 
   componentDidMount() {
     const load = n => {
@@ -862,8 +1050,7 @@ class Component extends DCLogic {
       csvParse(B.COND_CSV || '').forEach(r => { if (r.matchup) cond[r.matchup] = r; });
       const lines = buildLines(B.LINES_CSV || '');
       const results = buildResults(B.RESULTS_CSV || '');
-      const cw = currentWeek(Date.now());
-      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results, week: cw ? String(cw) : 'all' });
+      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results });
       this.fetchForecast(cond);
     };
     load(0);
@@ -884,9 +1071,535 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { clearInterval(this._tick); window.removeEventListener('keydown', this._esc); document.removeEventListener('mousedown', this._away); }
 
+  /*
+   * The per-game market panel. Returns null unless this game is the one expanded,
+   * so the template renders nothing for every other row.
+   *
+   * `ha` is the pair of short names used inside market rows, `teams` the full
+   * CFBD school names the projection store is keyed on.
+   */
+  oddsPanel(gid, ha, teams) {
+    const s = this.state;
+    if (!window.OV || !OV.ready() || String(s.oddsOpen) !== String(gid)) return null;
+    const g = OV.game(gid);
+    if (!g) return null;
+
+    const counts = OV.familyCounts(gid);
+    const env = OV.env(gid, teams.home, teams.away);
+    const marketRows = OV.gameMarkets(gid, ha);
+    const defs = [{ id: 'GAME', label: 'Game', n: marketRows.length }];
+    OV.families().forEach(f => { if (counts[f.id]) defs.push({ id: f.id, label: f.label, n: counts[f.id] }); });
+    if (env) defs.push({ id: 'MODEL', label: 'Model', n: 0 });
+    // the tab is board-wide state, so a game without it falls back rather than blanking
+    let tab = s.oddsTab || 'GAME';
+    if (!defs.some(d => d.id === tab)) tab = defs[0].id;
+
+    const tabs = defs.map(d => ({
+      label: d.label, count: d.n ? String(d.n) : null, st: tabSt(tab === d.id),
+      countSt: { font: '400 9.5px/1 ' + MONO, opacity: 0.72 },
+      click: () => this.setState({ oddsTab: d.id })
+    }));
+
+    const panel = {
+      tabs: tabs, head: null, rows: [], grid: null, books: null, env: null, empty: null, note: null,
+      booksBtn: {
+        // the compact grid cannot also show eight books per cell, so this is a
+        // view switch rather than an overlay: the long form is the book compare
+        label: s.allBooks ? 'Compare books \u2713' : 'Compare books',
+        st: miniSt(!!s.allBooks),
+        click: () => this.setState(st => ({ allBooks: !st.allBooks }))
+      },
+      sortBtn: null,
+      close: () => this.setState({ oddsOpen: null }),
+      noteSt: { font: '400 10.5px/1.5 ' + MONO, color: MUT, margin: 0,
+                padding: '9px 12px', borderTop: '1px solid oklch(0.94 0.006 250)',
+                background: 'oklch(0.978 0.004 250)' }
+    };
+
+    if (tab === 'MODEL') {
+      panel.env = env.map(e => ({
+        team: e.team,
+        meta: e.side + ' \u00b7 ' + e.spread + ' \u00b7 total ' + e.total +
+              ' \u00b7 TD from ' + String(e.tdSource || '').toLowerCase().replace(/_/g, ' '),
+        rows: e.rows
+      }));
+      panel.note = OV.eligibilityNote();
+      return panel;
+    }
+
+    if (tab === 'GAME' && !s.allBooks) {
+      panel.grid = this.dressGrid(OV.gameGrid(gid, ha), 'Team');
+      const meta = OV.meta();
+      const unck = OV.unchecked(gid);
+      panel.note = 'Consensus of ' + (g.nb || 0) + ' books, recomputed here from the '
+        + 'per-book quotes \u2014 SGO\u2019s own consensus put 31% of its prices outside the '
+        + 'range of every book it claimed to summarise. Snapshot '
+        + (meta ? meta.snapshot + ' ' + String(meta.asOf).replace('T', ' ').replace('Z', ' UTC') : '')
+        + '. Shaded numbers are the opening line, shown only where it moved. Prices carry vig.'
+        + (unck ? ' ' + unck + ' price' + (unck === 1 ? '' : 's') + ' on this game had no '
+                + 'per-book row to check against and keep SGO\u2019s number.' : '');
+      if (!panel.grid) panel.empty = 'No game markets on this event.';
+      return panel;
+    }
+
+    if (tab === 'GAME') {
+      panel.books = this.dressBookGrid(OV.bookGrid(gid, ha));
+      if (panel.books) {
+        const dk = OV.book(OV.primaryBook());
+        panel.note = 'One row per book \u00b7 a cell is the line then both sides\u2019 prices, '
+          + 'because the home spread is the away spread negated and the under shares the '
+          + 'over\u2019s number. Green is the best price on that side among the books hanging '
+          + 'the line most of them hang. The tinted row is ' + dk.label + ': its delta is '
+          + 'probability points against the market row, positive meaning you are paying less '
+          + 'for the same outcome, and a different line is reported as a line difference '
+          + 'rather than a better price.';
+        return panel;
+      }
+      const head = headRow(['Market', 'Side', 'Line', 'Price', 'Opened', 'Move'], GAME_GRID);
+      panel.head = head.cells; panel.headSt = head.st;
+      let lastBucket = null;
+      const bookCache = {};
+      panel.rows = marketRows.map((r, i) => {
+        const openTxt = [r.openLine, r.openPrice].filter(Boolean).join('  ');
+        let books = null;
+        if (s.allBooks) {
+          if (!bookCache[r.bucket]) bookCache[r.bucket] = OV.bookRows(gid, r.bucket, ha);
+          // one chip per book, showing only the side this row is about, so the
+          // chip never needs a header to be read correctly
+          books = bookChips(bookCache[r.bucket].map(b => {
+            const hit = b.cells.filter(c => c.side === r.side);
+            return { book: b.book, cells: hit.length ? hit : [{ has: false }] };
+          }).filter(b => b.cells[0].has));
+        }
+        const first = r.bucket !== lastBucket;
+        lastBucket = r.bucket;
+        return {
+          wrapSt: Object.assign(rowWrap(i), first && i ? { borderTop: '1px solid oklch(0.92 0.006 250)' } : {}),
+          gridSt: { display: 'grid', gridTemplateColumns: GAME_GRID, gap: '8px', alignItems: 'baseline' },
+          cells: [
+            cell(r.label, { tone: 'mute', size: 11, blank: !first }),
+            cell(r.sideLabel, { sans: true, strong: true, size: 12.5 }),
+            cell(r.line, { strong: true, size: 13 }),
+            cell(r.price, { size: 12.5 }),
+            cell(openTxt, { shade: !!openTxt, size: 11.5 }),
+            cell(r.moveText, { tone: r.move ? 'flat' : 'mute', size: 11.5 })
+          ],
+          books: books, note: null,
+          noteSt: { font: '400 10.5px/1.4 ' + MONO, color: MUT, margin: '4px 0 0' }
+        };
+      });
+      const meta = OV.meta();
+      panel.note = 'Consensus of ' + (g.nb || 0) + ' books \u00b7 snapshot ' +
+        (meta ? meta.snapshot + ' ' + String(meta.asOf).replace('T', ' ').replace('Z', ' UTC') : '') +
+        '. The price shown is the book consensus with vig in it; the de-vigged fair price is what the edge column on the prop tabs is measured against.';
+      if (!panel.rows.length) panel.empty = 'No game markets on this event.';
+      return panel;
+    }
+
+    // --- a prop family ---
+    const srt = this.sortBits();
+    panel.sortBtn = srt;
+    const label0 = (defs.filter(d => d.id === tab)[0] || {}).label || tab;
+
+    if (!s.allBooks) {
+      const pg = OV.propGrid(gid, tab, { sort: srt.mode });
+      panel.grid = this.dressGrid(pg, 'Player');
+      if (!pg) {
+        panel.empty = 'No ' + label0.toLowerCase() + ' markets on this event.';
+        return panel;
+      }
+      const bits = [];
+      bits.push(srt.mode === 'odds' ? 'Shortest price first'
+              : srt.mode === 'edge' ? 'Biggest model edge first' : 'By player');
+      bits.push(pg.modelled
+        ? pg.modelled + ' of ' + pg.total + ' markets carry a projection'
+        : 'No projection reaches this market');
+      if (pg.soft) bits.push(pg.soft + ' greyed \u2014 the model calls that market not bettable');
+      if (pg.approx) bits.push(pg.approx + ' marked \u007e \u2014 read off a tail or a one-sided price');
+      panel.note = bits.join(' \u00b7 ') + '. ' +
+        (pg.modelled ? OV.eligibilityNote()
+         : 'The prop model covers FBS-vs-FBS games that had a market spread when it was fitted.');
+      return panel;
+    }
+
+    const rows = OV.props(gid, tab, { sort: srt.mode });
+    const yn = rows.length && rows[0].betType === 'yn';
+    const head = headRow(['Player', 'Market', 'Line', yn ? 'Yes' : 'Over', yn ? 'No' : 'Under',
+                          'Opened', 'Model', 'Edge'], PROP_GRID);
+    panel.head = head.cells; panel.headSt = head.st;
+    panel.rows = rows.map((r, i) => {
+      const openTxt = [r.lineMoved ? r.openLine : '', r.openOver].filter(Boolean).join('  ');
+      const edgeChip = r.tone === 'good' ? GOODBG : r.tone === 'bad' ? BADBG : null;
+      return {
+        wrapSt: rowWrap(i),
+        gridSt: { display: 'grid', gridTemplateColumns: PROP_GRID, gap: '8px', alignItems: 'baseline' },
+        cells: [
+          cell(r.player, { sans: true, strong: true, size: 12.5, sub: r.pos || null }),
+          cell(r.label, { tone: 'mute', size: 11 }),
+          cell(r.line, { strong: true, size: 12.5 }),
+          cell(r.over, { size: 12 }),
+          cell(r.under, { size: 12 }),
+          cell(openTxt, { shade: !!openTxt, size: 11 }),
+          cell(r.modelText, { size: 12, strong: true, sub: r.modelPrice || null,
+                              tone: r.modelability === 'NOT_BETTABLE' ? 'mute' : null }),
+          cell(r.edgeText, { size: 11.5, chip: edgeChip,
+                             tone: r.tone === 'good' ? 'good' : r.tone === 'bad' ? 'bad' : 'mute' })
+        ],
+        books: s.allBooks ? bookChips(OV.propBooks(r)) : null,
+        note: r.note || null,
+        noteSt: { font: '400 10px/1.4 ' + MONO, color: MUT, margin: '4px 0 0' }
+      };
+    });
+    if (!panel.rows.length) panel.empty = 'No ' + label0.toLowerCase() + ' markets on this event.';
+    const modelled = rows.filter(r => r.model).length;
+    panel.note = modelled
+      ? modelled + ' of ' + rows.length + ' markets carry a projection. ' + OV.eligibilityNote()
+      : 'No projection reaches this market. The prop model covers FBS-vs-FBS games that had a market spread when it was fitted; kickers and most FCS players sit outside it.';
+    return panel;
+  }
+
+  /*
+   * The week the board is showing. Defaults to whatever week the odds snapshot
+   * covers, because that is the live slate; when there is no odds file it falls
+   * back to the week the pick grid is about.
+   */
+  /*
+   * Prop sort. Three modes, cycled from one button because the tab strip has no
+   * room for a segmented control.
+   *
+   * Odds is the default: shortest price first puts the likeliest scorer at the
+   * top of a touchdown tab and the biggest number at the top of a yardage tab,
+   * which is the order you would read either board in. Alphabetical by player is
+   * a filing order, not a betting one.
+   */
+  sortModes() {
+    return [
+      { id: 'odds', label: 'Sort \u00b7 odds' },
+      { id: 'edge', label: 'Sort \u00b7 edge' },
+      { id: 'name', label: 'Sort \u00b7 A\u2013Z' }
+    ];
+  }
+  sortBits() {
+    const modes = this.sortModes();
+    const cur = this.state.propSort || 'odds';
+    const i = Math.max(0, modes.map(m => m.id).indexOf(cur));
+    const next = modes[(i + 1) % modes.length].id;
+    return {
+      mode: modes[i].id,
+      label: modes[i].label,
+      st: miniSt(modes[i].id !== 'name'),
+      click: () => this.setState({ propSort: next })
+    };
+  }
+
+  currentWeek() {
+    const s = this.state;
+    if (s.week) return Number(s.week);
+    if (window.OV && OV.ready() && OV.week()) return OV.week();
+    const d = s.d;
+    return (d && d.META && d.META.board_week) || 1;
+  }
+
+  headTitle(week) {
+    const M = window.BOARD && window.BOARD.META;
+    const boardWeek = (M && M.board_week) || 1;
+    if (week === boardWeek && M && M.title) return M.title;
+    return 'Week ' + week + ' board';
+  }
+
+  /*
+   * The standfirst. On the week the pick grid covers this is the ledger's own
+   * summary; on any other week that sentence would be a lie, so the page says
+   * what it actually has - schedule, market and model - and what it does not.
+   */
+  headSub(week) {
+    const M = window.BOARD && window.BOARD.META;
+    const boardWeek = (M && M.board_week) || 1;
+    const bits = [];
+    if (week === boardWeek && M && M.subtitle) bits.push(M.subtitle);
+    if (window.OV && OV.ready() && OV.week() === week) {
+      const meta = OV.meta(), j = meta.join || {};
+      bits.push('Sportsbook consensus across ' + (window.OV.books().length) + ' books, '
+        + meta.snapshot + ' snapshot ' + String(meta.asOf).slice(0, 10)
+        + ' \u00b7 ' + (j.matched || 0) + ' of ' + (j.sched_games || 0)
+        + ' games priced. Opening numbers are the median of the books\u2019 own opens, '
+        + 'not SGO\u2019s event-level open field, which is wrong on the moneyline.');
+    }
+    if (window.MODEL && window.MODEL.week === week) {
+      const n = Object.keys(window.MODEL.env || {}).length;
+      bits.push('Prop projections cover ' + n + ' FBS-vs-FBS games. '
+        + 'Every projected row is bet_eligible=FALSE \u2014 no prop has been graded yet, '
+        + 'so these are projections, not recommendations.');
+    }
+    if (week !== boardWeek) {
+      bits.unshift('No podcast positions have been extracted for this week; the pick grid '
+        + 'is Week ' + boardWeek + '.');
+    }
+    return bits.join(' ');
+  }
+
+  weekOptions() {
+    const R = window.REF, d = this.state.d, wk = {};
+    ((R && R.GAMES) || []).forEach(g => { wk[g.wk] = (wk[g.wk] || 0) + 1; });
+    const picks = {};
+    // A matchup the alias table cannot resolve still belongs to the week the pick
+    // grid is about, or the option label undercounts what the board then renders.
+    const bw = (d && d.META && d.META.board_week) || 1;
+    if (d) d.G.forEach(day => day[1].forEach(bg => {
+      const w = gridWeek(day[0], bg[1], bw);
+      picks[w] = (picks[w] || 0) + bg[4].length;
+    }));
+    const ow = window.OV && OV.ready() ? OV.week() : null;
+    return Object.keys(wk).map(Number).sort((a, b) => a - b).map(w => ({
+      value: String(w),
+      label: 'Week ' + w + ' \u00b7 ' + wk[w] + ' games'
+        + (picks[w] ? ' \u00b7 ' + picks[w] + ' picks' : '')
+        + (w === ow ? ' \u00b7 odds' : '')
+    }));
+  }
+
+  /*
+   * The week's slate, built from the schedule and then annotated with whatever
+   * positions the pick grid holds for each game.
+   *
+   * This is the inversion the board needed. It used to iterate the pick grid, so
+   * a game nobody had a position on did not exist on the page at all - 40-odd of
+   * Week 1's 99 games were invisible, and the market and the model had nowhere to
+   * be shown for the rest.
+   */
+  weekSlate(week) {
+    const d = this.state.d, R = window.REF;
+    const games = ((R && R.GAMES) || []).filter(g => g.wk === week);
+    const inWeek = {};
+    games.forEach(g => { inWeek[RK(g.a) + '@' + RK(g.h)] = g; });
+
+    // Board copy names the FCS side the way the show said it ("LIU at Kansas"),
+    // which the alias table does not carry. Fall back to the one side that does
+    // resolve, and only when it picks out a single game in the week.
+    const byHome = {}, byAway = {};
+    games.forEach(g => {
+      (byHome[RK(g.h)] = byHome[RK(g.h)] || []).push(g);
+      (byAway[RK(g.a)] = byAway[RK(g.a)] || []).push(g);
+    });
+    const oneSided = matchup => {
+      const parts = String(matchup || '').split(/ at | vs\.? /i).map(x => x.trim());
+      if (parts.length !== 2) return null;
+      const a = refTeam(parts[0]), h = refTeam(parts[1]);
+      const cand = {};
+      if (h) (byHome[RK(h)] || []).forEach(g => { cand[g.id] = g; });
+      if (a) (byAway[RK(a)] || []).forEach(g => { cand[g.id] = g; });
+      const keys = Object.keys(cand);
+      return keys.length === 1 ? cand[keys[0]] : null;
+    };
+
+    // The one-sided fallback only runs on the week the pick grid is about. A
+    // Week 1 position must never attach itself to a Week 2 game just because the
+    // same team is home in both.
+    const boardWk = (d && d.META && d.META.board_week) || 1;
+    const attached = {}, orphans = [];
+    if (d) d.G.forEach(day => day[1].forEach(bg => {
+      if (gridWeek(day[0], bg[1], boardWk) !== week) return;
+      let k = gameKey(bg[1]);
+      if (!inWeek[k]) {
+        const g = oneSided(bg[1]);
+        if (g) k = RK(g.a) + '@' + RK(g.h);
+      }
+      if (inWeek[k] && !attached[k]) attached[k] = { day: day[0], row: bg };
+      else orphans.push({ day: day[0], row: bg });
+    }));
+
+    const out = games.map(sg => {
+      const k = RK(sg.a) + '@' + RK(sg.h);
+      const b = attached[k];
+      const et = etParts(sg.ko);
+      return {
+        sg: sg, gid: String(sg.id), key: k,
+        board: b ? b.row : null,
+        picks: b ? b.row[4] : [],
+        matchup: b ? b.row[1] : (sg.a + (sg.nz ? ' vs ' : ' at ') + sg.h),
+        dayKey: et ? et.key : '9999-99-99',
+        dayLabel: et ? et.label : 'Date TBD',
+        time: (sg.tbd || !sg.ko) ? 'TBD' : (schedTime(sg) || (b ? b.row[0] : 'TBD'))
+      };
+    });
+
+    // A position whose matchup does not resolve against this week's schedule is
+    // still a position somebody took. Carry it on the week the pick grid belongs
+    // to rather than dropping it on the floor.
+    const boardWeek = (d && d.META && d.META.board_week) || 1;
+    orphans.forEach(o => out.push({
+      sg: null, gid: null, key: gameKey(o.row[1]), board: o.row, picks: o.row[4],
+      matchup: o.row[1], dayKey: '9999-99-98', dayLabel: o.day, time: o.row[0], orphan: true
+    }));
+    return out;
+  }
+
+  // slate -> [{label, times: Map(timeLabel -> [item])}], both sorted
+  weekDays(week) {
+    const byDay = new Map();
+    this.weekSlate(week).forEach(it => {
+      if (!byDay.has(it.dayKey)) byDay.set(it.dayKey, { key: it.dayKey, label: it.dayLabel, times: new Map() });
+      const dd = byDay.get(it.dayKey);
+      if (!dd.times.has(it.time)) dd.times.set(it.time, []);
+      dd.times.get(it.time).push(it);
+    });
+    return Array.from(byDay.values()).sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
+  }
+
+  /*
+   * Turn one of OV's grids into styled cells. The grid is the same shape for the
+   * game tab and the prop tabs - rows of a named thing, columns of markets - so
+   * one dresser and one template block serve both.
+   */
+  dressGrid(grid, nameHead) {
+    if (!grid) return null;
+    const isProp = grid.kind === 'prop';
+    return {
+      sections: grid.sections.map(sec => {
+        const cols = gridCols(sec.cols.length, isProp ? 150 : 132);
+        const gridSt = { display: 'grid', gridTemplateColumns: cols, gap: '6px 14px', alignItems: 'start' };
+        return {
+          label: sec.label,
+          labelSt: { font: '500 9.5px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.07em',
+                     color: MUT, margin: 0, padding: '11px 12px 0' },
+          nameHead: nameHead, nameHeadSt: HEADCELL,
+          headSt: Object.assign({}, gridSt, {
+            padding: '7px 12px 6px', borderBottom: '1px solid oklch(0.93 0.006 250)', alignItems: 'center'
+          }),
+          cols: sec.cols.map(c => ({ label: c.label, st: HEADCELL })),
+          rows: sec.rows.map((r, i) => ({
+            label: r.label, sub: r.sub || null,
+            wrapSt: Object.assign({}, gridSt, {
+              padding: '8px 12px', borderBottom: '1px solid oklch(0.955 0.004 250)',
+              background: i % 2 ? 'oklch(0.988 0.003 250)' : 'oklch(1 0 0)'
+            }),
+            nameSt: { font: "500 12.5px/1.3 'IBM Plex Sans',system-ui,sans-serif", color: INK,
+                      display: 'inline-flex', alignItems: 'baseline', gap: '5px',
+                      minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+            subSt: { font: '400 9.5px/1.3 ' + MONO, color: MUT },
+            cells: r.cells.map(c => this.dressCell(c))
+          }))
+        };
+      })
+    };
+  }
+
+  /*
+   * The book comparison: one row per book, one column per market, a market row
+   * on top to compare against, and DraftKings pinned and tinted because it is the
+   * book these prices actually get bet at.
+   */
+  dressBookGrid(bg) {
+    if (!bg) return null;
+    const dk = OV.book(OV.primaryBook());
+    return {
+      sections: bg.sections.map(sec => {
+        const cols = '116px repeat(' + sec.cols.length + ',minmax(120px,1fr))';
+        const grid = { display: 'grid', gridTemplateColumns: cols, gap: '6px 14px', alignItems: 'start' };
+        return {
+          label: sec.label,
+          labelSt: { font: '500 9.5px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.07em',
+                     color: MUT, margin: 0, padding: '11px 12px 0' },
+          nameHeadSt: HEADCELL,
+          headSt: Object.assign({}, grid, {
+            padding: '7px 12px 6px', borderBottom: '1px solid oklch(0.93 0.006 250)'
+          }),
+          cols: sec.cols.map(c => ({
+            label: c.label, pair: c.pair, st: HEADCELL,
+            pairSt: { font: '400 9px/1.2 ' + MONO, color: 'oklch(0.66 0.01 250)', whiteSpace: 'nowrap' }
+          })),
+          rows: sec.rows.map((r, i) => ({
+            label: r.isConsensus ? 'Market' : r.label,
+            badge: r.book ? r.book.mono : null,
+            badgeSt: r.book ? badgeSt(r.book) : null,
+            wrapSt: Object.assign({}, grid, {
+              padding: '8px 12px',
+              borderBottom: '1px solid oklch(0.955 0.004 250)',
+              background: r.isConsensus ? 'oklch(0.962 0.008 250)'
+                        : r.primary ? 'oklch(0.975 0.035 145)' : 'oklch(1 0 0)',
+              borderLeft: r.primary ? '3px solid ' + dk.bg : '3px solid transparent'
+            }),
+            nameSt: {
+              display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: 0,
+              font: (r.isConsensus || r.primary ? 600 : 500) + " 12px/1.3 'IBM Plex Sans',system-ui,sans-serif",
+              color: r.isConsensus ? MUT : INK, whiteSpace: 'nowrap', overflow: 'hidden'
+            },
+            cells: r.cells.map(c => this.dressPair(c, r))
+          }))
+        };
+      })
+    };
+  }
+
+  dressPair(c, row) {
+    const muted = { font: '400 12px/1.3 ' + MONO, color: 'oklch(0.80 0.01 250)' };
+    if (!c) return { line: '', pa: '\u2014', pb: '', delta: null, wrapSt: { minWidth: 0 },
+                     mainSt: { display: 'inline-flex', gap: '4px' }, paSt: muted, pbSt: muted,
+                     sepSt: Object.assign({}, muted, { opacity: 0 }) };
+    const priceSt = best => ({
+      font: (best ? 600 : 400) + ' 12px/1.3 ' + MONO,
+      color: best ? GOOD : (row.isConsensus ? SEC : INK),
+      background: best ? 'oklch(0.945 0.055 150)' : 'transparent',
+      padding: best ? '0 3px' : 0, borderRadius: '3px', whiteSpace: 'nowrap'
+    });
+    let delta = null, dTone = 'flat';
+    if (c.delta) {
+      if (c.delta.lineDiff !== undefined) {
+        delta = OV.sgn(c.delta.lineDiff) + ' line';
+        dTone = c.delta.lineDiff > 0 ? 'good' : 'bad';
+      } else {
+        const fmt = v => v === null ? '\u00b7' : (v >= 0 ? '+' : '\u2212') + Math.abs(100 * v).toFixed(1);
+        delta = fmt(c.delta.a) + ' / ' + fmt(c.delta.b);
+        const bestSide = Math.max(c.delta.a === null ? -9 : c.delta.a,
+                                  c.delta.b === null ? -9 : c.delta.b);
+        dTone = bestSide >= 0.005 ? 'good' : bestSide <= -0.005 ? 'bad' : 'flat';
+      }
+    }
+    return {
+      line: c.line || '', pa: c.pa || '\u2014', pb: c.pb || '\u2014', delta: delta,
+      wrapSt: { display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 },
+      mainSt: { display: 'inline-flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' },
+      lineSt: { font: '500 13px/1.25 ' + MONO, color: INK, marginRight: '2px' },
+      paSt: priceSt(c.bestA), pbSt: priceSt(c.bestB),
+      sepSt: { font: '400 11px/1.3 ' + MONO, color: 'oklch(0.76 0.01 250)' },
+      deltaSt: {
+        font: '500 10px/1.3 ' + MONO, whiteSpace: 'nowrap', alignSelf: 'flex-start',
+        padding: '1px 4px', borderRadius: '3px',
+        background: dTone === 'good' ? GOODBG : dTone === 'bad' ? BADBG : 'oklch(0.94 0.006 250)',
+        color: dTone === 'good' ? GOOD : dTone === 'bad' ? FLAG : MUT
+      }
+    };
+  }
+
+  dressCell(c) {
+    if (!c) {
+      return { main: '\u2014', cost: null, was: null, model: null, edge: null,
+               wrapSt: { minWidth: 0 },
+               mainSt: { font: '400 12px/1.35 ' + MONO, color: 'oklch(0.80 0.01 250)' } };
+    }
+    return {
+      main: c.main || '\u2014',
+      cost: c.cost || null,
+      was: c.was || null,
+      model: c.model ? (c.approx ? c.model + ' \u007e' : c.model) : null,
+      edge: c.edge || null,
+      wrapSt: { display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 },
+      mainSt: { display: 'inline-flex', alignItems: 'baseline', gap: '5px', flexWrap: 'wrap',
+                font: '500 13px/1.25 ' + MONO, color: INK },
+      costSt: { font: '400 11px/1.25 ' + MONO, color: SEC, whiteSpace: 'nowrap' },
+      wasSt: { font: '400 10px/1.3 ' + MONO, color: SEC, background: SHADE,
+               padding: '1px 5px', borderRadius: '3px', alignSelf: 'flex-start', whiteSpace: 'nowrap' },
+      modelSt: { display: 'inline-flex', alignItems: 'baseline', gap: '5px', flexWrap: 'wrap',
+                 font: '400 10.5px/1.3 ' + MONO, color: c.soft ? 'oklch(0.68 0.01 250)' : SEC },
+      edgeSt: { font: '500 10.5px/1.3 ' + MONO, padding: '1px 4px', borderRadius: '3px',
+                background: c.tone === 'good' ? GOODBG : c.tone === 'bad' ? BADBG : 'transparent',
+                color: c.tone === 'good' ? GOOD : c.tone === 'bad' ? FLAG : MUT }
+    };
+  }
+
   pickerBits() {
     const s = this.state, sel = s.pickers;
-    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Brooks', 'Dentist', 'Producer'];
+    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Portnoy', 'Bosco', 'Big Cat', 'Hank', 'Brooks', 'Dentist', 'Producer', 'Zuppi', 'Unnamed', 'Ibo'];
     const tally = {};
     if (s.d) s.d.G.forEach(day => day[1].forEach(g => g[4].forEach(p => { tally[p[0]] = (tally[p[0]] || 0) + 1; })));
     return {
@@ -917,6 +1630,7 @@ class Component extends DCLogic {
     const s = this.state, f = p[9] || '', mk = market(p[1]), d = s.d, src = p[8] || '';
     if (s.show === 'c3' && src.indexOf('Cover 3') !== 0) return false;
     if (s.show === 'bboc' && src.indexOf('BBOC') !== 0) return false;
+    if (s.show === 'pickem' && src.indexOf('Barstool Pick Em') !== 0) return false;
     if (s.show === 'ep_c3' && d && src !== d.C3) return false;
     if (s.show === 'ep_bp' && d && src !== d.BP) return false;
     if (s.show === 'ep_sg' && d && src !== d.SG) return false;
@@ -997,10 +1711,7 @@ class Component extends DCLogic {
     const legend = [0, 1, 2, 3].map(i => ({
       label: T[i].key.charAt(0).toUpperCase() + T[i].key.slice(1),
       st: { width: '10px', height: '10px', borderRadius: '2px', background: T[i].bg, boxShadow: 'inset 0 0 0 1px ' + T[i].line + ', inset 0 -3px 0 0 ' + T[i].tick, display: 'inline-block' }
-    })).concat(['W', 'L', 'P'].map(c => ({
-      label: RES[c].label + ' (' + c + ')',
-      st: { width: '10px', height: '10px', borderRadius: '2px', background: RES[c].bg, boxShadow: 'inset 0 0 0 1px ' + RES[c].fg, display: 'inline-block' }
-    })));
+    }));
     const halfTabs = [['both', 'Both'], ['h1', '1H'], ['h2', '2H']].map(v => ({
       label: v[1],
       click: () => this.setState({ half: v[0] }),
@@ -1013,67 +1724,48 @@ class Component extends DCLogic {
       }
     }));
     const pk = this.pickerBits();
-    if (!d) return { hdrTitle: 'Pick board', legend: legend, days: [], empty: false, emptyNote: '', week: s.week, weekOpts: [], onWeek: () => {}, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear };
+    if (!d) return { hdrTitle: 'Pick board', hdrSub: '', legend: legend, days: [], empty: false, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear, week: '', weekOpts: [], gameFilter: s.gameFilter, onWeek: () => {}, onGameFilter: () => {} };
 
-    // Weeks come from the schedule, not from the weeks the pick grid happens to cover:
-    // a week with a market but no extracted picks still has to be selectable.
-    const cw = currentWeek(s.now);
-    const wkSet = {};
-    (window.REF ? window.REF.GAMES : []).forEach(g => { if (g.wk && (!cw || g.wk <= cw + 1)) wkSet[g.wk] = 1; });
-    d.G.forEach(day => day[1].forEach(g => { const sg = refGame(g[1]); if (sg && sg.wk) wkSet[sg.wk] = 1; }));
-    if (cw) wkSet[cw] = 1;
-    const wkPicks = {};
-    d.G.forEach(day => day[1].forEach(g => {
-      const sg = refGame(g[1]);
-      if (sg && sg.wk) wkPicks[sg.wk] = (wkPicks[sg.wk] || 0) + g[4].length;
-    }));
-    const weekOpts = Object.keys(wkSet).map(Number).sort((a, b) => a - b).map(w => ({
-      v: String(w),
-      label: 'Week ' + w + (wkPicks[w] ? '' : ' · no picks yet')
-    }));
-
-    let count = 0;
+    let count = 0, gamesShown = 0;
+    const week = this.currentWeek();
     const days = [], postDays = [];
-    d.G.forEach(day => {
-      if (s.date !== 'all' && day[0] !== s.date) return;
-      const slots = [], fslots = [], byTime = new Map();
-      day[1].forEach(g => {
-        const tm = schedTime(refGame(g[1])) || g[0];
-        if (!byTime.has(tm)) byTime.set(tm, []);
-        byTime.get(tm).push(g);
-      });
-      byTime.forEach((games, time) => {
+    const weekDays = this.weekDays(week);
+    weekDays.forEach(day => {
+      if (s.date !== 'all' && day.label !== s.date) return;
+      const slots = [], fslots = [];
+      day.times.forEach((games, time) => {
         if (s.win !== 'all' && slotWindow(time) !== s.win) return;
         const rows = [], frows = [];
-        games.forEach(g => {
-          const sg = refGame(g[1]);
-          if (s.week !== 'all' && String((sg && sg.wk) || '') !== s.week) return;
-          const all = g[4];
+        games.forEach(it => {
+          // A game with no position still renders. `g` keeps the shape the rest of
+          // this block was written against: [slot, matchup, venue, wxIndex, picks].
+          const g = it.board || [it.time, it.matchup, '', 0, []];
+          const all = it.picks || [];
           const idx = all.map((p, i) => i).filter(i => this.keep(all[i]));
-          if (!idx.length) return;
-          const gid = g[1] + '|' + g[0];
+          const sg = it.sg;
+          const hasOdds = !!(it.gid && window.OV && OV.ready() && OV.has(it.gid));
+          if (s.gameFilter === 'picks' && !idx.length) return;
+          if (s.gameFilter === 'nopicks' && all.length) return;
+          if (s.gameFilter === 'odds' && !hasOdds) return;
+          gamesShown++;
+          const gid = it.key + '|' + it.time;
           const mm = modelMargin(sg);
           const ko = sg && sg.ko ? Date.parse(sg.ko) : NaN;
           const mins = isNaN(ko) ? null : (s.now - ko) / 60000;
           const phase = (mins === null || (sg && sg.tbd)) ? 'pre' : mins < 0 ? 'pre' : mins <= 210 ? 'live' : 'post';
           count += idx.length;
           const venueTxt = sg && sg.vn ? (String(sg.vn).replace(/\s*\([^)]*\)\s*$/, '') + ' · ' + sg.vc + (sg.vs ? ', ' + sg.vs : '') + (sg.nz ? ' · neutral' : '') + (sg.el !== null && sg.el >= 3000 ? ' · ' + sg.el.toLocaleString() + ' ft' : '')) : g[2];
+          const ha = sg ? { h: teamShort(sg.h), a: teamShort(sg.a), hFull: sg.h, aFull: sg.a }
+                        : { h: '', a: '', hFull: '', aFull: '' };
+          const oddsChip = hasOdds ? OV.rowChip(it.gid, ha) : null;
           const chips = idx.slice().sort((a, b) => (all[b][3] - all[a][3]) || (mrank(market(all[a][1])) - mrank(market(all[b][1])))).map(i => {
             const p = all[i], mk = market(p[1]), t = T[p[2]], k = p[3];
             const isOpen = s.open && s.open.g === gid && s.open.i === i;
             const dl = delta(p);
             const eg = modelEdge(p, sg);
             const twoCond = eg && k >= 2 && eg.pts >= 1;
-            const rs = resultFor(p, g[1], reasonRows, ledgerRows);
             return {
               name: p[0], pick: p[1], flagged: isProblem(p), star: k === 3,
-              res: rs ? rs.mark : null,
-              resSt: rs ? {
-                flex: 'none', width: '15px', height: '15px', borderRadius: '3px',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                font: '600 10px/1 ' + MONO, background: rs.bg, color: rs.fg,
-                border: rs.disputed ? '1px dashed ' + rs.fg : '1px solid ' + rs.bg
-              } : null,
               edge: eg ? (twoCond ? '\u2713\u2713 ' : '') + (eg.pts >= 0 ? '+' : '') + eg.pts.toFixed(1) : null,
               edgeSt: eg ? { font: '500 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: twoCond ? 'oklch(0.90 0.09 150)' : 'oklch(1 0 0 / 0.62)', color: eg.pts >= 1 ? GOOD : eg.pts <= -1 ? FLAG : MUT } : null,
               expanded: isOpen ? 'true' : 'false',
@@ -1103,7 +1795,8 @@ class Component extends DCLogic {
           let split = '';
           if (dirs[0] && dirs[1]) split = dirs[0] + '–' + dirs[1] + ' split on the side';
           else if (dirs[2] && dirs[3]) split = dirs[2] + '–' + dirs[3] + ' split on the total';
-          const cons = (all.length === 1 ? '1 on this game' : all.length + ' on this game')
+          const cons = !all.length ? ''
+            : (all.length === 1 ? '1 on this game' : all.length + ' on this game')
             + (dirs[lead] > 1 ? ' · ' + dirs[lead] + '× ' + T[lead].key : '')
             + (split ? ' · ' + split : '');
           const w = d.WX[g[3]];
@@ -1113,14 +1806,7 @@ class Component extends DCLogic {
             const p = open, dl = delta(p), rl = recLine(rec[p[0]]);
             const eDet = modelEdge(p, sg);
             const why = reasonBlock(reasonFor(p, g[1], reasonRows, ledgerRows));
-            const rsD = resultFor(p, g[1], reasonRows, ledgerRows);
             det = {
-              resLabel: rsD ? rsD.label + (rsD.disputed ? ' · disputed' : '') : null,
-              resSt: rsD ? {
-                font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em',
-                padding: '3px 6px', borderRadius: '3px', background: rsD.bg, color: rsD.fg,
-                border: rsD.disputed ? '1px dashed ' + rsD.fg : '1px solid transparent'
-              } : null,
               why: why, whyMissing: !why,
               model: mm === null
                 ? (sg ? 'No rating — FCS opponent' : 'Game not on the schedule')
@@ -1181,7 +1867,6 @@ class Component extends DCLogic {
             if (!det.others.length) det.others = [{ text: 'nobody else on this game', st: { font: '400 12px/1.3 ' + MONO, color: MUT } }];
           }
           const finalTxt = finalText(s.results, sg);
-          const mi = mktText(s.lines, sg);
           const statusTxt = phase === 'live' ? 'in progress'
             : phase === 'post' ? (finalTxt || 'final pending') : null;
           const row = {
@@ -1198,9 +1883,27 @@ class Component extends DCLogic {
             slot: g[0], phase: phase,
             title: g[1], venue: venueTxt, det: det,
             proj: projSpread(sg),
-            mkt: mi ? mi.txt : null,
-            mktDK: mi ? mi.dk : false,
-            mktBook: mi ? mi.book : null,
+            // The sportsbook consensus wins when there is one; the CFBD chip stays
+            // as the fallback so weeks the odds pull has not covered still read the
+            // way they always did.
+            mkt: oddsChip ? oddsChip.text : mktText(s.lines, sg),
+            mktTag: 'market',
+            mktOpen: oddsChip ? oddsChip.open : null,
+            mktOpenSt: {
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              font: '500 11px/1.4 ' + MONO, padding: '2px 7px', borderRadius: '4px',
+              background: SHADE, color: oddsChip && oddsChip.moved ? SEC : MUT
+            },
+            oddsBtn: !hasOdds ? null : {
+              label: 'Markets',
+              caret: String(s.oddsOpen) === String(it.gid) ? '\u25b2' : '\u25bc',
+              expanded: String(s.oddsOpen) === String(it.gid) ? 'true' : 'false',
+              st: miniSt(String(s.oddsOpen) === String(it.gid)),
+              click: () => this.setState(st => ({
+                oddsOpen: String(st.oddsOpen) === String(it.gid) ? null : String(it.gid)
+              }))
+            },
+            odds: hasOdds ? this.oddsPanel(it.gid, ha, { home: sg.h, away: sg.a }) : null,
             mktSt: {
               display: 'inline-flex', alignItems: 'center', gap: '5px',
               font: '500 11px/1.4 ' + MONO, padding: '2px 7px', borderRadius: '4px',
@@ -1224,11 +1927,13 @@ class Component extends DCLogic {
       const DAYHEAD = { position: 'sticky', top: 0, zIndex: 3, font: "600 13px/1 'IBM Plex Sans',system-ui,sans-serif", color: INK, margin: 0, padding: '9px 0 8px', background: 'oklch(0.985 0.003 250)', borderBottom: '1.5px solid oklch(0.72 0.01 250)', letterSpacing: '0.01em', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline' };
       slots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
       fslots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
-      if (slots.length) days.push({ label: day[0], slots: slots, note: null, wrapSt: { marginBottom: '26px' }, headSt: DAYHEAD });
+      if (slots.length) days.push({ label: day.label, slots: slots, note: null, wrapSt: { marginBottom: '26px' }, headSt: DAYHEAD });
       if (fslots.length) {
+        let n = 0;
+        fslots.forEach(sl => { n += sl.games.length; });
         postDays.push({
-          label: day[0], slots: fslots,
-          note: 'finished',
+          label: day.label, slots: fslots,
+          note: 'finished · ' + n + (n === 1 ? ' game' : ' games') + ' past kickoff + 3h30',
           wrapSt: { marginBottom: '26px', opacity: 0.74 },
           headSt: Object.assign({}, DAYHEAD, { borderBottom: '1.5px dashed oklch(0.78 0.01 250)' })
         });
@@ -1236,25 +1941,20 @@ class Component extends DCLogic {
     });
 
     postDays.forEach(pd => days.push(pd));
-    const onlyWeek = s.week !== 'all';
-    const noPicksThisWeek = onlyWeek && count === 0
-      && !s.pickers.length && s.tier === '0' && s.market === 'all' && s.flag === 'all' && s.date === 'all' && s.win === 'all';
     return {
-      hdrTitle: onlyWeek ? 'Week ' + s.week + ' pick board' : 'Pick board',
-      legend: legend, days: days, empty: count === 0,
-      week: s.week, weekOpts: weekOpts,
-      onWeek: e => this.setState({ week: e.target.value, open: null }),
-      emptyNote: noPicksThisWeek
-        ? 'Week ' + s.week + ' has a market but no extracted picks yet. Switch weeks to look back.'
-        : 'Widen the tier or market filter to bring rows back.',
-      countLabel: !s.pickers.length && s.tier === '0' && s.market === 'all' && s.flag === 'all'
-        ? count + ' positions · tap a chip'
-        : count + (count === 1 ? ' position shown' : ' positions shown'),
+      hdrTitle: this.headTitle(week),
+      hdrSub: this.headSub(week, gamesShown, count),
+      legend: legend, days: days, empty: gamesShown === 0,
+      countLabel: gamesShown + (gamesShown === 1 ? ' game' : ' games') + ' · '
+        + count + (count === 1 ? ' position' : ' positions'),
       tier: s.tier, market: s.market, flag: s.flag, show: s.show,
+      week: String(week), weekOpts: this.weekOptions(), gameFilter: s.gameFilter,
+      onWeek: e => this.setState({ week: e.target.value, open: null, oddsOpen: null, date: 'all' }),
+      onGameFilter: e => this.setState({ gameFilter: e.target.value, open: null }),
       lensTabs: lensTabs, date: s.date, win: s.win, halfTabs: halfTabs,
       pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false',
       pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear,
-      dateOpts: d.G.map(day => day[0]),
+      dateOpts: weekDays.map(day => day.label),
       onDate: e => this.setState({ date: e.target.value, open: null }),
       onWin: e => this.setState({ win: e.target.value, open: null }),
       onShow: e => this.setState({ show: e.target.value, open: null }),
