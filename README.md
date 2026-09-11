@@ -382,9 +382,11 @@ kickers and most FCS players sit outside it.
 
 ## Week 2 (added 2026-09-10)
 
-The board now carries two weeks. 257 positions: Week 1's 149 plus 108 from Week 2
+The board now carries two weeks. 297 positions: Week 1's 149 plus 148 from Week 2
 (BBOC Sixth Gear 9 Sep, `W02-009` to `W02-018`; Cover 3 LOCKS 10 Sep, `W02-019` to
-`W02-078`; Barstool Pick Em 9 Sep cards and mortals, `W02-079` to `W02-117`). `W02-001` to `W02-008`, the Cover 3 Tuesday leans, are reserved and not yet
+`W02-078`; Barstool Pick Em 9 Sep cards and mortals, `W02-079` to `W02-117`; BBOC Week 2
+preview 11 Sep, `W02-118` to `W02-157`, including one player prop, which never grades). Picks marked [INF] had no number said on air and carry a
+market-inferred number or price; they never produce CLV. `W02-001` to `W02-008`, the Cover 3 Tuesday leans, are reserved and not yet
 ingested. Week 2 is ungraded: no Week 2 game has kicked off.
 
 - `G` in `board-bundle.js` holds both weeks. Both board pages now place each grid game in

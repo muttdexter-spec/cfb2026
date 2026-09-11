@@ -6,7 +6,7 @@ Files:
 
   index.html                 2,980 bytes
   support.js                 69,150 bytes
-  board-bundle.js            482,558 bytes
+  board-bundle.js            533,619 bytes
   ref-data.js                289,785 bytes
   odds-data.js               1,143,304 bytes
   model-data.js              605,791 bytes
@@ -14,10 +14,10 @@ Files:
   Pick Board.dc.html         113,505 bytes
   Pick Board Mobile.dc.html  109,705 bytes
   Picker Performance.dc.html 54,753 bytes
-  host_pick_ledger.csv       149,191 bytes
+  host_pick_ledger.csv       173,568 bytes
   market_lines.csv           102,416 bytes
-  reasoning.csv              119,877 bytes
-  game_conditions.csv        7,504 bytes
+  reasoning.csv              132,006 bytes
+  game_conditions.csv        7,770 bytes
   results.csv                11,975 bytes
   README.md                  (documentation, optional)
 
@@ -27,6 +27,6 @@ In this folder but NOT part of the upload (build inputs only):
 16 files total (15 + README). Vercel serves the repo root as-is; no build step.
 
 Sanity check after pushing:
-  board-bundle.js must read 482,558 bytes on GitHub. A smaller number means the
+  board-bundle.js must read 533,619 bytes on GitHub. A smaller number means the
   upload did not replace it and the site is showing stale data.
   host_pick_ledger.csv must have 61 columns.
