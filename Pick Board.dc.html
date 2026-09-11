@@ -41,7 +41,7 @@ select{font-family:inherit}
 <option value="all">All games</option><option value="picks">With a host pick</option><option value="nopicks">No host pick</option><option value="odds">Priced games only</option>
 </select>
 <select value="{{ show }}" onChange="{{ onShow }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
-<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option><option value="ep_c3">— Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">— BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">— BBOC Sixth Gear · 2 Sep</option>
+<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option>
 </select>
 <span data-pk="1" style="position:relative;display:inline-block">
 <button type="button" onClick="{{ onPkOpen }}" aria-expanded="{{ pkExpanded }}" style="font:400 12.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px">{{ pickerLabel }}<span style="font-size:9px;color:oklch(0.505 0.014 255)">▼</span></button>
@@ -1313,29 +1313,7 @@ class Component extends DCLogic {
    * what it actually has - schedule, market and model - and what it does not.
    */
   headSub(week) {
-    const M = window.BOARD && window.BOARD.META;
-    const boardWeek = (M && M.board_week) || 1;
-    const bits = [];
-    if (week === boardWeek && M && M.subtitle) bits.push(M.subtitle);
-    if (window.OV && OV.ready() && OV.week() === week) {
-      const meta = OV.meta(), j = meta.join || {};
-      bits.push('Sportsbook consensus across ' + (window.OV.books().length) + ' books, '
-        + meta.snapshot + ' snapshot ' + String(meta.asOf).slice(0, 10)
-        + ' \u00b7 ' + (j.matched || 0) + ' of ' + (j.sched_games || 0)
-        + ' games priced. Opening numbers are the median of the books\u2019 own opens, '
-        + 'not SGO\u2019s event-level open field, which is wrong on the moneyline.');
-    }
-    if (window.MODEL && window.MODEL.week === week) {
-      const n = Object.keys(window.MODEL.env || {}).length;
-      bits.push('Prop projections cover ' + n + ' FBS-vs-FBS games. '
-        + 'Every projected row is bet_eligible=FALSE \u2014 no prop has been graded yet, '
-        + 'so these are projections, not recommendations.');
-    }
-    if (week !== boardWeek) {
-      bits.unshift('No podcast positions have been extracted for this week; the pick grid '
-        + 'is Week ' + boardWeek + '.');
-    }
-    return bits.join(' ');
+    return '';
   }
 
   weekOptions() {

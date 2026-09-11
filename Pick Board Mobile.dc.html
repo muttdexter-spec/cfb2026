@@ -57,7 +57,7 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 <div style="grid-column:span 2">
 <p style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 3px">Show</p>
 <select value="{{ show }}" onChange="{{ onShow }}" style="font-size:16px;padding:9px 34px 9px 10px;min-height:44px;border:1px solid oklch(0.83 0.008 250);border-radius:7px;background-color:oklch(1 0 0);color:inherit;width:100%">
-<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option><option value="ep_c3">Cover 3 LOCKS · 3 Sep</option><option value="ep_bp">BBOC Week 1 Preview · 3 Sep</option><option value="ep_sg">BBOC Sixth Gear · 2 Sep</option>
+<option value="all">All shows</option><option value="c3">Cover 3</option><option value="bboc">BBOC</option><option value="pickem">Barstool Pick Em</option>
 </select>
 </div>
 <div style="grid-column:span 2">
@@ -1350,18 +1350,7 @@ class Component extends DCLogic {
   }
 
   headSub(week) {
-    const M = window.BOARD && window.BOARD.META;
-    const boardWeek = (M && M.board_week) || 1;
-    if (week === boardWeek && M && M.subtitle) return M.subtitle;
-    const bits = ['No podcast positions extracted for this week; the pick grid is Week '
-      + boardWeek + '.'];
-    if (window.OV && OV.ready() && OV.week() === week) {
-      const meta = OV.meta(), j = meta.join || {};
-      bits.push((j.matched || 0) + ' of ' + (j.sched_games || 0) + ' games priced across '
-        + OV.books().length + ' books, ' + meta.snapshot + ' snapshot '
-        + String(meta.asOf).slice(0, 10) + '.');
-    }
-    return bits.join(' ');
+    return '';
   }
 
   /*
