@@ -1295,9 +1295,12 @@ class Component extends DCLogic {
   currentWeek() {
     const s = this.state;
     if (s.week) return Number(s.week);
-    if (window.OV && OV.ready() && OV.week()) return OV.week();
-    const d = s.d;
-    return (d && d.META && d.META.board_week) || 1;
+    // Land on the newer of the pick week and the odds week. Until 2026-09-19 the odds
+    // week always won, which pinned the board to Week 2 after the Week 3 picks went up
+    // ahead of a Week 3 odds pull.
+    const d = s.d, bw = (d && d.META && d.META.board_week) || 1;
+    const ow = (window.OV && OV.ready() && OV.week()) || 0;
+    return Math.max(bw, ow);
   }
 
   headTitle(week) {
