@@ -428,11 +428,11 @@ const T = {
 const INK = 'oklch(0.23 0.02 258)', SEC = 'oklch(0.44 0.015 255)', MUT = 'oklch(0.505 0.014 255)';
 const FLAG = 'oklch(0.48 0.20 25)', GOOD = 'oklch(0.45 0.13 150)';
 const WXC = { aqua: 'oklch(0.80 0.06 196)', orange: 'oklch(0.80 0.07 62)', blue: 'oklch(0.80 0.06 255)', yellow: 'oklch(0.84 0.07 100)' };
-const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer', Unnamed: 'unresolved', Ibo: 'guest', Zuppi: 'unresolved' };
+const NONHOST = { Brooks: 'guest', Dentist: 'unresolved', Producer: 'producer', Unnamed: 'unresolved', Ibo: 'guest', Zuppi: 'unresolved', Snowden: 'guest' };
 const PROBLEM = /STALE|UNGRADEABLE|NO NUMBER|NO PRICE|NOT CITED|NEVER CITED|garbled|OPPONENT WAS NEVER|AMBIGUOUS|IMPLAUSIBLE|unverified|limit risk/i;
 function isProblem(p) { return PROBLEM.test(p[9] || ''); }
 const MONO = "'IBM Plex Mono',ui-monospace,monospace";
-const HOSTMAP = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck', 'Rico Bosco': 'Bosco', 'Dave Portnoy': 'Portnoy', 'Big Cat': 'Big Cat', 'Hank': 'Hank', 'Unnamed Picker (Pick Em)': 'Unnamed', 'Ibo': 'Ibo', 'Zuppi': 'Zuppi' };
+const HOSTMAP = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck', 'Rico Bosco': 'Bosco', 'Dave Portnoy': 'Portnoy', 'Big Cat': 'Big Cat', 'Hank': 'Hank', 'Unnamed Picker (Pick Em)': 'Unnamed', 'Ibo': 'Ibo', 'Zuppi': 'Zuppi', 'Michael Snowden': 'Snowden', 'Unnamed Picker (Cover 3)': 'Unnamed' };
 const CONDC = { plain: 'oklch(0.505 0.014 255)', warn: 'oklch(0.40 0.10 220)', hot: 'oklch(0.46 0.17 32)', cold: 'oklch(0.42 0.11 240)', storm: 'oklch(0.42 0.16 300)', roof: 'oklch(0.42 0.008 250)' };
 const PILL = { warn: 'oklch(0.945 0.035 220)', hot: 'oklch(0.952 0.05 32)', cold: 'oklch(0.955 0.035 240)', storm: 'oklch(0.955 0.04 300)', roof: 'oklch(0.928 0.005 250)' };
 
@@ -723,7 +723,7 @@ function modelEdge(p, g) {
 }
 
 // --- reasoning layer (reasoning.csv, keyed by pick_id) ---
-const LHOST = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck', 'Rico Bosco': 'Bosco', 'Dave Portnoy': 'Portnoy', 'Big Cat': 'Big Cat', 'Hank': 'Hank', 'Unnamed Picker (Pick Em)': 'Unnamed', 'Ibo': 'Ibo', 'Zuppi': 'Zuppi' };
+const LHOST = { 'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli', 'Kinsey Brooks': 'Brooks', 'The Dentist': 'Dentist', 'Producer (Taft/Stryker)': 'Producer', 'Stucky': 'Stucky', 'Colin Wilson': 'Wilson', 'Mike Calabrese': 'Calabrese', 'Duck': 'Duck', 'Rico Bosco': 'Bosco', 'Dave Portnoy': 'Portnoy', 'Big Cat': 'Big Cat', 'Hank': 'Hank', 'Unnamed Picker (Pick Em)': 'Unnamed', 'Ibo': 'Ibo', 'Zuppi': 'Zuppi', 'Michael Snowden': 'Snowden', 'Unnamed Picker (Cover 3)': 'Unnamed' };
 const GRADE = {
   CHARTED: { label: 'charted', tone: 'strong' }, STAT_CITED: { label: 'stat cited', tone: 'strong' },
   BASE_RATE: { label: 'base rate', tone: 'ok' }, SCHEME: { label: 'scheme', tone: 'ok' },
@@ -1515,7 +1515,7 @@ class Component extends DCLogic {
 
   pickerBits() {
     const s = this.state, sel = s.pickers;
-    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Portnoy', 'Bosco', 'Big Cat', 'Hank', 'Brooks', 'Dentist', 'Producer', 'Zuppi', 'Unnamed', 'Ibo'];
+    const names = ['Elliott', 'Patterson', 'Kanell', 'Fornelli', 'Stucky', 'Wilson', 'Calabrese', 'Duck', 'Portnoy', 'Bosco', 'Big Cat', 'Hank', 'Brooks', 'Dentist', 'Producer', 'Zuppi', 'Unnamed', 'Ibo', 'Snowden'];
     return {
       label: !sel.length ? 'all' : sel.length === 1 ? sel[0] : sel.length + ' selected',
       clear: () => this.setState({ pickers: [], open: null }),
