@@ -1,4 +1,4 @@
-cfb2026 - complete site, 2026-09-19.
+cfb2026 - complete site, 2026-09-26.
 
 Delete everything in the repo root, then upload all of these.
 
@@ -6,29 +6,27 @@ Files:
 
   index.html                 2,980 bytes
   support.js                 69,150 bytes
-  board-bundle.js            697,439 bytes
+  board-bundle.js            1,051,199 bytes
   ref-data.js                289,785 bytes
+  odds-data.js               2,592,709 bytes
+  model-data.js              818,625 bytes
   odds-view.js               42,858 bytes
-  Pick Board.dc.html         112,303 bytes
-  Pick Board Mobile.dc.html  109,143 bytes
-  Picker Performance.dc.html 54,727 bytes
-  host_pick_ledger.csv       241,426 bytes
-  market_lines.csv           102,612 bytes
-  reasoning.csv              182,980 bytes
-  game_conditions.csv        7,770 bytes
-  results.csv                11,874 bytes
+  Pick Board.dc.html         112,470 bytes
+  Pick Board Mobile.dc.html  109,310 bytes
+  Picker Performance.dc.html 55,814 bytes
+  host_pick_ledger.csv       321,237 bytes
+  market_lines.csv           241,617 bytes
+  reasoning.csv              248,117 bytes
+  game_conditions.csv        11,283 bytes
+  results.csv                30,565 bytes
   README.md                  (documentation, optional)
 
 In this folder but NOT part of the upload (build inputs only):
   model_calibration.json
 
-Not built yet (run make_odds_data.py, menu option 16). The board falls back to the CFBD market chip without them:
-  odds-data.js
-  model-data.js
-
-14 files total (13 + README). Vercel serves the repo root as-is; no build step.
+16 files total (15 + README). Vercel serves the repo root as-is; no build step.
 
 Sanity check after pushing:
-  board-bundle.js must read 697,439 bytes on GitHub. A smaller number means the
+  board-bundle.js must read 1,051,199 bytes on GitHub. A smaller number means the
   upload did not replace it and the site is showing stale data.
   host_pick_ledger.csv must have 61 columns.
