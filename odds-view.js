@@ -1,8 +1,14 @@
 /*
  * odds-view.js - the sportsbook + model view layer, shared by both board pages.
  *
- * window.ODDS  (odds-data.js)  consensus and per-book prices, keyed cfbd_game_id
- * window.MODEL (model-data.js) team environment and player prop projections
+ * window.ODDS   (odds-data.js)  consensus and per-book prices, keyed cfbd_game_id
+ * window.ODDS_P (odds-props.js) the player props, when the build writes them to a
+ *                               file of their own (ODDS.props_file names it)
+ * window.MODEL  (model-data.js) team environment and player prop projections
+ *
+ * odds-data.js is loaded with the page. model-data.js and odds-props.js are loaded
+ * the first time a game's markets panel opens (OV.ensureModel, OV.ensureProps):
+ * nothing else reads them, and together they are most of the bytes.
  *
  * Everything here is a pure function of those two globals plus a game id. It
  * returns plain view-model objects - text, numbers, tone strings - and never any
@@ -116,6 +122,18 @@
     return o ? { asOf: o.as_of, snapshot: o.snapshot, week: o.week, join: o.join } : null;
   };
   OV.week = function () { var o = O(); return o ? o.week : null; };
+  // "MID snapshot, Fri, Sep 25, 9:51 PM ET": when the prices on the board were
+  // captured. On a Saturday that is often the night before, and it should say so.
+  OV.asOfText = function () {
+    var o = O();
+    if (!o || !o.as_of) return '';
+    var t = Date.parse(o.as_of);
+    if (isNaN(t)) return ((o.snapshot || '') + ' ' + o.as_of).trim();
+    var d = new Date(t), tz = 'America/New_York';
+    var day = d.toLocaleDateString('en-US', { timeZone: tz, weekday: 'short', month: 'short', day: 'numeric' });
+    var hm = d.toLocaleTimeString('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit' });
+    return (o.snapshot ? o.snapshot + ' snapshot, ' : '') + day + ', ' + hm + ' ET';
+  };
 
   var BOOKS = null;
   OV.books = function () {
@@ -149,6 +167,97 @@
   };
   OV.has = function (gid) { return !!OV.game(gid); };
 
+  // ---- files loaded on first use ------------------------------------------
+  /*
+   * model-data.js is 818 KB and the pages read only its team environment card
+   * (26 KB of it); the player props are 91% of odds-data.js and only the markets
+   * panel shows them. Neither needs to hold up the slate, so they load the first
+   * time a markets panel opens. Each returns 'ready', 'loading' or 'failed';
+   * `onReady` is called once the file has loaded or failed, so the page can
+   * re-render.
+   */
+  var LAZY = {}, RETRY_MS = 20000;
+  function lazy(src, ready, onReady) {
+    if (ready()) return 'ready';
+    var st = LAZY[src];
+    // a failed load (a dropped connection) is tried again on a render after a pause,
+    // not on the re-render its own failure triggers
+    if (st && st.done && !ready() && Date.now() - st.at > RETRY_MS) {
+      delete LAZY[src];
+      st = null;
+    }
+    if (!st) {
+      st = LAZY[src] = { done: false, cbs: [] };
+      var el = document.createElement('script');
+      el.src = src;
+      el.async = true;
+      el.onload = el.onerror = function () {
+        st.done = true;
+        st.at = Date.now();
+        var cbs = st.cbs;
+        st.cbs = [];
+        cbs.forEach(function (f) { try { f(); } catch (e) { /* the page re-renders on its own */ } });
+      };
+      document.head.appendChild(el);
+    }
+    if (st.done) return ready() ? 'ready' : 'failed';
+    if (onReady && st.cbs.indexOf(onReady) < 0) st.cbs.push(onReady);
+    return 'loading';
+  }
+  OV.modelReady = function () { return !!window.MODEL; };
+  // the build stamp on the URL, so a browser never pairs this odds file with a
+  // cached copy of the previous build's model or props
+  function stamp() {
+    var o = O();
+    return o && o.as_of ? '?v=' + encodeURIComponent(o.as_of) : '';
+  }
+  OV.ensureModel = function (onReady) {
+    return lazy('./model-data.js' + stamp(), OV.modelReady, onReady);
+  };
+
+  /*
+   * Props sit inside odds-data.js (builds before 26 Sep) or in their own file,
+   * named by ODDS.props_file. The two halves are one build: a props file from a
+   * different snapshot than the odds file is ignored rather than mixed in.
+   */
+  function propsFile() {
+    var o = O();
+    return (o && o.props_file) || null;
+  }
+  function propsLoaded() {
+    var o = O(), x = window.ODDS_P;
+    return !!(x && x.G && o && x.as_of === o.as_of);
+  }
+  OV.propsReady = function () { return !propsFile() || propsLoaded(); };
+  OV.ensureProps = function (onReady) {
+    var f = propsFile();
+    if (!f) return 'ready';
+    return lazy('./' + f + stamp(), propsLoaded, onReady);
+  };
+  function propsOf(g, gid) {
+    if (g && g.P) return g.P;
+    if (!propsLoaded()) return null;
+    return window.ODDS_P.G[String(gid)] || {};
+  }
+  // Loads whatever a markets panel needs. `loading` is about the props, which the
+  // page holds a tab open for; the model only adds its own tab when it lands, and a
+  // missing model file costs just that tab. A missing props file costs every prop
+  // tab, so it is reported.
+  OV.ensurePanel = function (onReady) {
+    var m = OV.ensureModel(onReady), p = OV.ensureProps(onReady);
+    return { loading: p === 'loading', modelLoading: m === 'loading', propsFailed: p === 'failed' };
+  };
+
+  /*
+   * True once the odds build keeps full-game props only (make_odds_data.py writes
+   * "periods": "game"). Until then the build keyed props without the period, and a
+   * yes/no market has no line to tell a first-half quote from a full-game one, so
+   * an anytime-TD row can carry both: Dallas Wilson sits at FanDuel +145, BetMGM
+   * +115 and Bovada +150 against DraftKings +600 in the 26 Sep MID snapshot. The
+   * board then claims no best price on yes/no and touchdown rows, and says so.
+   */
+  OV.periodSafe = function () { var o = O(); return !!(o && o.periods === 'game'); };
+
   // ---- game markets ------------------------------------------------------
   // side -> the label the board shows, given the two team abbreviations
   function sideLabel(bucket, side, ha) {
@@ -165,6 +274,9 @@
     SPREAD_1H: '1H spread', TOTAL_1H: '1H total', TEAM_TOTAL_1H: '1H team total'
   };
   OV.bucketLabel = function (b) { return BUCKET_LABEL[b] || b; };
+
+  // American odds have no numbers between -100 and +100
+  function cents(p) { return p >= 100 ? p - 100 : p <= -100 ? p + 100 : 0; }
 
   // a market with no line (moneyline) prints its price where the line goes
   function lineText(bucket, cell) {
@@ -191,7 +303,9 @@
         var c = slot[side];
         var move = null;
         if (bucket === 'ML') {
-          if (isNum(c.p) && isNum(c.op)) move = c.p - c.op;
+          // in cents, measured from even money on each side: -103 to +142 is 45
+          // cents, where the raw difference read +245
+          if (isNum(c.p) && isNum(c.op)) move = cents(c.p) - cents(c.op);
         } else if (isNum(c.l) && isNum(c.ol)) {
           move = c.l - c.ol;
         }
@@ -288,8 +402,17 @@
         if (!isFinite(p)) return;
         if (bestPrice === null || p > bestPrice) { bestPrice = p; bestIdx = ri; }
       });
-      // a lone quote is not a shopped price
-      if (bestIdx >= 0 && rows.length > 1) rows[bestIdx].cells[i].best = true;
+      // a lone quote is not a shopped price: it takes two books quoting this side
+      // at the target number for one of them to be the best
+      var quoting = 0;
+      rows.forEach(function (r) {
+        var c = r.cells[i];
+        if (!c.has) return;
+        var l = parse(c.line);
+        if (target !== null && isFinite(l) && l !== target) return;
+        if (isFinite(parse(c.price))) quoting++;
+      });
+      if (bestIdx >= 0 && quoting > 1) rows[bestIdx].cells[i].best = true;
     }
   }
 
@@ -307,11 +430,13 @@
 
     if (sp && (sp.home || sp.away)) {
       var fav = (sp.home && isNum(sp.home.l) && sp.home.l <= 0) ? 'home' : 'away';
-      var c = sp[fav] || sp.home || sp.away;
+      // a game quoted on one side only shows that side, under its own name
+      var side = sp[fav] ? fav : (sp.home ? 'home' : 'away');
+      var c = sp[side];
       if (c && isNum(c.l)) {
-        cur.push((fav === 'home' ? ha.h : ha.a) + ' ' + sgn(c.l));
+        cur.push((side === 'home' ? ha.h : ha.a) + ' ' + sgn(c.l));
         if (isNum(c.ol)) {
-          open.push((fav === 'home' ? ha.h : ha.a) + ' ' + sgn(c.ol));
+          open.push((side === 'home' ? ha.h : ha.a) + ' ' + sgn(c.ol));
           if (c.ol !== c.l) moved = true;
         }
       }
@@ -386,10 +511,22 @@
     var o = O();
     return ((o && o.families) || []).map(function (f) { return { id: f[0], label: f[1] }; });
   };
+  /*
+   * What each prop tab's grid shows: priced markets, one over/under per player and
+   * stat, a yes/no and its over/under at 0.5 counted once. Counting the raw
+   * entries overstated 133 of 192 tabs. Computed once per game; the data does not
+   * change under the page.
+   */
+  var COUNTS = {};
   OV.familyCounts = function (gid) {
     var g = OV.game(gid), out = {};
-    if (!g) return out;
-    Object.keys(g.P || {}).forEach(function (k) { out[k] = g.P[k].length; });
+    if (!g || !propsOf(g, gid)) return out;
+    if (COUNTS[gid]) return COUNTS[gid];
+    OV.families().forEach(function (f) {
+      var pg = OV.propGrid(gid, f.id, {});
+      if (pg && pg.total) out[f.id] = pg.total;
+    });
+    COUNTS[gid] = out;
     return out;
   };
 
@@ -402,10 +539,11 @@
    * de-vigged price.
    */
   OV.props = function (gid, fam, opts) {
-    var g = OV.game(gid);
-    if (!g || !g.P || !g.P[fam]) return [];
+    var g = OV.game(gid), P = propsOf(g, gid);
+    if (!g || !P || !P[fam]) return [];
     opts = opts || {};
-    var rows = g.P[fam].map(function (p) {
+    var periodSafe = OV.periodSafe();
+    var rows = P[fam].map(function (p) {
       var yn = p.bt === 'yn';
       var overKey = yn ? 'yes' : 'over', underKey = yn ? 'no' : 'under';
       var a = p.sides[overKey] || null, b = p.sides[underKey] || null;
@@ -435,13 +573,26 @@
        * not a quote, and 494 of 2,695 priced sides carry that +100. It is only
        * trusted when its line is the line the book is pricing.
        */
+      /*
+       * A third failure: on 198 of the 2,493 markets that fall back to it, the fair
+       * price sits more than 10 points of probability from the book price it is
+       * supposed to de-vig (Jadan Baugh anytime TD: book -424, 81%; fair +198, 34%).
+       * Most are rows where a first-half quote shares the full-game row. A fair
+       * price that far from its own book price is not used.
+       */
       var fairUsable = function (c) {
         if (!c || !isNum(c.fp)) return false;
-        if (!isNum(c.l) && !isNum(c.fl)) return true;   // yes/no market, no line
+        if (isNum(c.p) && Math.abs(impl(c.fp) - impl(c.p)) > 0.10) return false;
+        // yes/no market, no line: exactly even money is the same placeholder
+        if (!isNum(c.l) && !isNum(c.fl)) return Math.abs(c.fp) !== 100;
         return isNum(c.fl) && isNum(c.l) && c.fl === c.l;
       };
       var dv, probBasis;
-      if (a && isNum(a.p) && b && isNum(b.p)) {
+      // The two consensus sides are rebuilt independently, so they can land on
+      // different numbers (a DK over at 42.5 against a Bovada under at 30.5).
+      // Normalising those two prices against each other is not a de-vig of any bet.
+      var sameLine = a && b && (a.l === b.l || (!isNum(a.l) && !isNum(b.l)));
+      if (a && isNum(a.p) && b && isNum(b.p) && sameLine) {
         dv = deVig(a.p, b.p);
         probBasis = 'devig';
       } else if (fairUsable(a)) {
@@ -460,6 +611,7 @@
         lineNum: isNum(p.l) ? p.l : null,
         overLabel: yn ? 'Yes' : 'Over', underLabel: yn ? 'No' : 'Under',
         over: a ? price(a.p) : '', under: b ? price(b.p) : '',
+        overNum: a && isNum(a.p) ? a.p : null,
         openOver: a && isNum(a.op) ? price(a.op) : '',
         openUnder: b && isNum(b.op) ? price(b.op) : '',
         openLine: a && isNum(a.ol) ? plain(a.ol) : '',
@@ -472,7 +624,8 @@
         bookCount: Object.keys(p.bk || {}).length,
         books: p.bk || {},
         model: null, edge: null, edgeText: '', modelText: '', tone: null,
-        eligible: false, note: ''
+        eligible: false, note: '',
+        periodRisk: !periodSafe && priceOnly(p.st, p.bt)
       };
 
       var m = p.m;
@@ -487,7 +640,7 @@
         if (p.st === 'touchdowns') {
           if (p.td2) { mp = isNum(m.p2) ? m.p2 : null; src = 'p2'; }
           else if (m.ln && m.ln.length) { mp = m.ln[0][1]; src = 'ladder'; }
-          if (isNum(m.mu)) row.modelText = (100 * (mp === null ? 0 : mp)).toFixed(0) + '%';
+          if (isNum(m.mu) && mp !== null) row.modelText = (100 * mp).toFixed(0) + '%';
         } else if (isNum(p.l)) {
           var po = pOver(m, p.l);
           if (po) { mp = po.p; src = po.src; }
@@ -513,7 +666,10 @@
             row.edge = mp - row.marketProb;
             row.edgeText = (row.edge >= 0 ? '+' : '−') +
                            Math.abs(100 * row.edge).toFixed(1) + ' pt';
-            row.tone = row.edge >= 0.03 ? 'good' : row.edge <= -0.03 ? 'bad' : 'flat';
+            // No colour. Out of sample (W2-W3, 639 two-sided lines) no version of
+            // the prop model beat the market (WK04_PROP_FINETUNE.md), so a large
+            // delta is as likely the model's miss as the book's.
+            row.tone = 'flat';
           }
         }
         row.model = m;
@@ -537,6 +693,31 @@
     // row of dashes. SGO carries a fair price for some of these; that is a
     // reference number, not an offer, and it does not belong on a betting board.
     rows = rows.filter(function (r) { return r.priced; });
+
+    /*
+     * One over/under row per player, stat and bet type.
+     *
+     * The feed carries each market once per period (odd_id is stat-player-PERIOD-
+     * bettype-side), and make_odds_data.py keys props without the period, so a
+     * first-half line arrives as a second full-game row for the same player: DeSean
+     * Bishop at 79.5 rush yards and again at 40.5, which is his 1st-half line, with
+     * the full-game projection scored against it as a +13.5 "edge". Until the build
+     * carries period_id, keep the row most books price (ties: the higher number,
+     * since a half is always the smaller one) and count what was dropped.
+     */
+    var keepAt = {}, hidden = 0;
+    rows.forEach(function (r, i) {
+      if (r.betType !== 'ou') return;
+      var k = r.id + '|' + r.stat;
+      var j = keepAt[k];
+      if (j === undefined) { keepAt[k] = i; return; }
+      var o = rows[j];
+      var better = (r.bookCount > o.bookCount) ||
+                   (r.bookCount === o.bookCount && isNum(r.lineNum) && isNum(o.lineNum) && r.lineNum > o.lineNum);
+      if (better) { o._drop = true; keepAt[k] = i; } else { r._drop = true; }
+      hidden++;
+    });
+    rows = rows.filter(function (r) { return !r._drop; });
     if (opts.modelOnly) rows = rows.filter(function (r) { return r.model; });
     if (opts.sort === 'edge') {
       rows.sort(function (x, y) {
@@ -544,42 +725,61 @@
         return b - a;
       });
     } else if (opts.sort === 'odds') {
-      rows.sort(oddsFirst);
+      var seen = [];
+      rows.forEach(function (r) { if (seen.indexOf(r.label) < 0) seen.push(r.label); });
+      var col = colIndex(fam, seen);
+      rows.forEach(function (r) {
+        var isLine = !priceOnly(r.stat, r.betType) && isNum(r.lineNum);
+        r._k = [col(r.label), isLine ? 0 : 1, rankValue(isLine, r.lineNum, shownProb(r))];
+      });
+      rows.sort(function (x, y) { return byKeys(x._k, y._k); });
+    } else if (opts.sort === 'name') {
+      rows.sort(function (x, y) { return String(x.player).localeCompare(String(y.player)); });
     }
+    rows.hidden = hidden;
     return rows;
   };
 
   /*
-   * Shortest price first - the likeliest thing at the top.
+   * The default ("odds") sort, as a sort key so the order is total.
    *
-   * Sorting the American number itself would work on a touchdown board by
-   * accident, because American odds happen to be monotonic in probability, but
-   * it breaks the moment a market has a line: every receiving over is priced
-   * within a few cents of -110, so the order would be noise. Sort on the
-   * de-vigged probability, then break the tie on the line, which puts the player
-   * with the biggest number on top of a yardage tab and the likeliest scorer on
-   * top of a touchdown tab under one rule.
+   * A market with a line (yards, attempts, receptions) ranks on the line, biggest
+   * first: every over is priced within a few cents of -110, so its de-vigged
+   * probability sits near 50% and ordering on it is noise. A yes/no or touchdown
+   * market ranks on the de-vigged probability, likeliest first, because its line
+   * ("2+ TD" is 1.5) says nothing about who is likelier to score. Rows group by
+   * market in the tab's column order first (the grid by each player's leftmost
+   * market), and within a market the lined rows come before the yes/no ones (an
+   * "INT thrown" column holds both), so the two rules never compare across each
+   * other. An earlier version
+   * compared line-first only when both rows had a line, which is not transitive:
+   * 477 pairs came out of order.
    */
-  function oddsFirst(x, y) {
-    var a = probOf(x), b = probOf(y);
-    if (a === null && b === null) return 0;
-    if (a === null) return 1;
-    if (b === null) return -1;
-    if (Math.abs(b - a) > 0.005) return b - a;
-    var al = lineOf(x), bl = lineOf(y);
-    if (al === null && bl === null) return 0;
-    if (al === null) return 1;
-    if (bl === null) return -1;
-    return bl - al;
+  // the probability of the price the row shows, so "likeliest first" reads true
+  // against the column; the de-vigged number is kept for the model delta
+  function shownProb(r) {
+    return isNum(r.overNum) ? impl(r.overNum) : r.marketProb;
   }
-  function probOf(r) {
-    var v = r.anchor ? r.anchor.prob : r.marketProb;
-    return isNum(v) ? v : null;
+  function rankValue(isLine, line, prob) {
+    if (isLine && isNum(line)) return -line;
+    return isNum(prob) ? -prob : Infinity;
   }
-  function lineOf(r) {
-    var v = r.anchor ? r.anchor.line : r.lineNum;
-    return isNum(v) ? v : null;
+  function byKeys(a, b) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
+    }
+    return 0;
   }
+  function colIndex(fam, seen) {
+    var pref = PROP_COLS[fam] || [];
+    return function (label) {
+      var i = pref.indexOf(label);
+      return i < 0 ? 100 + seen.indexOf(label) : i;
+    };
+  }
+  OV.sortNote = function () {
+    return 'Biggest number first; likeliest first on yes/no and touchdown markets';
+  };
 
   // per-book prices for one prop row, same shape as bookRows
   OV.propBooks = function (row) {
@@ -601,7 +801,8 @@
         ]
       });
     });
-    markBest(out);
+    // a first-half quote would be the "best" anytime-TD price by construction
+    if (!row.periodRisk) markBest(out);
     return out;
   };
 
@@ -726,7 +927,9 @@
   }
   function pairCell(A, B, col) {
     if (!A && !B) return null;
-    var line = A && isNum(A.l) ? A.l : (B && isNum(B.l) ? B.l : null);
+    // the cell prints the away number; a home-only spread is that number negated
+    var line = A && isNum(A.l) ? A.l
+             : (B && isNum(B.l) ? (col.signed ? -B.l : B.l) : null);
     return {
       line: (col.noLine || !isNum(line)) ? '' : (col.signed ? sgn(line) : plain(line)),
       lineNum: isNum(line) ? line : null,
@@ -871,13 +1074,14 @@
       approx: /ladder|one-sided/.test(r.note || ''),
       _key: betKey(r), _books: r.bookCount || 0,
       // kept for sorting: the formatted strings above cannot be compared
-      _prob: r.marketProb, _line: r.lineNum
+      _prob: r.marketProb, _line: r.lineNum, _bare: bare, _shown: shownProb(r)
     };
   }
 
   OV.propGrid = function (gid, fam, opts) {
     var rows = OV.props(gid, fam, {});
     if (!rows.length) return null;
+    var hiddenRows = rows.hidden || 0;
     opts = opts || {};
 
     var pref = PROP_COLS[fam] || [], seen = [];
@@ -889,7 +1093,7 @@
       return ia - ib;
     }).map(function (l) { return { key: l, label: l }; });
 
-    var order = [], byKey = {}, soft = 0, approx = 0, modelled = 0;
+    var order = [], byKey = {}, soft = 0, approx = 0, modelled = 0, risk = 0, ncells = 0;
     rows.forEach(function (r) {
       var c = pcell(r), k = r.player, n = 0;
 
@@ -912,8 +1116,10 @@
         order.push(k);
       }
       byKey[k].cells[r.label] = c;
+      ncells++;
       if (c.soft) soft++;
       if (c.approx) approx++;
+      if (r.periodRisk) risk++;
       if (r.model) modelled++;
       if (r.edge !== null && r.edge !== undefined &&
           (byKey[k].best === null || r.edge > byKey[k].best)) byKey[k].best = r.edge;
@@ -928,7 +1134,7 @@
       // receiving tab it is Rec yds - the market you would rank the player by.
       var anchor = null;
       for (var i = 0; i < cells.length && !anchor; i++) {
-        if (cells[i]) anchor = { prob: cells[i]._prob, line: cells[i]._line };
+        if (cells[i]) anchor = { col: i, prob: cells[i]._shown, line: cells[i]._line, bare: cells[i]._bare };
       }
       return { label: pl.player, sub: pl.pos, best: pl.best, anchor: anchor, cells: cells };
     });
@@ -937,11 +1143,21 @@
         return (b.best === null ? -99 : b.best) - (a.best === null ? -99 : a.best);
       });
     } else if (opts.sort === 'odds') {
-      out.sort(oddsFirst);
+      out.forEach(function (r) {
+        var a = r.anchor;
+        var isLine = !!a && !a.bare && isNum(a.line);
+        r._k = a ? [a.col, isLine ? 0 : 1, rankValue(isLine, a.line, a.prob)] : [Infinity, Infinity, Infinity];
+      });
+      out.sort(function (x, y) { return byKeys(x._k, y._k); });
+    } else if (opts.sort === 'name') {
+      out.sort(function (a, b) { return String(a.label).localeCompare(String(b.label)); });
     }
     return {
       kind: 'prop', sections: [{ label: null, cols: cols, rows: out }],
-      modelled: modelled, total: rows.length, soft: soft, approx: approx
+      // cells, not rows: a yes/no and its over/under at 0.5 are one market and
+      // share a cell, so counting rows overstated 79 of 192 tabs
+      modelled: modelled, total: ncells, soft: soft, approx: approx, hidden: hiddenRows,
+      risk: risk
     };
   };
 
@@ -984,11 +1200,19 @@
     return (m && m.note) || '';
   };
 
+  // Under a prop tab with yes/no or touchdown rows, until the build separates periods.
+  OV.periodNote = function (n) {
+    return n + ' yes/no and touchdown price' + (n === 1 ? '' : 's') + ' may include a ' +
+      'first-half quote: this odds build does not separate periods, and a market with no ' +
+      'line cannot be told apart, so no best price is claimed on them';
+  };
+
   // Every projection is blocked from betting today. Surfaced as one line so both
   // pages say the same thing in the same words.
   OV.eligibilityNote = function () {
-    return 'Projections only — bet_eligible is FALSE on every row (c_prop NOT_YET_POPULATED). ' +
-           'No prop has been graded, so the two-condition rule cannot be evaluated.';
+    return 'Model column: prop_projections.py, reference only. Out of sample on 639 two-sided lines (Weeks 2 and 3) ' +
+           'no version of the model beat the market, so a delta here is not an edge and is not coloured. ' +
+           'The plays that passed the two-condition test are on the prop card (This week, above the slate).';
   };
 
   window.OV = OV;

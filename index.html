@@ -11,25 +11,25 @@
 html,body{margin:0;background:oklch(0.985 0.003 250);color:oklch(0.23 0.02 258);-webkit-font-smoothing:antialiased;color-scheme:light}
 a{color:oklch(0.42 0.16 258);text-decoration:none}
 a:hover{color:oklch(0.30 0.15 258)}
+.wrap{max-width:560px;margin:0 auto;padding:56px 24px 80px;font-family:'IBM Plex Sans',system-ui,sans-serif}
+.lede{font:400 13px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 12px}
+.fine{font:400 11.5px/1.55 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:0 0 26px}
+.links{display:flex;flex-direction:column;gap:10px}
+.card{display:flex;flex-direction:column;gap:3px;padding:15px 16px;border:1px solid oklch(0.895 0.006 250);border-radius:9px;background:oklch(1 0 0)}
+.card b{font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.23 0.02 258)}
+.card span{font:400 12px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)}
+@media (max-width:640px){.phone-first{order:-1}}
 </style>
 </head>
 <body>
-<div style="max-width:560px;margin:0 auto;padding:56px 24px 80px;font-family:'IBM Plex Sans',system-ui,sans-serif">
+<div class="wrap">
 <h1 style="font:600 20px/1.25 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 6px;letter-spacing:-0.01em">CFB 2026 pick board</h1>
-<p style="font:400 13px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 26px">Every game on the week's schedule, with host positions from Cover 3, BBOC and Barstool Pick Em where they exist. Model edge from power ratings, sportsbook consensus and opening numbers across 8 books, player prop projections. Week 1 is graded as of 7 Sep. Week 2 has the market and the model but no positions — no transcripts extracted yet.</p>
-<div style="display:flex;flex-direction:column;gap:10px">
-<a href="./Pick%20Board.dc.html" style="display:flex;flex-direction:column;gap:3px;padding:15px 16px;border:1px solid oklch(0.895 0.006 250);border-radius:9px;background:oklch(1 0 0)">
-<span style="font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.23 0.02 258)">Pick board</span>
-<span style="font:400 12px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">Desktop · all games, week filter, market and prop tabs, weather</span>
-</a>
-<a href="./Pick%20Board%20Mobile.dc.html" style="display:flex;flex-direction:column;gap:3px;padding:15px 16px;border:1px solid oklch(0.895 0.006 250);border-radius:9px;background:oklch(1 0 0)">
-<span style="font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.23 0.02 258)">Pick board · mobile</span>
-<span style="font:400 12px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">Phone layout, collapsing filters, same market and prop tabs</span>
-</a>
-<a href="./Picker%20Performance.dc.html" style="display:flex;flex-direction:column;gap:3px;padding:15px 16px;border:1px solid oklch(0.895 0.006 250);border-radius:9px;background:oklch(1 0 0)">
-<span style="font:500 14.5px/1.3 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.23 0.02 258)">Picker performance</span>
-<span style="font:400 12px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">Follow board, model edge, graded results and CLV</span>
-</a>
+<p class="lede">Every game on the week's schedule, with the positions Cover 3, BBOC and Barstool Pick Em took on it, each one's graded result and closing-line value once the game is final. Sportsbook consensus and opening numbers across eight books, player props, and for the current week the injury tracker and the prop card.</p>
+<p class="fine">An observational tracker, not a tipping service. CLV is measured against CLOSE_PROXY, the last line CFBD recorded, which has not yet been checked against a real close, so no picker is ranked. The ratings model is a reference number, not an edge.</p>
+<div class="links">
+<a class="card" href="./Pick%20Board.dc.html"><b>Pick board</b><span>Desktop · all games, week filter, market and prop tabs, injuries, prop card, weather</span></a>
+<a class="card phone-first" href="./Pick%20Board%20Mobile.dc.html"><b>Pick board · phone</b><span>Games first, filters one tap away, same markets and injuries</span></a>
+<a class="card" href="./Picker%20Performance.dc.html"><b>Picker performance</b><span>Each host's CLV and win rate with sample sizes and 95% intervals, over time and by stated confidence</span></a>
 </div>
 </div>
 </body>

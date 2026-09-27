@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<script src="./board-bundle.js"></script>
+<script src="./ref-data.js"></script>
+<script src="./odds-data.js"></script>
+<script src="./odds-view.js"></script>
+<script src="./intel-data.js"></script>
+<script src="./intel-view.js"></script>
 </head>
 <body>
 <x-dc>
@@ -11,11 +17,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="./board-bundle.js"></script>
-<script src="./ref-data.js"></script>
-<script src="./odds-data.js"></script>
-<script src="./model-data.js"></script>
-<script src="./odds-view.js"></script>
 <style>
 html,body{margin:0;background:oklch(0.985 0.003 250);color:oklch(0.23 0.02 258);-webkit-font-smoothing:antialiased;color-scheme:light}
 a{color:oklch(0.42 0.16 258);text-decoration:none}
@@ -73,14 +74,58 @@ select{font-family:inherit}
 <select value="{{ flag }}" onChange="{{ onFlag }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
 <option value="all">Any data quality</option><option value="flagged">Flagged only</option><option value="ungrade">Ungradeable</option><option value="stale">Stale numbers</option><option value="nonhost">Guest / non-host</option><option value="opposed">Opposed / head-to-head</option>
 </select>
+<select value="{{ ev }}" onChange="{{ onEv }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="all">Any evidence</option><option value="strong">Charted or stat cited</option><option value="BASE_RATE">Base rate</option><option value="ROSTER">Roster</option><option value="SCHEME">Scheme</option><option value="MARKET">Market</option><option value="MOTIVATION">Motivation</option><option value="ASSERTION">Assertion</option><option value="NONE">None offered</option>
+</select>
 <span style="font:500 12px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin-left:2px">{{ countLabel }}</span>
 </div>
 
 <div style="display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);padding-bottom:14px">
+<span style="display:inline-flex;gap:3px;align-items:center"><sc-for list="{{ colorTabs }}" as="ct" hint-placeholder-count="2"><button type="button" onClick="{{ ct.click }}" aria-pressed="{{ ct.on }}" style="{{ ct.st }}">{{ ct.label }}</button></sc-for></span>
 <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
-<span style="display:inline-flex;align-items:center;gap:5px"><span style="{{ l.st }}"></span>{{ l.label }}</span>
+<span style="display:inline-flex;align-items:center;gap:5px"><span style="{{ l.st }}"></span><span style="{{ l.lst }}">{{ l.label }}</span></span>
 </sc-for>
+<button type="button" onClick="{{ keyBtn.click }}" aria-expanded="{{ keyBtn.expanded }}" style="{{ keyBtn.st }}">{{ keyBtn.label }}</button>
 </div>
+
+<p style="font:400 10.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:-8px 0 14px;max-width:118ch">{{ legend2 }}</p>
+<sc-if value="{{ keyRows }}" hint-placeholder-val="{{ false }}">
+<div style="columns:3 300px;column-gap:28px;margin:-6px 0 16px;padding:11px 14px 4px;border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0)">
+<sc-for list="{{ keyRows }}" as="kr" hint-placeholder-count="6"><p style="font:400 10.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255);margin:0 0 7px;break-inside:avoid;text-wrap:pretty"><span style="font-weight:600;color:oklch(0.23 0.02 258);margin-right:7px">{{ kr.term }}</span>{{ kr.def }}</p></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ intel }}" hint-placeholder-val="{{ false }}">
+<div style="{{ intel.wrapSt }}">
+<div style="{{ intel.barSt }}">
+<span style="{{ intel.titleSt }}">This week</span>
+<sc-for list="{{ intel.pills }}" as="ip" hint-placeholder-count="2"><button type="button" onClick="{{ ip.click }}" aria-expanded="{{ ip.expanded }}" style="{{ ip.st }}">{{ ip.label }}<span style="{{ ip.subSt }}">{{ ip.sub }}</span></button></sc-for>
+</div>
+<sc-if value="{{ intel.card }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ intel.card }}" as="cp" hint-placeholder-count="3">
+<div style="{{ cp.rowSt }}">
+<div style="display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;margin:0 0 3px"><span style="{{ cp.st }}"><span style="{{ cp.tagSt }}">{{ cp.tag }}</span>{{ cp.head }}</span><span style="{{ cp.layerSt }}">{{ cp.layer }}</span></div>
+<p style="{{ cp.termsSt }}">{{ cp.terms }}</p>
+<sc-if value="{{ cp.inj }}" hint-placeholder-val="{{ false }}"><p style="{{ cp.injSt }}">{{ cp.inj }}</p></sc-if>
+<p style="{{ cp.whySt }}">{{ cp.why }}</p>
+</div>
+</sc-for>
+<sc-if value="{{ intel.reads }}" hint-placeholder-val="{{ false }}">
+<p style="{{ intel.readsHeadSt }}">Injury reads on card plays</p>
+<sc-for list="{{ intel.reads }}" as="rd" hint-placeholder-count="2"><div style="{{ intel.readSt }}"><p style="{{ rd.st }}">{{ rd.text }}</p><p style="{{ rd.subSt }}">{{ rd.sub }}</p></div></sc-for>
+</sc-if>
+</sc-if>
+<sc-if value="{{ intel.inj }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ intel.inj }}" as="ir" hint-placeholder-count="3">
+<div style="{{ ir.rowSt }}">
+<div style="display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline"><span style="{{ ir.st }}"><span style="{{ ir.tagSt }}">{{ ir.tag }}</span>{{ ir.head }}</span><span style="{{ ir.metaSt }}">{{ ir.meta }}</span></div>
+<sc-if value="{{ ir.note }}" hint-placeholder-val="{{ false }}"><p style="{{ ir.noteSt }}">{{ ir.note }}</p></sc-if>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ intel.note }}" hint-placeholder-val="{{ false }}"><p style="{{ intel.noteSt }}">{{ intel.note }}</p></sc-if>
+</div>
+</sc-if>
 
 <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
 <div style="padding:44px 0;text-align:center;border-top:1px solid oklch(0.895 0.006 250)">
@@ -91,7 +136,7 @@ select{font-family:inherit}
 
 <sc-for list="{{ days }}" as="d" hint-placeholder-count="3">
 <div style="{{ d.wrapSt }}">
-<p style="{{ d.headSt }}">{{ d.label }}<sc-if value="{{ d.note }}" hint-placeholder-val="{{ false }}"><span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin-left:10px">{{ d.note }}</span></sc-if></p>
+<p style="{{ d.headSt }}">{{ d.label }}<sc-if value="{{ d.note }}" hint-placeholder-val="{{ false }}"><span style="{{ d.noteWrapSt }}"><span style="{{ d.noteSt }}">{{ d.note }}</span></span></sc-if></p>
 <sc-for list="{{ d.slots }}" as="s" hint-placeholder-count="4">
 <div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;padding:10px 0 2px;border-bottom:1px solid oklch(0.895 0.006 250)">
 <p style="font:500 12px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255);margin:0;position:sticky;top:44px;align-self:start">{{ s.time }}</p>
@@ -110,23 +155,34 @@ select{font-family:inherit}
 <button type="button" onClick="{{ g.oddsBtn.click }}" aria-expanded="{{ g.oddsBtn.expanded }}" style="{{ g.oddsBtn.st }}">{{ g.oddsBtn.label }}<span style="font-size:8px;line-height:1">{{ g.oddsBtn.caret }}</span></button>
 </sc-if>
 </div>
+<sc-if value="{{ g.cons }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-wrap:wrap;gap:3px 7px;align-items:center;margin-bottom:7px">
 <span style="display:inline-flex;gap:2px;align-items:center;flex:none">
 <sc-for list="{{ g.ticks }}" as="t" hint-placeholder-count="3"><span style="{{ t.st }}"></span></sc-for>
 </span>
 <span style="{{ g.consSt }}">{{ g.cons }}</span>
 </div>
+</sc-if>
 <div style="display:flex;flex-wrap:wrap;gap:6px">
 <sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3">
 <button type="button" onClick="{{ c.click }}" aria-expanded="{{ c.expanded }}" style="{{ c.st }}">
 <sc-if value="{{ c.star }}" hint-placeholder-val="{{ false }}"><span aria-label="Tier 3" style="font-size:11px;line-height:1;margin-right:-1px">★</span></sc-if>
 <span style="{{ c.nameSt }}">{{ c.name }}</span><span>{{ c.pick }}</span>
+<sc-if value="{{ c.ev }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" title="{{ c.evTitle }}" style="{{ c.evSt }}">{{ c.ev }}</span><span style="{{ c.srSt }}">{{ c.evTitle }}</span></sc-if>
 <sc-if value="{{ c.delta }}" hint-placeholder-val="{{ false }}"><span style="{{ c.deltaSt }}">{{ c.delta }}</span></sc-if>
 <sc-if value="{{ c.edge }}" hint-placeholder-val="{{ false }}"><span style="{{ c.edgeSt }}">{{ c.edge }}</span></sc-if>
+<sc-if value="{{ c.clv }}" hint-placeholder-val="{{ false }}"><span style="{{ c.clvSt }}">{{ c.clv }}</span></sc-if>
+<sc-if value="{{ c.res }}" hint-placeholder-val="{{ false }}"><span style="{{ c.resSt }}">{{ c.res }}</span></sc-if>
+<sc-if value="{{ c.news }}" hint-placeholder-val="{{ false }}"><span style="{{ c.newsSt }}">{{ c.news }}</span></sc-if>
 <sc-if value="{{ c.flagged }}" hint-placeholder-val="{{ false }}"><span style="color:oklch(0.48 0.20 25);font-size:10px;line-height:1">⚑</span></sc-if>
 </button>
 </sc-for>
 </div>
+<sc-if value="{{ g.intel }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 0">
+<sc-for list="{{ g.intel }}" as="ii" hint-placeholder-count="2"><span style="{{ ii.st }}"><span style="{{ ii.tagSt }}">{{ ii.tag }}</span>{{ ii.text }}</span></sc-for>
+</div>
+</sc-if>
 
 <sc-if value="{{ g.odds }}" hint-placeholder-val="{{ false }}">
 <div style="margin:10px 0 4px;border:1px solid oklch(0.87 0.01 250);border-radius:8px;background:oklch(1 0 0);overflow-x:auto;overflow-y:hidden">
@@ -175,7 +231,7 @@ select{font-family:inherit}
 </div>
 <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="3">
 <div style="{{ r.wrapSt }}">
-<span style="{{ r.nameSt }}">{{ r.label }}<sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}"><span style="{{ r.subSt }}">{{ r.sub }}</span></sc-if></span>
+<span style="{{ r.nameColSt }}"><span style="{{ r.nameSt }}">{{ r.label }}<sc-if value="{{ r.sub }}" hint-placeholder-val="{{ false }}"><span style="{{ r.subSt }}">{{ r.sub }}</span></sc-if></span><sc-if value="{{ r.badges }}" hint-placeholder-val="{{ false }}"><span style="{{ r.badgeRowSt }}"><sc-for list="{{ r.badges }}" as="bd" hint-placeholder-count="1"><span style="{{ bd.st }}">{{ bd.text }}</span></sc-for></span></sc-if></span>
 <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4">
 <span style="{{ c.wrapSt }}">
 <span style="{{ c.mainSt }}">{{ c.main }}<sc-if value="{{ c.cost }}" hint-placeholder-val="{{ false }}"><span style="{{ c.costSt }}">{{ c.cost }}</span></sc-if></span>
@@ -309,6 +365,14 @@ select{font-family:inherit}
 </sc-if>
 
 </div>
+<sc-if value="{{ g.det.news }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 0 14px;padding:9px 11px;border:1px solid oklch(0.895 0.006 250);border-radius:7px;background:oklch(1 0 0)">
+<p style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255);margin:0 0 7px">Injury tracker on this game</p>
+<sc-for list="{{ g.det.news }}" as="nw" hint-placeholder-count="2">
+<div style="display:flex;flex-wrap:wrap;gap:3px 9px;align-items:baseline;margin:0 0 5px"><span style="{{ nw.st }}"><span style="{{ nw.tagSt }}">{{ nw.tag }}</span>{{ nw.text }}</span><span style="font:400 10.5px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ nw.meta }}</span></div>
+</sc-for>
+</div>
+</sc-if>
 <div style="display:flex;flex-wrap:wrap;gap:14px 30px">
 <div style="flex:1 1 380px;max-width:66ch">
 <sc-if value="{{ g.det.why }}" hint-placeholder-val="{{ false }}">
@@ -434,13 +498,17 @@ function buildRecords(rows) {
     const k = HOSTMAP[r.host]; if (!k) return;
     const o = m[k] || (m[k] = { host: k, n: 0, w: 0, l: 0, p: 0, graded: 0, t3: 0, ung: 0, clvN: 0, clvSum: 0, rows: [] });
     o.n++;
-    o.rows.push({ mt: (r.market_type || '').toUpperCase(), period: (r.ext_period || '').toUpperCase(), res: (r.result || '').toUpperCase().charAt(0), clv: r.clv_points, tier: r.confidence_tier, price: r.price_cited, notes: r.notes });
+    // A disputed row (CFB Picks\LEDGER_DEFECTS.csv) keeps its graded result - nobody
+    // knows the right answer - but its CLV is left out of every mean: W01-093 alone
+    // carries +33.5 and moved Wilson's average from +0.18 to +1.13.
+    const disp = String(r.disputed || '').toLowerCase() === 'true';
+    o.rows.push({ mt: (r.market_type || '').toUpperCase(), period: (r.ext_period || '').toUpperCase(), res: (r.result || '').toUpperCase().charAt(0), clv: r.clv_points, tier: r.confidence_tier, price: r.price_cited, notes: r.notes, disp: disp });
     if (String(r.confidence_tier) === '3') o.t3++;
     if (/UNGRADEABLE|NOT CITED|AMBIGUOUS|NOT BE VERIFIED/i.test(r.notes || '')) o.ung++;
     const res = (r.result || '').toUpperCase();
     if (res) { o.graded++; if (res[0] === 'W') o.w++; else if (res[0] === 'L') o.l++; else o.p++; }
     const c = parseFloat(r.clv_points);
-    if (!isNaN(c)) { o.clvN++; o.clvSum += c; }
+    if (!isNaN(c) && !disp) { o.clvN++; o.clvSum += c; }
   });
   return m;
 }
@@ -468,8 +536,10 @@ function amUnits(price, res) {
 }
 
 function lensStats(o, lens) {
+  // CLV first and win rate second, each with its n. Nothing is coloured good or bad:
+  // at these sample sizes a colour is a verdict the numbers cannot support.
   const rows = ((o && o.rows) || []).filter(r => rowIn(r, lens));
-  let w = 0, l = 0, p = 0, graded = 0, t3 = 0, clvN = 0, clvSum = 0, priced = 0, units = 0, staked = 0;
+  let w = 0, l = 0, p = 0, graded = 0, t3 = 0, clvN = 0, clvSum = 0, priced = 0, units = 0, staked = 0, disp = 0;
   rows.forEach(r => {
     if (String(r.tier) === '3') t3++;
     const hasPrice = /([+\-]?\d+)/.test(r.price || '');
@@ -480,24 +550,24 @@ function lensStats(o, lens) {
       const u = amUnits(r.price, r.res);
       if (u !== null) { units += u; staked++; }
     }
+    if (r.disp) { disp++; return; }
     const c = parseFloat(r.clv);
     if (!isNaN(c)) { clvN++; clvSum += c; }
   });
   const avg = clvN ? clvSum / clvN : null;
   const dec = w + l;
   const out = [
-    { label: 'record', value: graded ? w + '-' + l + (p ? '-' + p : '') : '—', strong: true },
-    { label: 'win%', value: dec ? (100 * w / dec).toFixed(1) + '%' : '—', tone: dec ? (w / dec >= 0.5 ? 'good' : 'bad') : null, strong: true },
+    { label: 'clv vs proxy', value: avg === null ? '\u2014' : (avg >= 0 ? '+' : '') + avg.toFixed(2) + ' \u00b7 n ' + clvN, strong: true },
+    { label: 'record', value: graded ? w + '-' + l + (p ? '-' + p : '') : '\u2014', strong: true },
+    { label: 'win%', value: dec ? (100 * w / dec).toFixed(1) + '% \u00b7 n ' + dec : '\u2014' },
     { label: 'logged', value: String(rows.length) }
   ];
   if (lens === 'ml') {
     out.push({ label: 'priced', value: priced + '/' + rows.length });
-    out.push({ label: 'units', value: staked ? (units >= 0 ? '+' : '') + units.toFixed(2) : '—', tone: staked ? (units >= 0 ? 'good' : 'bad') : null, strong: true });
-    out.push({ label: 'roi', value: staked ? (units / staked >= 0 ? '+' : '') + (100 * units / staked).toFixed(1) + '%' : '—', tone: staked ? (units >= 0 ? 'good' : 'bad') : null });
-  } else {
-    out.push({ label: 'clv', value: avg === null ? '—' : (avg >= 0 ? '+' : '') + avg.toFixed(2), tone: avg === null ? null : (avg >= 0 ? 'good' : 'bad') });
-    if (t3) out.push({ label: 'tier 3', value: String(t3) });
+    out.push({ label: 'units', value: staked ? (units >= 0 ? '+' : '') + units.toFixed(2) + ' \u00b7 n ' + staked : '\u2014' });
   }
+  if (t3) out.push({ label: 'tier 3', value: String(t3) });
+  if (disp) out.push({ label: 'disputed', value: disp + ' out of CLV' });
   return out;
 }
 
@@ -515,14 +585,17 @@ const WMO_SNOW = [71,73,75,77,85,86], WMO_STORM = [95,96,99], WMO_MIX = [56,57,6
 function codeRank(c) { return WMO_STORM.indexOf(c) >= 0 ? 4 : WMO_SNOW.indexOf(c) >= 0 ? 3 : WMO_MIX.indexOf(c) >= 0 ? 2 : (c >= 51 ? 1 : 0); }
 function typeRank(t) { return t === 'thunder' ? 4 : t === 'snow' ? 3 : t === 'mix' ? 2 : t === 'rain' ? 1 : 0; }
 function inches(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+function fin(v) { return typeof v === 'number' && isFinite(v); }
 function halfCard(label, o) {
   if (!o) return null;
   const amt = o.precip_in || 0;
   const ty = o.precip_type === 'snow' ? 'snow' : o.precip_type === 'thunder' ? 'thunder' : o.precip_type === 'mix' ? 'wintry mix' : 'rain';
   return {
     label: label,
-    temp: Math.round(o.temp_f) + '\u00b0F',
-    wind: 'wind ' + Math.round(o.wind_mph) + ' g' + Math.round(o.wind_gust_mph) + ' mph' + (o.wind_dir ? ' ' + o.wind_dir : ''),
+    // a forecast hour Open-Meteo has no value for arrives as null, which Math.round
+    // turns into 0 and the card printed as 0\u00b0F
+    temp: fin(o.temp_f) ? Math.round(o.temp_f) + '\u00b0F' : '',
+    wind: fin(o.wind_mph) ? 'wind ' + Math.round(o.wind_mph) + (fin(o.wind_gust_mph) ? ' g' + Math.round(o.wind_gust_mph) : '') + ' mph' + (o.wind_dir ? ' ' + o.wind_dir : '') : '',
     rain: ty + ' ' + Math.round(o.precip_pct) + '%' + (amt >= 0.01 ? ' \u00b7 ' + amt.toFixed(2) + '"' : '')
   };
 }
@@ -573,8 +646,11 @@ const RK = s => String(s || '').toUpperCase().replace(/&/g, 'AND').replace(/[^A-
 function refTeam(s) {
   const R = window.REF;
   if (!R) return null;
-  const raw = String(s || '').replace(/\s*\([^)]*\)/g, '').trim();
-  return R.ALIAS[RK(raw)] || null;
+  // The full string first: "Miami (OH)" is its own school, and stripping the
+  // parentheses before looking it up turned it into Miami (FL).
+  const full = String(s || '').trim();
+  const raw = full.replace(/\s*\([^)]*\)/g, '').trim();
+  return R.ALIAS[RK(full)] || R.ALIAS[RK(raw)] || null;
 }
 let _gidx = null;
 function gameIndex() {
@@ -624,23 +700,47 @@ function modelCfg() {
 }
 
 // kickoff time from the schedule (ET), formatted like the board's own slot labels
+// Memoised, like etParts below: every render formats every game's kickoff, and an
+// Intl formatter per call was the largest single cost of a render on a phone.
+const SCHED_TIME = {};
+const SCHED_FMT = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
 function schedTime(g) {
   if (!g || !g.ko || g.tbd) return null;
+  if (g.ko in SCHED_TIME) return SCHED_TIME[g.ko];
   const t = Date.parse(g.ko);
-  if (isNaN(t)) return null;
-  const s = new Date(t).toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
-  return s.replace(' AM', 'a').replace(' PM', 'p');
+  let out = null;
+  if (!isNaN(t)) {
+    const s = SCHED_FMT.format(new Date(t));
+    out = s.replace(' AM', 'a').replace(' PM', 'p');
+  }
+  SCHED_TIME[g.ko] = out;
+  return out;
 }
 // ET calendar day for a kickoff: a sort key and the label the day header shows.
 // en-CA gives YYYY-MM-DD, which sorts as a string.
+const ET_PARTS = {};
 function etParts(ko) {
+  const k = String(ko || '');
+  if (!(k in ET_PARTS)) ET_PARTS[k] = etPartsOf(k);
+  return ET_PARTS[k];
+}
+// four formatters built once: constructing one per call cost more than the render
+const ET_FMT = (() => {
+  const z = 'America/New_York';
+  return {
+    key: new Intl.DateTimeFormat('en-CA', { timeZone: z }),
+    wd: new Intl.DateTimeFormat('en-US', { timeZone: z, weekday: 'long' }),
+    day: new Intl.DateTimeFormat('en-US', { timeZone: z, day: 'numeric' }),
+    mon: new Intl.DateTimeFormat('en-US', { timeZone: z, month: 'short' })
+  };
+})();
+function etPartsOf(ko) {
   const t = Date.parse(ko || '');
   if (isNaN(t)) return null;
-  const d = new Date(t), z = { timeZone: 'America/New_York' };
-  const f = o => d.toLocaleDateString('en-US', Object.assign({}, z, o));
+  const d = new Date(t);
   return {
-    key: d.toLocaleDateString('en-CA', z),
-    label: f({ weekday: 'long' }) + ' ' + f({ day: 'numeric' }) + ' ' + f({ month: 'short' })
+    key: ET_FMT.key.format(d),
+    label: ET_FMT.wd.format(d) + ' ' + ET_FMT.day.format(d) + ' ' + ET_FMT.mon.format(d)
   };
 }
 function slotMinutes(label) {
@@ -658,7 +758,7 @@ function tokenMatches(tok, name) {
   for (let j = 0; j < b.length && i < a.length; j++) if (b[j] === a[i]) i++;
   return i === a.length;
 }
-// board copy uses house shorthand (BAMA, SCAR, JVST) — resolve against the game, not a global alias table
+// board copy uses house shorthand (BAMA, SCAR, JVST): resolve against the game, not a global alias table
 function sideTeam(tok, g) {
   if (!g) return null;
   const direct = refTeam(tok);
@@ -692,24 +792,68 @@ function modelEdge(p, g) {
   const m = modelMargin(g);
   if (m === null) return null;
   const txt = String(p[1] || '');
+  if (market(txt) === 'prop') return null;
   if (/\b(over|under|o\d|u\d|TT)\b/i.test(txt) || /total/i.test(txt)) return null;
-  // a full-game power rating cannot price a half or a quarter
-  if (/\b(1H|2H|1Q|2Q|3Q|4Q)\b/i.test(txt)) return null;
-  const mt = /\bML\b|plus money|moneyline/i.test(txt);
+  // a full-game power rating cannot price a half or a quarter (the grid writes 1Q, the ledger Q1)
+  if (/\b(1H|2H|[1-4]Q|Q[1-4])\b/i.test(txt)) return null;
   const team = sideTeam(txt.replace(/[-+]?\d.*$/, '').replace(/\bML\b|plus money|moneyline/gi, '').replace(/\([^)]*\)/g, '').trim(), g);
   if (!team) return null;
   const isHome = RK(team) === RK(g.h);
   if (!isHome && RK(team) !== RK(g.a)) return null;
   const teamModel = isHome ? m : -m;
-  const signed = /([+-]\d+(?:\.\d+)?)/.exec(txt);
-  if (mt) {
-    // on a moneyline the signed number IS the price
-    const fm = signed ? fairMargin(signed[1]) : null;
+  const nums = (txt.match(/[+-]\d+(?:\.\d+)?/g) || []).map(parseFloat);
+  const line = nums.filter(n => Math.abs(n) < 100)[0];
+  const price = nums.filter(n => Math.abs(n) >= 100)[0];
+  // "SMU -3 + ML" is a spread and a moneyline in one chip. The -3 is a spread number:
+  // read as a price it implied a 3% win chance and a +36.3 "edge". Only a number of
+  // three digits or more can be a moneyline price.
+  if (line !== undefined) return { pts: teamModel + line, kind: 'spread' };
+  if (/\bML\b|plus money|moneyline/i.test(txt) && price !== undefined) {
+    const fm = fairMargin(String(price));
     if (fm === null) return null;
-    return { pts: teamModel - fm, kind: 'ml', fair: fm, price: signed[1] };
+    return { pts: teamModel - fm, kind: 'ml', fair: fm, price: String(price) };
   }
-  if (!signed) return null;
-  return { pts: teamModel + parseFloat(signed[1]), kind: 'spread' };
+  return null;
+}
+// The ratings model's measured error against the market (calibrate_model.py). A
+// delta inside it is noise, and the ratings are the preseason set, so the board shows
+// the number as a delta and never marks it as an edge.
+function modelNoise() {
+  const M = modelCfg();
+  return (M && M.fitted && M.resid_sd) ? M.resid_sd : null;
+}
+function deltaTxt(pts) { return '\u0394' + (pts >= 0 ? '+' : '\u2212') + Math.abs(pts).toFixed(1); }
+// The episode's date from its label ("Cover 3 LOCKS Week 4 \u00b7 24 Sep \u00b7 ...") as YYYY-MM-DD.
+function epDayOf(label) {
+  const m = /(\d{1,2})\s+(Aug|Sep|Oct|Nov|Dec|Jan)\b/.exec(String(label || ''));
+  if (!m) return null;
+  const R = window.REF, yr = (R && R.season) || 2026;
+  const mon = { Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12, Jan: 1 }[m[2]];
+  return (mon === 1 ? yr + 1 : yr) + '-' + String(mon).padStart(2, '0') + '-' + String(m[1]).padStart(2, '0');
+}
+function resSt(r) {
+  return { font: '600 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: 'oklch(1 0 0 / 0.75)',
+           color: r === 'W' ? GOOD : r === 'L' ? FLAG : MUT };
+}
+// One line for the detail panel: how the ledger graded this position.
+function gradedTxt(led) {
+  if (!led) return 'No ledger row joined to this position';
+  const bits = [];
+  const res = String(led.result || '').toUpperCase();
+  if (/^[WLP]/.test(res)) {
+    bits.push(res.charAt(0) === 'W' ? 'Won' : res.charAt(0) === 'L' ? 'Lost' : 'Push');
+    if (led.margin_or_total !== '') bits.push((/TOTAL/i.test(led.market_type) ? 'total ' : 'margin ') + led.margin_or_total);
+  } else {
+    bits.push('Not graded' + (led.ungradeable_reason ? ': ' + String(led.ungradeable_reason).toLowerCase().replace(/_/g, ' ') : ''));
+  }
+  const clv = parseFloat(led.clv_points);
+  if (!isNaN(clv)) {
+    bits.push('CLV ' + (clv >= 0 ? '+' : '') + clv.toFixed(1) + ' vs ' + (String(led.closing_basis || '').split('/')[0] || 'close') + ' ' + led.closing_number);
+  } else if (led.clv_blocked_reason) {
+    bits.push('no CLV: ' + String(led.clv_blocked_reason).split(' - ')[0].toLowerCase().replace(/_/g, ' '));
+  }
+  if (String(led.disputed).toLowerCase() === 'true') bits.push('DISPUTED, CLV kept out of every mean');
+  return bits.join(' \u00b7 ') + ' \u00b7 ' + led.pick_id;
 }
 
 // --- reasoning layer (reasoning.csv, keyed by pick_id) ---
@@ -718,14 +862,116 @@ const GRADE = {
   CHARTED: { label: 'charted', tone: 'strong' }, STAT_CITED: { label: 'stat cited', tone: 'strong' },
   BASE_RATE: { label: 'base rate', tone: 'ok' }, SCHEME: { label: 'scheme', tone: 'ok' },
   ROSTER: { label: 'roster', tone: 'ok' }, MOTIVATION: { label: 'motivation', tone: 'weak' },
-  ASSERTION: { label: 'assertion', tone: 'weak' }, NONE: { label: 'no evidence', tone: 'weak' }
+  ASSERTION: { label: 'assertion', tone: 'weak' }, NONE: { label: 'none offered', tone: 'weak' },
+  MARKET: { label: 'market', tone: 'ok' }
 };
+// Evidence grade on the chip (DESIGN_BRIEF 4: the most important field on the site).
+// It is carried by weight, not colour: colour already means side (or CLV) and the bar
+// means tier, and the brief asks that tier and evidence never read as one signal.
+const EV_SHORT = { CHARTED: 'chart', STAT_CITED: 'stat', BASE_RATE: 'base', ROSTER: 'roster', SCHEME: 'scheme', MARKET: 'mkt', MOTIVATION: 'motiv', ASSERTION: 'assert', NONE: 'none' };
+function evTag(grade) {
+  const g = GRADE[grade];
+  if (!g || !EV_SHORT[grade]) return null;
+  const base = { font: '600 9px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '2px 4px', borderRadius: '3px', whiteSpace: 'nowrap' };
+  const look = g.tone === 'strong'
+    ? { background: 'oklch(0.30 0.02 258)', color: 'oklch(0.98 0 0)', border: '1px solid oklch(0.30 0.02 258)' }
+    : g.tone === 'ok'
+      ? { background: 'oklch(1 0 0 / 0.72)', color: 'oklch(0.40 0.015 255)', border: '1px solid oklch(0.62 0.01 250)' }
+      : { background: 'transparent', color: 'oklch(0.48 0.014 255)', border: '1px dashed oklch(0.60 0.01 250)', fontWeight: 500 };
+  return { text: EV_SHORT[grade], st: Object.assign(base, look) };
+}
+// Graded colours (PODCAST_BOARD_SPEC 4): the position's CLV against CLOSE_PROXY,
+// CFBD's last recorded number, not a verified close. Disputed rows, rows with no CLV
+// and positions with no ledger row are "no CLV".
+const CLVC = {
+  beat: { key: 'beat CLOSE_PROXY', bg: 'oklch(0.925 0.065 150)', fg: 'oklch(0.36 0.11 150)', line: 'oklch(0.62 0.11 150)' },
+  same: { key: 'same number', bg: 'oklch(0.93 0.006 250)', fg: 'oklch(0.38 0.015 255)', line: 'oklch(0.70 0.01 250)' },
+  worse: { key: 'worse than CLOSE_PROXY', bg: 'oklch(0.93 0.05 15)', fg: 'oklch(0.44 0.16 15)', line: 'oklch(0.66 0.14 15)' },
+  none: { key: 'no CLV', bg: 'oklch(1 0 0)', fg: 'oklch(0.50 0.014 255)', line: 'oklch(0.72 0.01 250)', dash: true }
+};
+// Points on sides and totals; on a moneyline the ledger carries CLV as the change in
+// implied probability (clv_prob_delta), shown in probability points.
+function clvOf(led) {
+  if (!led || String(led.disputed || '').toLowerCase() === 'true') return { cat: 'none', text: 'no CLV' };
+  const cat = v => v > 0 ? 'beat' : v < 0 ? 'worse' : 'same';
+  const sg = v => v > 0 ? '+' : v < 0 ? '\u2212' : '';
+  const c = parseFloat(led.clv_points);
+  if (!isNaN(c)) return { cat: cat(c), text: 'CLV ' + sg(c) + Math.abs(c).toFixed(1) };
+  const q = parseFloat(led.clv_prob_delta);
+  if (!isNaN(q)) return { cat: cat(q), text: 'CLV ' + sg(q) + Math.abs(100 * q).toFixed(1) + 'pp' };
+  return { cat: 'none', text: 'no CLV' };
+}
+// "in 2h 05m" / "in 45m": time to kickoff, the spec's capture-window urgency
+function untilTxt(mins) {
+  if (mins < 1) return 'now';
+  const h = Math.floor(mins / 60), m = Math.floor(mins % 60);
+  return 'in ' + (h ? h + 'h ' + String(m).padStart(2, '0') + 'm' : m + 'm');
+}
+const LEG_SW = { width: '14px', height: '10px', borderRadius: '2px 4px 4px 2px', background: 'oklch(0.93 0.006 250)', display: 'inline-block' };
+// the half of the legend that does not change with the colour mode: tier, market
+// kind, guests and problem rows, which the legend did not explain before
+const TIER_LEGEND = [
+  { st: { width: '1px', height: '12px', background: 'oklch(0.84 0.008 250)', display: 'inline-block' }, label: '', lst: { display: 'none' } },
+  { st: Object.assign({}, LEG_SW, { borderLeft: '4px solid oklch(0.44 0.015 255)' }), label: '\u2605 tier 3', lst: {} },
+  { st: Object.assign({}, LEG_SW, { borderLeft: '2px solid oklch(0.44 0.015 255)' }), label: 'tier 2', lst: {} },
+  { st: Object.assign({}, LEG_SW, { borderLeft: '1px solid oklch(0.44 0.015 255)' }), label: 'tier 1', lst: {} },
+  { st: Object.assign({}, LEG_SW, { background: 'oklch(1 0 0)', boxShadow: 'inset 0 0 0 1px oklch(0.62 0.01 250)' }), label: 'moneyline', lst: {} },
+  { st: { display: 'none' }, label: 'guest / non-host', lst: { fontStyle: 'italic', borderBottom: '1px dotted currentColor' } },
+  { st: { display: 'none' }, label: '\u2691 no number or data problem', lst: {} }
+];
+const CLV_LEGEND = ['beat', 'same', 'worse', 'none'].map(k => ({
+  st: Object.assign({ width: '10px', height: '10px', borderRadius: '2px', background: CLVC[k].bg, display: 'inline-block', boxSizing: 'border-box' },
+    CLVC[k].dash ? { border: '1px dashed ' + CLVC[k].line } : { boxShadow: 'inset 0 0 0 1px ' + CLVC[k].line }),
+  label: CLVC[k].key, lst: {}
+}));
+// the ticks beside a game in CLV colours, one per position, filtered or not
+const CLV_TICK = {
+  beat: { background: CLVC.beat.fg }, same: { background: 'oklch(0.62 0.01 250)' },
+  worse: { background: CLVC.worse.fg }, none: { background: 'transparent', boxShadow: 'inset 0 0 0 1px ' + CLVC.none.line }
+};
+const SR_ONLY = { position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 };
+// The chip key, behind a toggle so the legend stays short. The one
+// caveat that must always show (the model delta is noise) stays in legend2.
+const KEY_ROWS = [
+  { term: 'MODEL', def: 'the spread from the preseason power ratings' },
+  { term: 'MARKET · OPEN', def: 'the consensus number in the odds snapshot and where it opened (Markets gives the snapshot time); without odds, CFBD’s line, where close~ is CLOSE_PROXY' },
+  { term: '★ and the bar', def: 'confidence tier: a thick bar and ★ for tier 3, thinner for 2 and 1. Stated on air for Cover 3 and Pick Em, mostly inferred for BBOC' },
+  { term: 'Outlined chip', def: 'a moneyline, in By side colours' },
+  { term: 'Italic name', def: 'a guest or non-host pick, outside the host baseline' },
+  { term: 'STAT · BASE · NONE', def: 'the evidence grade of the argument: solid for charted or stat cited; outlined for base rate, roster, scheme or market; dashed for motivation, assertion or none offered' },
+  { term: 'W / L / P', def: 'the graded result at the cited number' },
+  { term: '⚕ n', def: 'n designations posted after the episode the pick came from: OUT, out for the first half, doubtful, or a QB listed short of probable' },
+  { term: '⚑', def: 'no number cited, or a data problem on the row; open the chip for the note' },
+  { term: 'Ticks', def: 'one per position on the game, filtered or not: side colours, or CLV colours in By CLV' },
+  { term: 'By CLV', def: 'chips and ticks coloured by CLV against CLOSE_PROXY (CFBD’s last recorded line, not a verified close), shown in place of Δ: in points, or in probability points (pp) on a moneyline. The board switches to it once every scheduled game with a position has a result; a toggle holds until the week changes' },
+  { term: 'CARD · OUT · UNIT', def: 'under a game: this week’s prop card plays (book, price, stake as a share of bankroll), injury designations short of probable, and position groups the injury pass rates a moderate or major hit' },
+  { term: 'Weather', def: 'shown only past a threshold at the kickoff hour: wind 15 mph or more, gusts 25 or more, rain 60% or more, 95°F or hotter, 32°F or colder; dome marks an indoor game' },
+  { term: 'in 1h 05m', def: 'time to kickoff, for games in the next 24 hours. Amber marks the next close to capture: the next kickoff among the games shown that carry a position, also named in the day heading' }
+];
+const DAYNOTE_ST = { font: '400 11px/1.4 ' + MONO, color: MUT, marginLeft: '10px' };
+const NEXTCLOSE_WRAP = {};
+const NEXTCLOSE_ST = Object.assign({}, DAYNOTE_ST, { font: '500 10.5px/1.4 ' + MONO, color: 'oklch(0.42 0.13 62)', background: 'oklch(0.955 0.05 78)', padding: '1px 7px', borderRadius: '4px' });
 // board pick text -> the market signature used in the ledger
+// The grid writes quarters as 1Q, the ledger as Q1 (period_norm). Both sides are
+// read into Q1..Q4 so a quarter pick can match its own ledger row.
+function periodOf(t) {
+  const h = /\b(1H|2H)\b/i.exec(t);
+  if (h) return h[1].toUpperCase();
+  const q = /\b([1-4])Q\b|\bQ([1-4])\b/i.exec(t);
+  return q ? 'Q' + (q[1] || q[2]) : 'FG';
+}
+function normPeriod(v) {
+  const s = String(v || '').toUpperCase().trim();
+  if (!s || s === 'FG') return 'FG';
+  const q = /^([1-4])Q$|^Q([1-4])$/.exec(s);
+  return q ? 'Q' + (q[1] || q[2]) : s;
+}
 function pickSig(txt) {
   const t = String(txt || '');
-  const per = /\b1H\b/i.test(t) ? '1H' : /\b2H\b/i.test(t) ? '2H' : /\b4Q\b/i.test(t) ? '4Q' : 'FG';
+  const per = periodOf(t);
   let mt = 'SPREAD';
-  if (/\bML\b|plus money|moneyline/i.test(t)) mt = 'ML';
+  if (market(t) === 'prop') mt = 'PROP';
+  else if (/\bML\b|plus money|moneyline/i.test(t)) mt = 'ML';
   else if (/\bTT\b/i.test(t)) mt = 'TEAM_TOTAL';
   else if (/^[uo]\d|\bunder\b|\bover\b|\b[uo]\d/i.test(t)) mt = 'TOTAL';
   return mt + '|' + per;
@@ -745,24 +991,32 @@ function reasonIndex(reasonRows, ledgerRows) {
   ledgerRows.forEach(r => {
     const host = LHOST[r.host];
     if (!host) return;
-    const sig = ((r.market_type || 'SPREAD').toUpperCase()) + '|' + ((r.ext_period || 'FG').toUpperCase() || 'FG');
+    const sig = ((r.market_type || 'SPREAD').toUpperCase()) + '|' + normPeriod(r.period_norm || r.ext_period);
     const k = host + '|' + gameKey(r.matchup);
-    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null });
+    (_rmap[k] = _rmap[k] || []).push({ sig: sig, row: byId[r.pick_id] || null, led: r });
   });
   return _rmap;
 }
-function reasonFor(p, matchup, reasonRows, ledgerRows) {
-  if (!reasonRows || !reasonRows.length) return null;
-  const ix = reasonIndex(reasonRows, ledgerRows);
+// The ledger entry a grid position belongs to: {sig, row (reasoning), led (ledger)}.
+// The grid carries no pick_id, so this joins on picker + game and, where a picker has
+// more than one position on a game, on the market signature.
+function pickEntry(p, matchup, reasonRows, ledgerRows) {
+  if (!ledgerRows || !ledgerRows.length) return null;
+  const ix = reasonIndex(reasonRows || [], ledgerRows);
   const list = ix[p[0] + '|' + gameKey(matchup)];
   if (!list || !list.length) return null;
-  if (list.length === 1) return list[0].row;
+  if (list.length === 1) return list[0];
   const sig = pickSig(p[1]);
   const exact = list.filter(x => x.sig === sig);
-  if (exact.length === 1) return exact[0].row;
+  if (exact.length === 1) return exact[0];
   const mt = sig.split('|')[0];
   const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
-  return byMt.length === 1 ? byMt[0].row : null;
+  return byMt.length === 1 ? byMt[0] : null;
+}
+function reasonFor(p, matchup, reasonRows, ledgerRows) {
+  if (!reasonRows || !reasonRows.length) return null;
+  const e = pickEntry(p, matchup, reasonRows, ledgerRows);
+  return e ? e.row : null;
 }
 function reasonBlock(r) {
   if (!r) return null;
@@ -779,7 +1033,7 @@ function reasonBlock(r) {
     gradeSt: { font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '3px 6px', borderRadius: '3px', background: bg, color: tone },
     instrument: r.instrument_rationale || null,
     counter: r.counter_case || null,
-    counterTag: (r.counter_case_type || '').toUpperCase() === 'OBSERVED' ? 'said on air' : (r.counter_case_type ? 'not raised — constructed' : null),
+    counterTag: (r.counter_case_type || '').toUpperCase() === 'OBSERVED' ? 'said on air' : (r.counter_case_type ? 'not raised: constructed' : null),
     counterTagSt: {
       font: '500 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '3px 6px', borderRadius: '3px',
       background: (r.counter_case_type || '').toUpperCase() === 'OBSERVED' ? 'oklch(0.93 0.006 250)' : 'oklch(0.955 0.05 78)',
@@ -824,28 +1078,30 @@ function condChips(row, wx) {
       });
       return out;
     }
+    // PODCAST_BOARD_SPEC 2.3: silent unless a threshold trips, so a badge means
+    // something when it appears. Sustained wind 15+, gusts 25+, rain 60%+ at the
+    // kickoff hour, 95F or hotter, 32F or colder. Anything under renders as nothing.
     const t = parseFloat(row.temp_f);
-    if (!isNaN(t)) out.push(mk(Math.round(t) + '\u00b0F', t >= 95 ? 'hot' : t <= 35 ? 'cold' : 'plain'));
+    if (!isNaN(t) && (t >= 95 || t <= 32)) out.push(mk(Math.round(t) + '\u00b0F', t >= 95 ? 'hot' : 'cold'));
     const w = parseFloat(row.wind_mph), gu = parseFloat(row.wind_gust_mph);
     const dir = row.wind_dir ? ' ' + row.wind_dir : '';
-    if (!isNaN(w)) {
-      out.push(mk('wind ' + Math.round(w) + (!isNaN(gu) ? ' g' + Math.round(gu) : '') + ' mph' + dir,
-        w > 15 ? 'hot' : (!isNaN(gu) && gu >= 25) ? 'warn' : 'plain'));
-    } else if (!isNaN(gu)) {
-      out.push(mk('gusts ' + Math.round(gu) + ' mph' + dir, gu >= 25 ? 'warn' : 'plain'));
+    if (!isNaN(w) && w >= 15) {
+      out.push(mk('wind ' + Math.round(w) + (!isNaN(gu) ? ' g' + Math.round(gu) : '') + ' mph' + dir, 'hot'));
+    } else if (!isNaN(gu) && gu >= 25) {
+      out.push(mk('gusts ' + Math.round(gu) + ' mph' + dir, 'warn'));
     }
     const p = parseFloat(row.precip_pct), ty = (row.precip_type || '').toLowerCase();
-    if ((!isNaN(p) && p >= 15) || ty) {
+    if (!isNaN(p) && p >= 60) {
       const snow = /snow/.test(ty), storm = /thunder|storm/.test(ty), mix = /mix|sleet|ice|freez/.test(ty);
       const label = snow ? 'snow' : storm ? 'thunder' : mix ? 'wintry mix' : 'rain';
       const amt = inches(row.precip_in);
-      const pct = (isNaN(p) ? '' : ' ' + Math.round(p) + '%') + (amt !== null && amt >= 0.01 ? ' ' + amt.toFixed(2) + '"' : '');
-      const loud = (!isNaN(p) && p >= 40) || snow || storm || mix;
-      const tone = !loud ? 'plain' : storm ? 'storm' : (snow || mix) ? 'cold' : 'warn';
-      out.push(mk(label + pct, tone));
+      out.push(mk(label + ' ' + Math.round(p) + '%' + (amt !== null && amt >= 0.01 ? ' ' + amt.toFixed(2) + '"' : ''),
+        storm ? 'storm' : (snow || mix) ? 'cold' : 'warn'));
     }
   }
-  if (!out.length && wx) out.push(mk(wx[0], 'plain'));
+  // The WX notes ("conditions pulled \u00b7 benign") are the badge-on-every-game the
+  // spec rules out; an indoor note still gets the dome marker.
+  if (!out.length && wx && /indoor/i.test(wx[0] || '')) return condChips({ roof: 'dome' }, null);
   return out;
 }
 
@@ -861,9 +1117,11 @@ function slotWindow(t) {
 }
 
 function market(t) {
-  if (/\bML\b|plus money/.test(t)) return 'ml';
-  if (/1H|4Q|TT/.test(t)) return 'deriv';
-  if (/^[uo]\d|under|over/i.test(t)) return 'total';
+  // Word boundaries matter: "PITT -16.5" contains TT and was filed as a team total.
+  if (/\b(pass|rush|rec)(ing)?\s*(yds|yards|att)\b|\breceptions\b|\banytime\b/i.test(t)) return 'prop';
+  if (/\b(1H|2H|[1-4]Q|Q[1-4]|TT)\b/i.test(t)) return 'deriv';
+  if (/\bML\b|plus money|moneyline/i.test(t)) return 'ml';
+  if (/^[uo]\d|\b[uo]\d|\bunder\b|\bover\b/i.test(t)) return 'total';
   return 'side';
 }
 function num(s) { const m = /Cited\s*([+\-]?[\d.]+)/i.exec(s || ''); return m ? m[1] : null; }
@@ -884,7 +1142,24 @@ function dSt(tone, sz) {
   return { font: '500 ' + sz + 'px/1.35 ' + MONO, color: c, margin: 0 };
 }
 function opp(a, b) { return (a === 0 && b === 1) || (a === 1 && b === 0) || (a === 2 && b === 3) || (a === 3 && b === 2); }
-function mrank(m) { return m === 'ml' ? 3 : m === 'deriv' ? 2 : m === 'total' ? 1 : 0; }
+// The bet a position is on, for pairing: opposite teams on the full-game side (spread
+// or moneyline), over against under on one total, or the same period's derivative (a
+// first-half side, one team's total). A game-total over and a team-total under, or a
+// first-half side and a full-game side, can both win, so they do not oppose.
+function oppKey(t) {
+  const m = market(t), per = periodOf(t);
+  if (m === 'prop') return null;
+  if (m === 'side' || m === 'ml') return 'side|' + per;
+  if (m === 'total') return 'total|' + per;
+  const tt = /^\s*(\S+)\s+TT\b/i.exec(t || '');
+  return 'deriv|' + per + '|' + (tt ? 'TT:' + tt[1].toUpperCase() : '');
+}
+function opposes(a, b) {
+  if (!opp(a[2], b[2])) return false;
+  const ka = oppKey(a[1]);
+  return ka !== null && ka === oppKey(b[1]);
+}
+function mrank(m) { return m === 'ml' ? 3 : (m === 'deriv' || m === 'prop') ? 2 : m === 'total' ? 1 : 0; }
 
 // ---- market layer -------------------------------------------------------
 // One number per game from LINES_CSV, book-preferred and snapshot-preferred.
@@ -930,6 +1205,22 @@ function mktText(lines, sg) {
 // Finals from results.csv, keyed on cfbd_game_id. Before this existed the board had
 // no score source at all: anything past kickoff + 3h30 sat on "final pending" for
 // good, because REF.GAMES carries the schedule and no points.
+// Real kickoffs for games the schedule still calls TBD. ref-data.js is the 5 Sep
+// generation: 41 of Week 4's 71 games carry its 04:00Z placeholder, and a TBD game
+// could never go live or final. The CFBD line pulls carry the announced kickoff;
+// the newest capture wins.
+function buildKickoffs(csv) {
+  const best = {};
+  csvParse(csv || '').forEach(r => {
+    const id = String(r.cfbd_game_id || '').trim(), ko = String(r.kickoff_utc || '').trim();
+    if (!id || !ko) return;
+    const at = r.last_captured_at || '';
+    if (!best[id] || at > best[id].at) best[id] = { ko: ko, at: at };
+  });
+  const out = {};
+  Object.keys(best).forEach(id => { out[id] = best[id].ko; });
+  return out;
+}
 function buildResults(csv) {
   const idx = {};
   csvParse(csv || '').forEach(r => {
@@ -1037,7 +1328,7 @@ function bookChips(list) {
 }
 
 class Component extends DCLogic {
-  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), tier: '0', market: 'all', flag: 'all', show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0,
+  state = { d: null, pickers: [], pkOpen: false, half: 'both', now: Date.now(), tier: '0', market: 'all', flag: 'all', ev: 'all', colorBy: 'auto', keyOpen: false, show: 'all', date: 'all', win: 'all', lens: 'all', open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0,
     week: null, gameFilter: 'all', oddsOpen: null, oddsTab: 'GAME', allBooks: false, propSort: 'odds' };
 
   componentDidMount() {
@@ -1050,7 +1341,8 @@ class Component extends DCLogic {
       csvParse(B.COND_CSV || '').forEach(r => { if (r.matchup) cond[r.matchup] = r; });
       const lines = buildLines(B.LINES_CSV || '');
       const results = buildResults(B.RESULTS_CSV || '');
-      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results });
+      const kos = buildKickoffs(B.LINES_CSV || '');
+      this.setState({ d: B, rec: buildRecords(rows), ledgerN: rows.length, cond: cond, ledgerRows: rows, reasonRows: reasonRows, lines: lines, results: results, kos: kos });
       this.fetchForecast(cond);
     };
     load(0);
@@ -1084,20 +1376,27 @@ class Component extends DCLogic {
     const g = OV.game(gid);
     if (!g) return null;
 
+    // The player props and the model card load the first time any panel opens. Until
+    // they land the game markets show and a placeholder tab says what is coming.
+    if (!this._panelData) this._panelData = () => this.setState(st => ({ panelData: (st.panelData || 0) + 1 }));
+    const lz = OV.ensurePanel ? OV.ensurePanel(this._panelData) : { loading: false, propsFailed: false };
     const counts = OV.familyCounts(gid);
     const env = OV.env(gid, teams.home, teams.away);
     const marketRows = OV.gameMarkets(gid, ha);
     const defs = [{ id: 'GAME', label: 'Game', n: marketRows.length }];
     OV.families().forEach(f => { if (counts[f.id]) defs.push({ id: f.id, label: f.label, n: counts[f.id] }); });
     if (env) defs.push({ id: 'MODEL', label: 'Model', n: 0 });
+    if (lz.loading) defs.push({ id: 'WAIT', label: 'Loading props\u2026', n: 0, wait: true });
+    else if (lz.propsFailed) defs.push({ id: 'WAIT', label: 'Props unavailable', n: 0, wait: true });
     // the tab is board-wide state, so a game without it falls back rather than blanking
     let tab = s.oddsTab || 'GAME';
     if (!defs.some(d => d.id === tab)) tab = defs[0].id;
 
     const tabs = defs.map(d => ({
-      label: d.label, count: d.n ? String(d.n) : null, st: tabSt(tab === d.id),
+      label: d.label, count: d.n ? String(d.n) : null,
+      st: d.wait ? Object.assign({}, tabSt(false), { opacity: 0.55, cursor: 'default' }) : tabSt(tab === d.id),
       countSt: { font: '400 9.5px/1 ' + MONO, opacity: 0.72 },
-      click: () => this.setState({ oddsTab: d.id })
+      click: d.wait ? () => {} : () => this.setState({ oddsTab: d.id })
     }));
 
     const panel = {
@@ -1132,9 +1431,9 @@ class Component extends DCLogic {
       const meta = OV.meta();
       const unck = OV.unchecked(gid);
       panel.note = 'Consensus of ' + (g.nb || 0) + ' books, recomputed here from the '
-        + 'per-book quotes \u2014 SGO\u2019s own consensus put 31% of its prices outside the '
-        + 'range of every book it claimed to summarise. Snapshot '
-        + (meta ? meta.snapshot + ' ' + String(meta.asOf).replace('T', ' ').replace('Z', ' UTC') : '')
+        + 'per-book quotes: SGO\u2019s own consensus put 31% of its prices outside the '
+        + 'range of every book it claimed to summarise. Prices as of '
+        + (OV.asOfText ? OV.asOfText() : (meta ? meta.snapshot + ' ' + String(meta.asOf) : ''))
         + '. Shaded numbers are the opening line, shown only where it moved. Prices carry vig.'
         + (unck ? ' ' + unck + ' price' + (unck === 1 ? '' : 's') + ' on this game had no '
                 + 'per-book row to check against and keep SGO\u2019s number.' : '');
@@ -1203,19 +1502,21 @@ class Component extends DCLogic {
 
     if (!s.allBooks) {
       const pg = OV.propGrid(gid, tab, { sort: srt.mode });
-      panel.grid = this.dressGrid(pg, 'Player');
+      panel.grid = this.dressGrid(pg, 'Player', gid, tab);
       if (!pg) {
         panel.empty = 'No ' + label0.toLowerCase() + ' markets on this event.';
         return panel;
       }
       const bits = [];
-      bits.push(srt.mode === 'odds' ? 'Shortest price first'
-              : srt.mode === 'edge' ? 'Biggest model edge first' : 'By player');
+      bits.push(srt.mode === 'odds' ? (OV.sortNote ? OV.sortNote() : 'Shortest price first')
+              : srt.mode === 'edge' ? 'Biggest model delta first' : 'By player');
       bits.push(pg.modelled
         ? pg.modelled + ' of ' + pg.total + ' markets carry a projection'
         : 'No projection reaches this market');
-      if (pg.soft) bits.push(pg.soft + ' greyed \u2014 the model calls that market not bettable');
-      if (pg.approx) bits.push(pg.approx + ' marked \u007e \u2014 read off a tail or a one-sided price');
+      if (pg.soft) bits.push(pg.soft + ' greyed: the model calls that market not bettable');
+      if (pg.hidden) bits.push(pg.hidden + ' second line' + (pg.hidden === 1 ? '' : 's') + ' hidden: a first-half market the feed files under the full-game stat');
+      if (pg.approx) bits.push(pg.approx + ' marked \u007e: read off a tail or a one-sided price');
+      if (pg.risk && OV.periodNote) bits.push(OV.periodNote(pg.risk));
       panel.note = bits.join(' \u00b7 ') + '. ' +
         (pg.modelled ? OV.eligibilityNote()
          : 'The prop model covers FBS-vs-FBS games that had a market spread when it was fitted.');
@@ -1223,9 +1524,11 @@ class Component extends DCLogic {
     }
 
     const rows = OV.props(gid, tab, { sort: srt.mode });
-    const yn = rows.length && rows[0].betType === 'yn';
-    const head = headRow(['Player', 'Market', 'Line', yn ? 'Yes' : 'Over', yn ? 'No' : 'Under',
-                          'Opened', 'Model', 'Edge'], PROP_GRID);
+    // a touchdown tab mixes yes/no and over/under rows, so the header names both
+    const kinds = rows.reduce((o, r) => { o[r.betType] = 1; return o; }, {});
+    const both = !!(kinds.yn && kinds.ou), yn = !!kinds.yn && !kinds.ou;
+    const head = headRow(['Player', 'Market', 'Line', both ? 'Over / yes' : yn ? 'Yes' : 'Over',
+                          both ? 'Under / no' : yn ? 'No' : 'Under', 'Opened', 'Model', 'Edge'], PROP_GRID);
     panel.head = head.cells; panel.headSt = head.st;
     panel.rows = rows.map((r, i) => {
       const openTxt = [r.lineMoved ? r.openLine : '', r.openOver].filter(Boolean).join('  ');
@@ -1251,10 +1554,11 @@ class Component extends DCLogic {
       };
     });
     if (!panel.rows.length) panel.empty = 'No ' + label0.toLowerCase() + ' markets on this event.';
-    const modelled = rows.filter(r => r.model).length;
-    panel.note = modelled
+    const modelled = rows.filter(r => r.model).length, risky = rows.filter(r => r.periodRisk).length;
+    panel.note = (modelled
       ? modelled + ' of ' + rows.length + ' markets carry a projection. ' + OV.eligibilityNote()
-      : 'No projection reaches this market. The prop model covers FBS-vs-FBS games that had a market spread when it was fitted; kickers and most FCS players sit outside it.';
+      : 'No projection reaches this market. The prop model covers FBS-vs-FBS games that had a market spread when it was fitted; kickers and most FCS players sit outside it.')
+      + (risky && OV.periodNote ? ' ' + OV.periodNote(risky) + '.' : '');
     return panel;
   }
 
@@ -1292,6 +1596,77 @@ class Component extends DCLogic {
     };
   }
 
+  // The schedule's game, with the kickoff taken from the line pulls when the
+  // schedule still says TBD (see buildKickoffs).
+  fixGame(g) {
+    const fx = g && g.tbd && this.state.kos ? this.state.kos[String(g.id)] : null;
+    if (!fx || Date.parse(fx) === Date.parse(g.ko)) return g;
+    return Object.assign({}, g, { ko: fx, tbd: 0, koFromLines: 1 });
+  }
+
+  /*
+   * The week panel: the prop card and the injury tracker for the slate on screen,
+   * two buttons that each open a list. Null for any week intel-data.js does not
+   * cover, so Week 3 never shows Week 4's card.
+   */
+  intelPanel(week, mobile) {
+    if (!window.IV || !IV.forWeek(week)) return null;
+    const v = IV.weekPanel(week);
+    if (!v) return null;
+    const open = this.state.intelOpen;
+    const SANSF = "'IBM Plex Sans',system-ui,sans-serif";
+    const pill = (id, label, sub) => ({
+      label: label, sub: sub, expanded: open === id ? 'true' : 'false',
+      click: () => this.setState(st => ({ intelOpen: st.intelOpen === id ? null : id })),
+      st: { cursor: 'pointer', display: 'inline-flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '3px 8px',
+            textAlign: 'left', font: '500 12.5px/1.3 ' + SANSF, padding: mobile ? '10px 12px' : '6px 10px',
+            minHeight: mobile ? '44px' : '0', width: mobile ? '100%' : 'auto', boxSizing: 'border-box',
+            borderRadius: '6px', border: '1px solid ' + (open === id ? INK : 'oklch(0.83 0.008 250)'),
+            background: open === id ? INK : 'oklch(1 0 0)', color: open === id ? 'oklch(0.99 0 0)' : INK },
+      subSt: { font: '400 10.5px/1.3 ' + MONO, color: open === id ? 'oklch(0.86 0.01 250)' : MUT }
+    });
+    const pills = [];
+    if (v.card) pills.push(pill('card', 'Prop card', v.card.live + ' live of ' + v.card.total + ' \u00b7 ' + v.card.snapshot));
+    pills.push(pill('inj', 'Injury tracker', v.injMeta.listed + ' listed \u00b7 ' + v.injMeta.players + ' players tracked in ' +
+      v.injMeta.games + ' games' + (v.injMeta.updatedTxt ? ' \u00b7 merged ' + v.injMeta.updatedTxt : '')));
+    const lineSt = (sz, c, w) => ({ font: (w || 400) + ' ' + sz + 'px/1.45 ' + MONO, color: c || MUT, margin: 0, overflowWrap: 'anywhere' });
+    const rowSt = { padding: mobile ? '10px 12px' : '8px 12px', borderTop: '1px solid oklch(0.93 0.006 250)' };
+    const card = open === 'card' && v.card ? v.card.plays.map(p => ({
+      tag: p.live ? (p.status || 'card') : p.status, tagSt: IV.tagSt(p.live ? 'card' : 'p'), st: p.st,
+      head: p.text + (p.team ? ' \u00b7 ' + p.team : ''), layer: p.layer ? p.layer.toLowerCase() : '',
+      terms: [p.book, p.take ? 'take at ' + p.take : '', p.ev ? 'EV ' + p.ev : '', p.stake !== '' ? 'stake ' + String(p.stake).replace(/^(\d+(?:\.\d+)?)(?!\d|%)/, '$1%') : '', p.kick]
+        .filter(Boolean).join(' \u00b7 '),
+      why: [p.reason, p.move ? 'moved: ' + p.move : '', p.risk ? 'risk: ' + p.risk : ''].filter(Boolean).join(' \u00b7 '),
+      inj: p.inj || null,
+      rowSt: rowSt, termsSt: lineSt(11, SEC, 500), whySt: lineSt(10.5, MUT), injSt: lineSt(10.5, 'oklch(0.42 0.18 25)', 500),
+      layerSt: { font: '400 10px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.06em', color: MUT }
+    })) : null;
+    const inj = open === 'inj' ? v.injRows.map(r => ({
+      tag: r.tag, tagSt: r.tagSt, st: r.st,
+      head: [r.team, r.pos, r.player].filter(Boolean).join(' ') + (r.injury ? ' (' + r.injury + ')' : ''),
+      meta: [r.game, r.desig, 'tier ' + r.tier, r.src, r.when, r.proj].filter(Boolean).join(' \u00b7 '),
+      note: r.note, rowSt: rowSt, metaSt: lineSt(10.5, MUT), noteSt: lineSt(10.5, SEC)
+    })) : null;
+    const reads = open === 'card' && v.reads.length ? v.reads.map(r => ({
+      text: r.id + ' \u00b7 ' + r.text + ' \u00b7 counts as ' + r.counts + ' \u00b7 conviction ' + r.conv + ' \u00b7 ' + r.status,
+      sub: r.cond, st: lineSt(10.5, SEC, 500), subSt: lineSt(10.5, MUT)
+    })) : null;
+    const note = open === 'card'
+      ? 'Own card, as ' + v.card.file + ' wrote it: best book and price, the price to take it at or better, EV base / conservative, stake as % of bankroll. The two-condition test for each play is in WK04_PROP_FINETUNE.md. Settled and closed plays stay listed and drop off the game rows.'
+      : open === 'inj'
+      ? 'Tracked players only: every priced player in the card\u2019s games (tier A) and the starting QB of every other propped game (tier B), from the conference availability reports (SEC, Big Ten, ACC and Big 12 conference games; MAC on game day) and news for teams with no report. A game with no chip means nothing the tracker follows was listed, not that the team is healthy. OL and defense appear only as unit clusters on tier A games. Probable players are listed here and left off the game rows.'
+      : null;
+    return {
+      pills: pills, card: card, inj: inj, reads: reads, note: note,
+      wrapSt: { margin: mobile ? '10px 16px 4px' : '0 0 16px', border: '1px solid oklch(0.87 0.01 250)', borderRadius: '8px', background: 'oklch(1 0 0)', overflow: 'hidden' },
+      barSt: { display: 'flex', flexWrap: 'wrap', gap: '6px 8px', alignItems: 'center', padding: mobile ? '10px' : '8px 10px', background: 'oklch(0.972 0.006 250)' },
+      titleSt: { font: '600 12px/1.2 ' + SANSF, color: INK, marginRight: '4px', width: mobile ? '100%' : 'auto' },
+      noteSt: { font: '400 10.5px/1.5 ' + MONO, color: MUT, margin: 0, padding: '9px 12px', borderTop: '1px solid oklch(0.93 0.006 250)', background: 'oklch(0.978 0.004 250)' },
+      readsHeadSt: { font: '500 9.5px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.07em', color: MUT, margin: 0, padding: '10px 12px 4px', borderTop: '1px solid oklch(0.93 0.006 250)' },
+      readSt: { padding: '4px 12px 6px' }
+    };
+  }
+
   currentWeek() {
     const s = this.state;
     if (s.week) return Number(s.week);
@@ -1316,7 +1691,10 @@ class Component extends DCLogic {
    * what it actually has - schedule, market and model - and what it does not.
    */
   headSub(week) {
-    return '';
+    // the ledger's own caveats: CLOSE_PROXY is not a verified close, the non-host and
+    // disputed counts. Silent since 11 Sep; the page said nothing about either.
+    const M = window.BOARD && window.BOARD.META;
+    return (M && M.subtitle) || '';
   }
 
   weekOptions() {
@@ -1350,7 +1728,7 @@ class Component extends DCLogic {
    */
   weekSlate(week) {
     const d = this.state.d, R = window.REF;
-    const games = ((R && R.GAMES) || []).filter(g => g.wk === week);
+    const games = ((R && R.GAMES) || []).filter(g => g.wk === week).map(g => this.fixGame(g));
     const inWeek = {};
     games.forEach(g => { inWeek[RK(g.a) + '@' + RK(g.h)] = g; });
 
@@ -1432,7 +1810,7 @@ class Component extends DCLogic {
    * game tab and the prop tabs - rows of a named thing, columns of markets - so
    * one dresser and one template block serve both.
    */
-  dressGrid(grid, nameHead) {
+  dressGrid(grid, nameHead, gid, fam) {
     if (!grid) return null;
     const isProp = grid.kind === 'prop';
     return {
@@ -1458,6 +1836,9 @@ class Component extends DCLogic {
                       display: 'inline-flex', alignItems: 'baseline', gap: '5px',
                       minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
             subSt: { font: '400 9.5px/1.3 ' + MONO, color: MUT },
+            nameColSt: { display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 },
+            badges: (fam && window.IV) ? IV.propBadges(gid, String(r.label).split('\u2009#')[0], fam) : null,
+            badgeRowSt: { display: 'flex', flexWrap: 'wrap', gap: '3px' },
             cells: r.cells.map(c => this.dressCell(c))
           }))
         };
@@ -1527,7 +1908,9 @@ class Component extends DCLogic {
     if (c.delta) {
       if (c.delta.lineDiff !== undefined) {
         delta = OV.sgn(c.delta.lineDiff) + ' line';
-        dTone = c.delta.lineDiff > 0 ? 'good' : 'bad';
+        // one cell holds both sides, and a number that helps one side hurts the other,
+        // so a line difference carries no good/bad tone (58 cells were mis-toned)
+        dTone = 'flat';
       } else {
         const fmt = v => v === null ? '\u00b7' : (v >= 0 ? '+' : '\u2212') + Math.abs(100 * v).toFixed(1);
         delta = fmt(c.delta.a) + ' / ' + fmt(c.delta.b);
@@ -1607,7 +1990,7 @@ class Component extends DCLogic {
     };
   }
 
-  keep(p) {
+  keep(p, all, matchup) {
     const s = this.state, f = p[9] || '', mk = market(p[1]), d = s.d, src = p[8] || '';
     if (s.show === 'c3' && src.indexOf('Cover 3') !== 0) return false;
     if (s.show === 'bboc' && src.indexOf('BBOC') !== 0) return false;
@@ -1617,13 +2000,21 @@ class Component extends DCLogic {
     if (s.show === 'ep_sg' && d && src !== d.SG) return false;
     if (s.pickers.length && s.pickers.indexOf(p[0]) < 0) return false;
     if (s.tier !== '0' && s.tier.indexOf(String(p[3])) < 0) return false;
-    if (s.market === 'core') { if (mk === 'ml' || mk === 'deriv') return false; }
-    else if (s.market !== 'all' && s.market !== mk) return false;
+    if (s.market === 'core') { if (mk === 'ml' || mk === 'deriv' || mk === 'prop') return false; }
+    else if (s.market !== 'all' && s.market !== mk && !(s.market === 'deriv' && mk === 'prop')) return false;
     if (s.flag === 'flagged' && !isProblem(p)) return false;
     if (s.flag === 'ungrade' && !/ungradeable|NO NUMBER|NO PRICE/i.test(f)) return false;
     if (s.flag === 'stale' && !/stale|days stale|line shopped/i.test(f)) return false;
     if (s.flag === 'nonhost' && !NONHOST[p[0]]) return false;
-    if (s.flag === 'opposed' && !/head-to-head|opposed|opposes|other side|other team/i.test(f)) return false;
+    // Opposed: another position on this game takes the other side of the same bet
+    // (opposes()), the pairs the \u21c4 marker shows. The old test searched the flag
+    // text, which named 52 positions, 11 of them with nobody opposite.
+    if (s.flag === 'opposed' && !(all || []).some(x => x !== p && opposes(p, x))) return false;
+    if (s.ev && s.ev !== 'all') {
+      const e = pickEntry(p, matchup, s.reasonRows || [], s.ledgerRows || []);
+      const gr = String((e && ((e.row && e.row.evidence_grade) || (e.led && e.led.evidence_grade))) || '').toUpperCase();
+      if (s.ev === 'strong' ? !(gr === 'CHARTED' || gr === 'STAT_CITED') : gr !== s.ev) return false;
+    }
     return true;
   }
 
@@ -1635,7 +2026,7 @@ class Component extends DCLogic {
       + '&longitude=' + rows.map(r => r.lon).join(',')
       + '&hourly=temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code'
       + '&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch'
-      + '&timezone=America%2FNew_York&past_days=5&forecast_days=5';
+      + '&timezone=auto&past_days=5&forecast_days=5';  // kickoff_iso is venue-local; ask for venue-local hours
     fetch(url).then(r => r.json()).then(j => {
       const arr = Array.isArray(j) ? j : [j], wx = {};
       rows.forEach((r, i) => {
@@ -1646,17 +2037,20 @@ class Component extends DCLogic {
         // a game runs roughly 3.5 hours: first half ~kickoff to +1.5h, second half ~+1.5 to +3.5h
         const span = (a, b) => {
           const t = [], pr = [], wd = [], gu = [], po = [], cd = [];
+          // null hours are skipped: averaged in, they dragged the mean toward 0\u00b0F
           for (let n = a; n <= b; n++) {
-            if (h.temperature_2m[n] === undefined) continue;
+            if (!fin(h.temperature_2m[n])) continue;
             t.push(h.temperature_2m[n]); pr.push(h.precipitation[n] || 0);
-            wd.push(h.wind_speed_10m[n]); gu.push(h.wind_gusts_10m[n]);
+            if (fin(h.wind_speed_10m[n])) wd.push(h.wind_speed_10m[n]);
+            if (fin(h.wind_gusts_10m[n])) gu.push(h.wind_gusts_10m[n]);
             po.push(h.precipitation_probability[n] || 0); cd.push(h.weather_code[n]);
           }
           if (!t.length) return null;
           return {
             temp_f: t.reduce((x, y) => x + y, 0) / t.length,
             precip_in: pr.reduce((x, y) => x + y, 0),
-            wind_mph: Math.max.apply(null, wd), wind_gust_mph: Math.max.apply(null, gu),
+            wind_mph: wd.length ? Math.max.apply(null, wd) : null,
+            wind_gust_mph: gu.length ? Math.max.apply(null, gu) : null,
             precip_pct: Math.max.apply(null, po),
             wind_dir: degToCompass(h.wind_direction_10m[a]),
             precip_type: codeType(cd.slice().sort((x, y) => codeRank(y) - codeRank(x))[0])
@@ -1664,7 +2058,8 @@ class Component extends DCLogic {
         };
         const h1 = span(k, k + 1), h2 = span(k + 2, k + 3);
         wx[r.matchup] = {
-          temp_f: h.temperature_2m[k], precip_pct: Math.max(h1 ? h1.precip_pct : 0, h2 ? h2.precip_pct : 0),
+          // spec 2.3: rain counts at the kickoff hour; the halves keep their own peak
+          temp_f: h.temperature_2m[k], precip_pct: h.precipitation_probability[k],
           precip_in: (h1 ? h1.precip_in : 0) + (h2 ? h2.precip_in : 0),
           wind_mph: h.wind_speed_10m[k], wind_gust_mph: h.wind_gusts_10m[k],
           wind_dir: degToCompass(h.wind_direction_10m[k]),
@@ -1705,12 +2100,43 @@ class Component extends DCLogic {
       }
     }));
     const pk = this.pickerBits();
-    if (!d) return { hdrTitle: 'Pick board', hdrSub: '', legend: legend, days: [], empty: false, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear, week: '', weekOpts: [], gameFilter: s.gameFilter, onWeek: () => {}, onGameFilter: () => {} };
+    if (!d) return { hdrTitle: 'Pick board', hdrSub: '', legend2: '', intel: null, legend: legend, days: [], empty: false, countLabel: 'loading', tier: s.tier, market: s.market, flag: s.flag, show: s.show, date: s.date, win: s.win, dateOpts: [], lensTabs: lensTabs, halfTabs: halfTabs, pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false', pickerLabel: pk.label, pickerOpts: pk.opts, onPkOpen: pk.toggle, onPickerAll: pk.clear, week: '', weekOpts: [], gameFilter: s.gameFilter, onWeek: () => {}, onGameFilter: () => {}, ev: 'all', onEv: () => {}, colorTabs: [], keyBtn: { label: '', st: { display: 'none' } }, keyRows: null };
 
     let count = 0, gamesShown = 0;
     const week = this.currentWeek();
     const days = [], postDays = [];
     const weekDays = this.weekDays(week);
+    // Graded state (PODCAST_BOARD_SPEC 4): once every game carrying a position this
+    // week has a result, chips colour by CLV instead of side. The toggle overrides
+    // until the week changes.
+    // A row with no scheduled game (an orphan, such as an FCS game off the schedule)
+    // can never get a result, so it does not hold the week on side colours.
+    let pickedGames = 0, finalGames = 0;
+    weekDays.forEach(day => day.times.forEach(games => games.forEach(it => {
+      if (!it.sg || !(it.picks && it.picks.length)) return;
+      pickedGames++;
+      if (s.results && s.results[String(it.sg.id)]) finalGames++;
+    })));
+    const colorBy = s.colorBy === 'side' || s.colorBy === 'clv' ? s.colorBy : (pickedGames && finalGames === pickedGames ? 'clv' : 'side');
+    const closeCands = [];
+    const colorTabs = [['side', 'By side'], ['clv', 'By CLV']].map(v => ({
+      label: v[1], on: colorBy === v[0] ? 'true' : 'false',
+      click: () => this.setState({ colorBy: v[0] }),
+      st: {
+        cursor: 'pointer', font: '500 10.5px/1 ' + MONO, letterSpacing: '0.02em', padding: '4px 7px', borderRadius: '4px',
+        border: '1px solid ' + (colorBy === v[0] ? INK : 'oklch(0.86 0.008 250)'),
+        background: colorBy === v[0] ? INK : 'oklch(1 0 0)', color: colorBy === v[0] ? 'oklch(0.99 0 0)' : SEC
+      }
+    }));
+    const legendOut = colorBy === 'clv'
+      ? CLV_LEGEND.concat(TIER_LEGEND.filter(l => l.label !== 'moneyline'))
+      : legend.map(l => Object.assign({ lst: {} }, l)).concat(TIER_LEGEND);
+    const keyBtn = {
+      label: s.keyOpen ? 'Chip key \u25b4' : 'Chip key \u25be', expanded: s.keyOpen ? 'true' : 'false',
+      click: () => this.setState(st => ({ keyOpen: !st.keyOpen })),
+      st: { cursor: 'pointer', font: '500 10.5px/1 ' + MONO, letterSpacing: '0.02em', padding: '4px 8px', borderRadius: '4px', marginLeft: 'auto',
+        border: '1px solid oklch(0.86 0.008 250)', background: s.keyOpen ? 'oklch(0.95 0.006 250)' : 'oklch(1 0 0)', color: SEC }
+    };
     weekDays.forEach(day => {
       if (s.date !== 'all' && day.label !== s.date) return;
       const slots = [], fslots = [];
@@ -1722,7 +2148,7 @@ class Component extends DCLogic {
           // this block was written against: [slot, matchup, venue, wxIndex, picks].
           const g = it.board || [it.time, it.matchup, '', 0, []];
           const all = it.picks || [];
-          const idx = all.map((p, i) => i).filter(i => this.keep(all[i]));
+          const idx = all.map((p, i) => i).filter(i => this.keep(all[i], all, g[1]));
           const sg = it.sg;
           const hasOdds = !!(it.gid && window.OV && OV.ready() && OV.has(it.gid));
           if (s.gameFilter === 'picks' && !idx.length) return;
@@ -1733,7 +2159,8 @@ class Component extends DCLogic {
           const mm = modelMargin(sg);
           const ko = sg && sg.ko ? Date.parse(sg.ko) : NaN;
           const mins = isNaN(ko) ? null : (s.now - ko) / 60000;
-          const phase = (mins === null || (sg && sg.tbd)) ? 'pre' : mins < 0 ? 'pre' : mins <= 210 ? 'live' : 'post';
+          const fin = sg && s.results ? s.results[String(sg.id)] : null;
+          const phase = fin ? 'post' : (mins === null || (sg && sg.tbd)) ? 'pre' : mins < 0 ? 'pre' : mins <= 210 ? 'live' : 'post';
           count += idx.length;
           const venueTxt = sg && sg.vn ? (String(sg.vn).replace(/\s*\([^)]*\)\s*$/, '') + ' · ' + sg.vc + (sg.vs ? ', ' + sg.vs : '') + (sg.nz ? ' · neutral' : '') + (sg.el !== null && sg.el >= 3000 ? ' · ' + sg.el.toLocaleString() + ' ft' : '')) : g[2];
           const ha = sg ? { h: teamShort(sg.h), a: teamShort(sg.a), hFull: sg.h, aFull: sg.a }
@@ -1744,11 +2171,29 @@ class Component extends DCLogic {
             const isOpen = s.open && s.open.g === gid && s.open.i === i;
             const dl = delta(p);
             const eg = modelEdge(p, sg);
-            const twoCond = eg && k >= 2 && eg.pts >= 1;
+            // Model delta only. The old \u2713\u2713 fired at 1 point with tier 2+, which is
+            // neither condition (a) (the model's error is ~7.6 pts) nor condition (b).
+            const noise = modelNoise();
+            const beyond = !!(eg && noise !== null && Math.abs(eg.pts) >= noise);
+            const ent = pickEntry(p, g[1], reasonRows, ledgerRows);
+            const led = ent ? ent.led : null;
+            const res = led && /^[WLP]/i.test(led.result || '') ? String(led.result).charAt(0).toUpperCase() : null;
+            const epDay = (led && led.episode_date) || epDayOf(p[8]);
+            const news = sg && window.IV && IV.forWeek(week) ? IV.pickMarker(sg.id, epDay) : null;
+            const evg = String((ent && ((ent.row && ent.row.evidence_grade) || (ent.led && ent.led.evidence_grade))) || '').toUpperCase();
+            const ev = evTag(evg);
+            const cv = colorBy === 'clv' ? clvOf(led) : null;
+            const cc = cv ? CLVC[cv.cat] : null;
             return {
               name: p[0], pick: p[1], flagged: isProblem(p), star: k === 3,
-              edge: eg ? (twoCond ? '\u2713\u2713 ' : '') + (eg.pts >= 0 ? '+' : '') + eg.pts.toFixed(1) : null,
-              edgeSt: eg ? { font: '500 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: twoCond ? 'oklch(0.90 0.09 150)' : 'oklch(1 0 0 / 0.62)', color: eg.pts >= 1 ? GOOD : eg.pts <= -1 ? FLAG : MUT } : null,
+              // in CLV colours the chip carries its CLV instead of the pre-game model delta
+              edge: eg && !cc ? deltaTxt(eg.pts) : null,
+              ev: ev ? ev.text : null, evSt: ev ? ev.st : null, evTitle: ev ? 'evidence: ' + GRADE[evg].label : null, srSt: SR_ONLY,
+              clv: cv ? cv.text : null,
+              clvSt: { font: '500 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: 'oklch(1 0 0 / 0.62)', whiteSpace: 'nowrap' },
+              res: res, resSt: res ? resSt(res) : null,
+              news: news ? news.text : null, newsSt: news ? news.st : null,
+              edgeSt: eg ? { font: '500 10px/1 ' + MONO, padding: '2px 4px', borderRadius: '3px', background: 'oklch(1 0 0 / 0.62)', color: beyond ? SEC : MUT } : null,
               expanded: isOpen ? 'true' : 'false',
               delta: dl ? dl.text : null,
               deltaSt: dl ? { font: '500 10px/1 ' + MONO, color: dl.tone === 'bad' ? FLAG : dl.tone === 'good' ? GOOD : MUT, padding: '2px 4px', borderRadius: '3px', background: 'oklch(1 0 0 / 0.62)' } : null,
@@ -1758,28 +2203,40 @@ class Component extends DCLogic {
               st: {
                 display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer',
                 fontFamily: 'inherit', font: (k === 3 ? 600 : mk === 'ml' ? 400 : 500) + ' ' + (mk === 'ml' ? 11.5 : 12.5) + "px/1.25 'IBM Plex Sans',system-ui,sans-serif",
-                border: 0, borderLeft: (k === 3 ? '4px' : k === 2 ? '2px' : '1px') + ' solid ' + t.fg,
+                border: cc && cc.dash ? '1px dashed ' + cc.line : 0, borderLeft: (k === 3 ? '4px' : k === 2 ? '2px' : '1px') + ' solid ' + (cc ? cc.fg : t.fg),
                 borderRadius: '2px 5px 5px 2px', padding: mk === 'ml' ? '4px 8px' : '5px 10px',
-                background: mk === 'ml' ? 'oklch(1 0 0)' : t.bg,
-                boxShadow: (mk === 'ml' ? 'inset 0 0 0 1px ' + t.line : 'none') + (isOpen ? ', 0 0 0 2px ' + INK : ''),
-                color: t.fg
+                background: cc ? cc.bg : (mk === 'ml' ? 'oklch(1 0 0)' : t.bg),
+                boxShadow: [cc ? null : (mk === 'ml' ? 'inset 0 0 0 1px ' + t.line : null), isOpen ? '0 0 0 2px ' + INK : null].filter(Boolean).join(', ') || 'none',
+                color: cc ? cc.fg : t.fg
               },
               click: () => this.setState(st => ({ open: st.open && st.open.g === gid && st.open.i === i ? null : { g: gid, i: i } }))
             };
           });
           const dirs = [0, 1, 2, 3].map(c => all.filter(p => p[2] === c).length);
           const ticks = [];
-          [0, 1, 2, 3].forEach(c => { for (let n = 0; n < dirs[c]; n++) ticks.push({ st: { width: '5px', height: '11px', borderRadius: '1px', background: T[c].tick, opacity: 1, display: 'inline-block' } }); });
+          const TK = { width: '5px', height: '11px', borderRadius: '1px', display: 'inline-block', boxSizing: 'border-box' };
+          if (colorBy === 'clv') {
+            const nc = { beat: 0, same: 0, worse: 0, none: 0 };
+            all.forEach(p => { nc[clvOf((pickEntry(p, g[1], reasonRows, ledgerRows) || {}).led).cat]++; });
+            ['beat', 'same', 'worse', 'none'].forEach(k => { for (let n = 0; n < nc[k]; n++) ticks.push({ st: Object.assign({}, TK, CLV_TICK[k]) }); });
+          } else {
+            [0, 1, 2, 3].forEach(c => { for (let n = 0; n < dirs[c]; n++) ticks.push({ st: Object.assign({}, TK, { background: T[c].tick }) }); });
+          }
           let opposed = 0;
-          for (let a = 0; a < all.length; a++) for (let b = a + 1; b < all.length; b++) if (opp(all[a][2], all[b][2])) opposed++;
+          for (let a = 0; a < all.length; a++) for (let b = a + 1; b < all.length; b++) if (opposes(all[a], all[b])) opposed++;
           const lead = [0, 1, 2, 3].slice().sort((x, y) => dirs[y] - dirs[x])[0];
+          // a split is counted within one bet (oppKey), like the \u21c4 pairs
+          const grp = {};
+          all.forEach(p => { const k = oppKey(p[1]); if (k !== null && p[2] >= 0 && p[2] <= 3) (grp[k] = grp[k] || [0, 0, 0, 0])[p[2]]++; });
+          const sideG = grp['side|FG'], totG = grp['total|FG'];
           let split = '';
-          if (dirs[0] && dirs[1]) split = dirs[0] + '–' + dirs[1] + ' split on the side';
-          else if (dirs[2] && dirs[3]) split = dirs[2] + '–' + dirs[3] + ' split on the total';
+          if (sideG && sideG[0] && sideG[1]) split = sideG[0] + '–' + sideG[1] + ' split on the side';
+          else if (totG && totG[2] && totG[3]) split = totG[2] + '–' + totG[3] + ' split on the total';
           const cons = !all.length ? ''
             : (all.length === 1 ? '1 on this game' : all.length + ' on this game')
             + (dirs[lead] > 1 ? ' · ' + dirs[lead] + '× ' + T[lead].key : '')
-            + (split ? ' · ' + split : '');
+            + (split ? ' · ' + split : '')
+            + (idx.length < all.length ? ' · ' + (all.length - idx.length) + ' hidden by filters' : '');
           const w = d.WX[g[3]];
           const open = s.open && s.open.g === gid ? all[s.open.i] : null;
           let det = null;
@@ -1790,14 +2247,13 @@ class Component extends DCLogic {
             det = {
               why: why, whyMissing: !why,
               model: mm === null
-                ? (sg ? 'No rating — FCS opponent' : 'Game not on the schedule')
+                ? (sg ? 'No rating: FCS opponent' : 'Game not on the schedule')
                 : (mm >= 0 ? sg.h + ' by ' + mm.toFixed(1) : sg.a + ' by ' + (-mm).toFixed(1)),
               modelNote: mm === null ? 'unmodelable' : 'power ratings · scale ' + modelCfg().scale.toFixed(2) + ' · HFA ' + (sg.nz ? '0 (neutral)' : modelCfg().hfa.toFixed(2)) + (eDet && eDet.kind === 'ml' ? ' · price implies ' + eDet.fair.toFixed(1) : ''),
-              edgeTxt: eDet ? ((eDet.pts >= 1 && p[3] >= 2 ? '\u2713\u2713  ' : '') + (eDet.pts >= 0 ? '+' : '') + eDet.pts.toFixed(1) + ' pt edge') : (mm === null ? null : 'no edge on this market'),
+              edgeTxt: eDet ? (deltaTxt(eDet.pts) + ' pts vs the number' + (modelNoise() !== null ? (Math.abs(eDet.pts) >= modelNoise() ? ' \u00b7 outside the \u00b1' + modelNoise().toFixed(1) + ' noise band' : ' \u00b7 inside the \u00b1' + modelNoise().toFixed(1) + ' noise band') : '')) : (mm === null ? null : 'no model number for this market'),
               edgeChipSt: {
                 font: '500 11.5px/1 ' + MONO, padding: '5px 8px', borderRadius: '4px',
-                background: !eDet ? 'oklch(0.94 0.006 250)' : (eDet.pts >= 1 && p[3] >= 2) ? 'oklch(0.90 0.09 150)' : eDet.pts >= 1 ? 'oklch(0.955 0.05 150)' : eDet.pts <= -1 ? 'oklch(0.945 0.05 25)' : 'oklch(0.94 0.006 250)',
-                color: !eDet ? MUT : eDet.pts >= 1 ? GOOD : eDet.pts <= -1 ? FLAG : SEC
+                background: 'oklch(0.94 0.006 250)', color: SEC
               },
               halves: (function () {
                 const lw = live[g[1]] || {};
@@ -1815,7 +2271,7 @@ class Component extends DCLogic {
                   }
                 })) : null;
               })(),
-              statLabel: rl ? p[0] + ' — ledger' : p[0] + ' — not in ledger',
+              statLabel: rl ? p[0] + ' \u00b7 ledger' : p[0] + ' \u00b7 not in ledger',
               stats: rl ? lensStats(rec[p[0]], s.lens).map(v => ({
                 label: v.label, value: v.value,
                 st: {
@@ -1823,7 +2279,7 @@ class Component extends DCLogic {
                   color: v.tone === 'good' ? GOOD : v.tone === 'bad' ? FLAG : 'oklch(0.23 0.02 258)'
                 }
               })) : [{ label: '', value: 'no ledger rows for this picker', st: { font: '400 12px/1.35 ' + MONO, color: MUT } }],
-              head: p[0] + ' — ' + p[1],
+              head: p[0] + ' \u00b7 ' + p[1],
               tag: NONHOST[p[0]] || null,
               meta: g[0] + ' · ' + venueTxt,
               argument: p[4], evidence: p[5],
@@ -1834,11 +2290,17 @@ class Component extends DCLogic {
                 { label: 'Number', value: p[6], delta: dl ? dl.text : null, deltaSt: dl ? dSt(dl.tone, 11.5) : null },
                 { label: 'Stated confidence', value: p[7], delta: null, deltaSt: null },
                 { label: 'Source', value: p[8], delta: null, deltaSt: null },
-                { label: 'Market', value: { ml: 'Moneyline sprinkle', deriv: 'Derivative (half / quarter / team total)', total: 'Full-game total', side: 'Side' }[market(p[1])] + ' · tier ' + p[3], delta: null, deltaSt: null }
+                { label: 'Market', value: { ml: 'Moneyline sprinkle', deriv: 'Derivative (half / quarter / team total)', total: 'Full-game total', side: 'Side', prop: 'Player prop' }[market(p[1])] + ' · tier ' + p[3], delta: null, deltaSt: null },
+                { label: 'Graded', value: gradedTxt((pickEntry(p, g[1], reasonRows, ledgerRows) || {}).led), delta: null, deltaSt: null }
               ],
+              news: (sg && window.IV && IV.forWeek(week)) ? (function () {
+                const e = pickEntry(p, g[1], reasonRows, ledgerRows);
+                const rows = IV.detailRows(sg.id, (e && e.led && e.led.episode_date) || epDayOf(p[8]));
+                return rows.length ? rows : null;
+              })() : null,
               others: all.map((x, i) => {
                 if (x === p) return null;
-                const o = opp(p[2], x[2]);
+                const o = opposes(p, x);
                 return {
                   text: x[0] + ' ' + x[1] + (o ? '  ⇄' : ''),
                   st: { font: '400 12px/1.3 ' + MONO, padding: '3px 7px', borderRadius: '4px', background: o ? 'oklch(0.945 0.05 25)' : 'oklch(0.925 0.006 250)', color: o ? FLAG : SEC }
@@ -1848,8 +2310,13 @@ class Component extends DCLogic {
             if (!det.others.length) det.others = [{ text: 'nobody else on this game', st: { font: '400 12px/1.3 ' + MONO, color: MUT } }];
           }
           const finalTxt = finalText(s.results, sg);
+          // capture-window urgency (PODCAST_BOARD_SPEC 4.2): time to kickoff on the
+          // upcoming games; the next close is marked once every row is built
+          const toKick = phase === 'pre' && !isNaN(ko) && !(sg && sg.tbd) ? (ko - s.now) / 60000 : null;
+          const soon = toKick !== null && toKick > 0 && toKick <= 24 * 60;
           const statusTxt = phase === 'live' ? 'in progress'
-            : phase === 'post' ? (finalTxt || 'final pending') : null;
+            : phase === 'post' ? (finalTxt || 'final pending')
+            : soon ? untilTxt(toKick) : null;
           const row = {
             status: statusTxt,
             liveDot: phase === 'live',
@@ -1898,8 +2365,10 @@ class Component extends DCLogic {
             cond: condChips(mergeCond(cond[g[1]], Object.assign({ _dome: sg && sg.dome ? 1 : 0 }, live[g[1]])), w),
             ticks: ticks, cons: cons,
             consSt: { font: '400 11px/1.4 ' + MONO, color: MUT, minWidth: 0, overflowWrap: 'break-word' },
-            chips: chips
+            chips: chips,
+            intel: sg && window.IV && IV.forWeek(week) ? IV.gameItems(sg.id) : null
           };
+          if (toKick !== null && toKick > 0 && idx.length) closeCands.push({ row: row, ko: ko, toKick: toKick, n: idx.length, day: day.label });
           if (phase === 'post') frows.push(row); else rows.push(row);
         });
         if (rows.length) slots.push({ time: time, games: rows });
@@ -1908,29 +2377,52 @@ class Component extends DCLogic {
       const DAYHEAD = { position: 'sticky', top: 0, zIndex: 3, font: "600 13px/1 'IBM Plex Sans',system-ui,sans-serif", color: INK, margin: 0, padding: '9px 0 8px', background: 'oklch(0.985 0.003 250)', borderBottom: '1.5px solid oklch(0.72 0.01 250)', letterSpacing: '0.01em', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline' };
       slots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
       fslots.sort((a, b) => slotMinutes(a.time) - slotMinutes(b.time));
-      if (slots.length) days.push({ label: day.label, slots: slots, note: null, wrapSt: { marginBottom: '26px' }, headSt: DAYHEAD });
+      if (slots.length) days.push({ label: day.label, slots: slots, note: null, noteSt: DAYNOTE_ST, noteWrapSt: {}, wrapSt: { marginBottom: '26px' }, headSt: DAYHEAD });
       if (fslots.length) {
         let n = 0;
         fslots.forEach(sl => { n += sl.games.length; });
         postDays.push({
           label: day.label, slots: fslots,
           note: 'finished · ' + n + (n === 1 ? ' game' : ' games') + ' past kickoff + 3h30',
-          wrapSt: { marginBottom: '26px', opacity: 0.74 },
+          noteSt: DAYNOTE_ST, noteWrapSt: {}, wrapSt: { marginBottom: '26px', opacity: 0.74 },
           headSt: Object.assign({}, DAYHEAD, { borderBottom: '1.5px dashed oklch(0.78 0.01 250)' })
         });
       }
     });
 
+    // The next closing window (PODCAST_BOARD_SPEC 4.2): the next kickoff among the
+    // games on screen that carry a position, marked on its rows and named in the
+    // heading of its day, so a filter or a date never points it at a hidden game.
+    let nextClose = null;
+    closeCands.forEach(c => { if (nextClose === null || c.ko < nextClose) nextClose = c.ko; });
+    if (nextClose !== null && nextClose - s.now <= 36 * 3600000) {
+      const at = closeCands.filter(c => c.ko === nextClose);
+      const npos = at.reduce((a, c) => a + c.n, 0);
+      at.forEach(c => {
+        c.row.status = 'next close \u00b7 ' + untilTxt(c.toKick);
+        c.row.statusSt = Object.assign({}, c.row.statusSt, { background: 'oklch(0.95 0.06 78)', color: 'oklch(0.42 0.13 62)' });
+      });
+      const dd = days.filter(x => x.label === at[0].day)[0];
+      if (dd) {
+        dd.note = 'next close ' + schedTime({ ko: new Date(nextClose).toISOString() }) + ' ET \u00b7 ' + untilTxt((nextClose - s.now) / 60000)
+          + ' \u00b7 ' + at.length + (at.length === 1 ? ' game' : ' games') + ' \u00b7 ' + npos + (npos === 1 ? ' position' : ' positions');
+        dd.noteSt = NEXTCLOSE_ST; dd.noteWrapSt = NEXTCLOSE_WRAP;
+      }
+    }
     postDays.forEach(pd => days.push(pd));
     return {
       hdrTitle: this.headTitle(week),
       hdrSub: this.headSub(week, gamesShown, count),
-      legend: legend, days: days, empty: gamesShown === 0,
+      legend: legendOut, days: days, empty: gamesShown === 0,
+      colorTabs: colorTabs,
+      keyBtn: keyBtn, keyRows: s.keyOpen ? KEY_ROWS : null,
+      legend2: '\u0394 is the preseason-ratings model minus the cited number, in points. Against the market the model misses by ' + (modelNoise() !== null ? modelNoise().toFixed(2) : '?') + ' pts (sd), so a \u0394 inside that is noise; nothing on this board is marked as an edge.',
+      intel: this.intelPanel(week, false),
       countLabel: gamesShown + (gamesShown === 1 ? ' game' : ' games') + ' · '
         + count + (count === 1 ? ' position' : ' positions'),
       tier: s.tier, market: s.market, flag: s.flag, show: s.show,
       week: String(week), weekOpts: this.weekOptions(), gameFilter: s.gameFilter,
-      onWeek: e => this.setState({ week: e.target.value, open: null, oddsOpen: null, date: 'all' }),
+      onWeek: e => this.setState({ week: e.target.value, open: null, oddsOpen: null, date: 'all', colorBy: 'auto' }),
       onGameFilter: e => this.setState({ gameFilter: e.target.value, open: null }),
       lensTabs: lensTabs, date: s.date, win: s.win, halfTabs: halfTabs,
       pkOpen: s.pkOpen, pkExpanded: s.pkOpen ? 'true' : 'false',
@@ -1941,7 +2433,8 @@ class Component extends DCLogic {
       onShow: e => this.setState({ show: e.target.value, open: null }),
       onTier: e => this.setState({ tier: e.target.value, open: null }),
       onMarket: e => this.setState({ market: e.target.value, open: null }),
-      onFlag: e => this.setState({ flag: e.target.value, open: null })
+      onFlag: e => this.setState({ flag: e.target.value, open: null }),
+      ev: s.ev || 'all', onEv: e => this.setState({ ev: e.target.value, open: null })
     };
   }
 }

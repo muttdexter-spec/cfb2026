@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<script src="./board-bundle.js"></script>
+<script src="./ref-data.js"></script>
 </head>
 <body>
 <x-dc>
@@ -11,8 +13,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="./board-bundle.js"></script>
-<script src="./ref-data.js"></script>
 <style>
 html,body{margin:0;background:oklch(0.985 0.003 250);color:oklch(0.23 0.02 258);-webkit-font-smoothing:antialiased;color-scheme:light}
 a{color:oklch(0.42 0.16 258);text-decoration:none}
@@ -29,7 +29,7 @@ select{font-family:inherit}
 </div>
 
 <h1 style="font:600 20px/1.25 'IBM Plex Sans',system-ui,sans-serif;margin:0 0 6px;letter-spacing:-0.01em">Picker performance</h1>
-<p style="font:400 13px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 4px;max-width:66ch">{{ hdrSub }}</p>
+<p style="font:400 13px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:0 0 12px;max-width:84ch">{{ hdrSub }}</p>
 
 <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid oklch(0.895 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250);margin-bottom:18px">
 
@@ -53,7 +53,7 @@ select{font-family:inherit}
 <sc-for list="{{ weekOpts }}" as="wk" hint-placeholder-count="3"><option value="{{ wk.value }}">{{ wk.label }}</option></sc-for>
 </select>
 <select value="{{ show }}" onChange="{{ onShow }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
-<option value="all">All shows</option><option value="Cover 3">Cover 3</option><option value="BBOC">BBOC</option>
+<option value="all">All shows</option><option value="Cover 3">Cover 3</option><option value="BBOC">BBOC</option><option value="Pick Em">Barstool Pick Em</option>
 </select>
 
 <span style="display:inline-flex;align-items:center;gap:6px">
@@ -83,35 +83,32 @@ select{font-family:inherit}
 <select value="{{ tier }}" onChange="{{ onTier }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
 <option value="0">All tiers</option><option value="3">Tier 3 only</option><option value="23">Tier 2 and 3</option><option value="1">Tier 1 only</option>
 </select>
+<select value="{{ ent }}" onChange="{{ onEnt }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="host">Hosts only</option><option value="all">Hosts, guests and unresolved</option>
+</select>
+<select value="{{ pos }}" onChange="{{ onPos }}" style="font-size:12.5px;padding:5px 8px;border:1px solid oklch(0.83 0.008 250);border-radius:5px;background:oklch(1 0 0);color:inherit">
+<option value="pick">Picks only</option><option value="all">Picks and leans</option>
+</select>
 
 <span style="flex:1 1 12px"></span>
 <span style="font:500 12px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ countLabel }}</span>
 </div>
 
-<div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:0 0 10px">
-<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Follow board</h2>
-<span style="display:inline-flex;align-items:center;gap:6px">
-<span style="font:400 10.5px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.505 0.014 255)">Score weighting</span>
-<span style="display:inline-flex;gap:3px">
-<sc-for list="{{ presetTabs }}" as="pt" hint-placeholder-count="3">
-<button type="button" onClick="{{ pt.click }}" style="{{ pt.st }}">{{ pt.label }}</button>
-</sc-for>
-</span>
-</span>
-<span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ presetNote }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin:0 0 10px">
+<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Host record</h2>
+<span style="font:400 11px/1.45 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ boardNote }}</span>
 </div>
 
-<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);overflow:hidden;margin-bottom:30px">
-<div style="display:grid;grid-template-columns:26px minmax(104px,1.35fr) repeat(7,minmax(42px,0.58fr)) 82px;gap:0 8px;align-items:center;padding:9px 14px;background:oklch(0.968 0.006 250);border-bottom:1px solid oklch(0.895 0.006 250)">
-<span></span>
+<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);overflow-x:auto;margin-bottom:30px">
+<div style="min-width:900px">
+<div style="{{ headRowSt }}">
 <sc-for list="{{ cols }}" as="ch" hint-placeholder-count="8">
 <button type="button" onClick="{{ ch.click }}" style="{{ ch.st }}">{{ ch.label }}{{ ch.arrow }}</button>
 </sc-for>
 </div>
 <sc-for list="{{ board }}" as="r" hint-placeholder-count="8">
 <div style="{{ r.rowSt }}">
-<span style="font:500 11px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.rank }}</span>
-<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="display:flex;flex-direction:column;gap:3px;min-width:0">
 <span style="display:flex;align-items:baseline;gap:6px;min-width:0">
 <span style="font:500 13px/1.25 'IBM Plex Sans',system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
 <sc-if value="{{ r.tag }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font:400 9px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.06em;padding:3px 5px;border-radius:3px;background:oklch(0.925 0.006 250);color:oklch(0.505 0.014 255)">{{ r.tag }}</span></sc-if>
@@ -120,29 +117,27 @@ select{font-family:inherit}
 <sc-for list="{{ r.mix }}" as="m" hint-placeholder-count="3"><span style="{{ m.st }}"></span></sc-for>
 </span>
 </span>
-<span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace">{{ r.picks }}</span>
-<span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.graded }}</span>
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<span style="display:flex;align-items:baseline;gap:6px"><span style="font:500 13px/1.2 'IBM Plex Mono',ui-monospace,monospace">{{ r.clv }}</span><span style="font:400 10.5px/1.2 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.clvCi }}</span></span>
+<span style="{{ r.ciTrackSt }}"><span style="{{ r.ciZeroSt }}"></span><span style="{{ r.ciBarSt }}"></span><span style="{{ r.ciDotSt }}"></span></span>
+</span>
+<span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255)">{{ r.clvN }}</span>
+<span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255)">{{ r.beat }}</span>
+<span style="display:flex;flex-direction:column;gap:2px"><span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace">{{ r.win }}</span><span style="font:400 10px/1.2 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.winCi }}</span></span>
 <span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255)">{{ r.wlp }}</span>
-<span style="{{ r.winSt }}">{{ r.win }}</span>
-<span style="{{ r.unitsSt }}">{{ r.units }}</span>
-<span style="{{ r.clvSt }}">{{ r.clv }}</span>
-<span style="display:flex;flex-direction:column;gap:1px;min-width:0">
-<span style="{{ r.edgeSt }}">{{ r.edge }}</span>
-<span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.edgeSub }}</span>
-</span>
-<span style="display:flex;align-items:center;gap:7px">
-<span style="flex:1 1 auto;height:6px;border-radius:3px;background:oklch(0.93 0.006 250);overflow:hidden;min-width:26px"><span style="{{ r.scoreBarSt }}"></span></span>
-<span style="{{ r.scoreSt }}">{{ r.score }}</span>
-</span>
+<span style="display:flex;flex-direction:column;gap:2px"><span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace">{{ r.units }}</span><span style="font:400 10px/1.2 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.unitsSub }}</span></span>
+<span style="font:400 12.5px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.44 0.015 255)">{{ r.picks }}</span>
+<span style="display:flex;flex-direction:column;gap:2px"><span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ r.edge }}</span><span style="font:400 9.5px/1 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.60 0.01 250)">{{ r.edgeSub }}</span></span>
 </div>
 </sc-for>
 <sc-if value="{{ boardEmpty }}" hint-placeholder-val="{{ false }}">
 <div style="padding:32px 16px;text-align:center;font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255)">No picks match those filters.</div>
 </sc-if>
 </div>
+</div>
 
 <div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:0 0 10px">
-<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Performance over time</h2>
+<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Over time</h2>
 <span style="display:inline-flex;gap:3px">
 <sc-for list="{{ spanTabs }}" as="sp" hint-placeholder-count="3">
 <button type="button" onClick="{{ sp.click }}" style="{{ sp.st }}">{{ sp.label }}</button>
@@ -165,75 +160,33 @@ select{font-family:inherit}
 <sc-for list="{{ trendRows }}" as="tr" hint-placeholder-count="6">
 <span style="font:400 12px/1.25 'IBM Plex Sans',system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px">{{ tr.name }}</span>
 <sc-for list="{{ tr.cells }}" as="cl" hint-placeholder-count="4">
-<span style="{{ cl.st }}">{{ cl.txt }}</span>
+<span style="{{ cl.st }}">{{ cl.txt }}<span style="{{ cl.nSt }}">{{ cl.n }}</span></span>
 </sc-for>
 </sc-for>
 </div>
 <p style="font:400 11px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:11px 0 0">{{ trendLegend }}</p>
 </div>
 
-<div style="display:flex;flex-wrap:wrap;gap:22px;margin-bottom:30px">
-
-<div style="flex:1 1 400px;min-width:0">
-<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px">
-<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Who's hot</h2>
-<span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">last 10 · newest right</span>
-</div>
-<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);padding:6px 14px">
-<sc-for list="{{ formRows }}" as="fr" hint-placeholder-count="6">
-<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid oklch(0.945 0.006 250)">
-<span style="flex:1 1 auto;font:400 12.5px/1.25 'IBM Plex Sans',system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ fr.name }}</span>
-<span style="flex:none;display:flex;gap:3px">
-<sc-for list="{{ fr.pips }}" as="pp" hint-placeholder-count="10"><span style="{{ pp.st }}"></span></sc-for>
-</span>
-<span style="{{ fr.st }}">{{ fr.label }}</span>
-</div>
-</sc-for>
-</div>
-</div>
-
-<div style="flex:1 1 300px;min-width:0">
-<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px">
-<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Fade candidates</h2>
-<span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ fadeBasis }}</span>
-</div>
-<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);padding:6px 14px">
-<sc-for list="{{ fadeRows }}" as="fd" hint-placeholder-count="3">
-<div style="display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid oklch(0.945 0.006 250)">
-<span style="flex:1 1 auto;font:400 12.5px/1.3 'IBM Plex Sans',system-ui,sans-serif;min-width:0">{{ fd.name }}</span>
-<span style="{{ fd.st }}">{{ fd.value }}</span>
-</div>
-</sc-for>
-<sc-if value="{{ fadeEmpty }}" hint-placeholder-val="{{ false }}">
-<p style="font:400 12.5px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.505 0.014 255);margin:14px 0;text-wrap:pretty">{{ fadeEmpty }}</p>
-</sc-if>
-</div>
-</div>
-
-</div>
-
 <div style="display:flex;flex-wrap:wrap;gap:22px">
 
-<div style="flex:1 1 340px;min-width:0">
+<div style="flex:1 1 420px;min-width:0">
 <div style="display:flex;align-items:baseline;gap:10px;margin:0 0 10px">
-<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Tier calibration</h2>
-<span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">does stated confidence pay</span>
+<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Stated confidence</h2>
+<span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">by show: tiers mean different things on each</span>
 </div>
-<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);padding:14px">
-<div style="display:grid;grid-template-columns:minmax(66px,1fr) repeat(5,minmax(40px,0.68fr));gap:8px 8px;align-items:center">
-<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Tier</span>
+<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);padding:14px;overflow-x:auto">
+<div style="display:grid;grid-template-columns:minmax(84px,1fr) 42px 66px minmax(168px,1.7fr) minmax(150px,1.5fr);gap:8px 10px;align-items:baseline;min-width:540px">
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Show · tier</span>
 <span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Picks</span>
-<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Share</span>
-<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Edge</span>
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Basis</span>
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">CLV vs proxy</span>
 <span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Win%</span>
-<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">CLV</span>
-<sc-for list="{{ tierRows }}" as="tk" hint-placeholder-count="3">
-<span style="display:flex;align-items:center;gap:7px"><span style="{{ tk.edgeSt }}"></span><span style="font:500 12.5px/1.25 'IBM Plex Sans',system-ui,sans-serif">{{ tk.label }}</span></span>
+<sc-for list="{{ tierRows }}" as="tk" hint-placeholder-count="6">
+<span style="{{ tk.labelSt }}">{{ tk.label }}</span>
 <span style="font:400 12.5px/1.25 'IBM Plex Mono',ui-monospace,monospace">{{ tk.picks }}</span>
-<span style="font:400 12.5px/1.25 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">{{ tk.share }}</span>
-<span style="{{ tk.edgeSt }}">{{ tk.edge }}</span>
-<span style="{{ tk.winSt }}">{{ tk.win }}</span>
-<span style="{{ tk.clvSt }}">{{ tk.clv }}</span>
+<span style="font:400 10.5px/1.25 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);white-space:nowrap">{{ tk.basis }}</span>
+<span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap">{{ tk.clv }}</span>
+<span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap">{{ tk.win }}</span>
 </sc-for>
 </div>
 <p style="font:400 12px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:13px 0 0;padding-top:11px;border-top:1px solid oklch(0.945 0.006 250);text-wrap:pretty">{{ tierVerdict }}</p>
@@ -267,23 +220,62 @@ select{font-family:inherit}
 
 </div>
 
-<p style="font:400 11.5px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:26px 0 0;padding-top:14px;border-top:1px solid oklch(0.895 0.006 250);max-width:80ch;text-wrap:pretty">{{ footnote }}</p>
+<div style="margin:30px 0 0">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0 0 10px">
+<h2 style="font:600 15px/1.3 'IBM Plex Sans',system-ui,sans-serif;margin:0">Evidence grade</h2>
+<span style="font:400 11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255)">the kind of argument behind each position, pooled across hosts: the common grades reach a testable size within a season, the rare ones may not</span>
+</div>
+<div style="border:1px solid oklch(0.895 0.006 250);border-radius:8px;background:oklch(1 0 0);padding:14px;overflow-x:auto">
+<div style="display:grid;grid-template-columns:minmax(170px,230px) 52px minmax(210px,260px) minmax(120px,150px) minmax(180px,1fr);gap:8px 12px;align-items:baseline;min-width:720px">
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Grade</span>
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Picks</span>
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">CLV vs proxy · 95%</span>
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Beat / same / worse</span>
+<span style="font:400 10px/1 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.05em;color:oklch(0.505 0.014 255)">Win% · 95%</span>
+<sc-for list="{{ evRows }}" as="er" hint-placeholder-count="6">
+<span style="{{ er.labelSt }}"><span style="{{ er.tagSt }}">{{ er.tag }}</span>{{ er.label }}</span>
+<span style="font:400 12.5px/1.25 'IBM Plex Mono',ui-monospace,monospace">{{ er.picks }}</span>
+<span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap">{{ er.clv }}</span>
+<span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap">{{ er.bsw }}</span>
+<span style="font:400 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;white-space:nowrap">{{ er.win }}</span>
+</sc-for>
+</div>
+<p style="font:400 10.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:10px 0 0">Tags as they read on the board’s chips: solid for charted or stat cited, outlined for base rate, roster, scheme or market, dashed for motivation, assertion or none offered.</p>
+<p style="font:400 12px/1.55 'IBM Plex Sans',system-ui,sans-serif;color:oklch(0.44 0.015 255);margin:11px 0 0;padding-top:11px;border-top:1px solid oklch(0.945 0.006 250);text-wrap:pretty">{{ evVerdict }}</p>
+</div>
+</div>
+
+<p style="font:400 11.5px/1.6 'IBM Plex Mono',ui-monospace,monospace;color:oklch(0.505 0.014 255);margin:26px 0 0;padding-top:14px;border-top:1px solid oklch(0.895 0.006 250);max-width:88ch;text-wrap:pretty">{{ footnote }}</p>
 
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:1400}}">
+/*
+ * Picker performance: a record, not a ranking.
+ *
+ * The project's rules for this page: CLV before win rate, a sample size beside every
+ * rate, no ranking of hosts until the Saturday manual closes validate CLOSE_PROXY,
+ * and no characterising anyone as good or bad on a small sample. So there is no
+ * composite score, no rank column, no "who's hot" and no "fade" list; every rate
+ * carries its n and a 95% interval, and nothing is coloured as a verdict.
+ *
+ * What is excluded, and how the page says so:
+ *   - disputed rows (LEDGER_DEFECTS.csv): kept in W-L, out of every CLV mean;
+ *   - guests, producers, show-level and unresolved pickers: out by default
+ *     (entity_type / in_host_baseline from the ledger, not a hard-coded list);
+ *   - leans: out by default; a lean is not a wager.
+ */
 const INK = 'oklch(0.23 0.02 258)', SEC = 'oklch(0.44 0.015 255)', MUT = 'oklch(0.505 0.014 255)';
 const MONO = "'IBM Plex Mono',ui-monospace,monospace";
-const SANS = "'IBM Plex Sans',system-ui,sans-serif";
-const GOOD = 'oklch(0.45 0.13 150)', BAD = 'oklch(0.48 0.20 25)';
 const MKT = {
   SPREAD: { label: 'spread', c: 'oklch(0.42 0.15 258)' },
   TOTAL: { label: 'total', c: 'oklch(0.53 0.11 212)' },
   TEAM_TOTAL: { label: 'team total', c: 'oklch(0.60 0.13 68)' },
-  ML: { label: 'moneyline', c: 'oklch(0.50 0.18 25)' }
+  ML: { label: 'moneyline', c: 'oklch(0.50 0.18 25)' },
+  PROP: { label: 'player prop', c: 'oklch(0.55 0.10 300)' }
 };
-const MKT_ORDER = ['SPREAD', 'TOTAL', 'TEAM_TOTAL', 'ML'];
+const MKT_ORDER = ['SPREAD', 'TOTAL', 'TEAM_TOTAL', 'ML', 'PROP'];
 const SHORT = {
   'Bud Elliott': 'Elliott', 'Chip Patterson': 'Patterson', 'Danny Kanell': 'Kanell', 'Tom Fornelli': 'Fornelli',
   'Kinsey Brooks': 'Brooks', 'The Dentist': 'The Dentist', 'Producer (Taft/Stryker)': 'Producer',
@@ -293,53 +285,35 @@ const SHORT = {
   'Unnamed Picker (Pick Em)': 'Unnamed (Pick Em)', 'Ibo': 'Ibo',
   'Michael Snowden': 'Snowden', 'Unnamed Picker (Cover 3)': 'Unnamed (Cover 3)'
 };
-const TAG = { 'Kinsey Brooks': 'guest', 'The Dentist': 'unresolved', 'Producer (Taft/Stryker)': 'producer', 'Cover 3 (show-level)': 'show-level', 'Unnamed Picker (Pick Em)': 'unresolved', 'Ibo': 'guest', 'Michael Snowden': 'guest', 'Unnamed Picker (Cover 3)': 'unresolved' };
-const PRESETS = {
-  edge: { label: 'Model-led', w: { clv: 0.1, win: 0.1, units: 0.1, edge: 0.7 }, note: 'model edge 70 — price quality, on the largest sample' },
-  clv: { label: 'CLV-led', w: { clv: 0.5, win: 0.15, units: 0.15, edge: 0.2 }, note: 'CLV 50 · edge 20 · win% 15 · units 15' },
-  bal: { label: 'Balanced', w: { clv: 0.25, win: 0.25, units: 0.25, edge: 0.25 }, note: 'even blend of edge, CLV, win% and units' },
-  res: { label: 'Results-led', w: { clv: 0.15, win: 0.35, units: 0.35, edge: 0.15 }, note: 'win% 35 · units 35 — rewards banked profit' }
-};
-const SHRINK_K = 20, EDGE_K = 10, EDGE_CAP = 3;
-// An "edge" only counts once it clears the model's own measured noise against the
-// market. calibrate_model.py reports that residual sd; 1.0 was the old placeholder
-// and, at a residual near 7 points, counted essentially every pick as an edge.
-function edgeFloor() {
-  const M = modelCfg();
-  return M.fitted && M.resid_sd ? M.resid_sd : 1;
-}
+// tier basis per show (README): Cover 3 and Pick Em state their top tier, BBOC's are inferred
+const TIER_BASIS = { 'Cover 3': { 3: 'stated', 2: 'inferred', 1: 'inferred' }, 'Pick Em': { 3: 'stated', 2: 'inferred', 1: 'inferred' }, 'BBOC': { 3: 'mixed', 2: 'inferred', 1: 'inferred' } };
+const Z = 1.96;
+const CI_SPAN = 3;          // the CLV interval bar spans -3 to +3 points
 
-function csvParse(t) {
-  const lines = String(t || '').split(/\r?\n/).filter(l => l.trim().length);
-  if (!lines.length) return [];
-  const split = l => {
-    const out = []; let c = '', q = false;
-    for (let i = 0; i < l.length; i++) {
-      const ch = l[i];
-      if (ch === '"') { if (q && l[i + 1] === '"') { c += '"'; i++; } else q = !q; continue; }
-      if (ch === ',' && !q) { out.push(c); c = ''; continue; }
-      c += ch;
-    }
-    out.push(c); return out;
-  };
-  const head = split(lines[0]).map(h => h.trim());
-  return lines.slice(1).map(l => {
-    const cells = split(l), o = {};
-    head.forEach((h, i) => { o[h] = (cells[i] || '').trim(); });
-    return o;
-  });
+function csvParse(text) {
+  // quoted fields may hold commas and newlines
+  const rows = []; let f = '', r = [], q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ',') { r.push(f); f = ''; }
+    else if (ch === '\n') { r.push(f); f = ''; if (r.length > 1 || r[0] !== '') rows.push(r); r = []; }
+    else if (ch !== '\r') f += ch;
+  }
+  if (f !== '' || r.length) { r.push(f); rows.push(r); }
+  const head = rows.shift() || [];
+  return rows.map(row => { const o = {}; head.forEach((h, i) => { o[h.trim()] = (row[i] || '').trim(); }); return o; });
 }
 function num(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+function yes(v) { return String(v || '').toLowerCase() === 'true'; }
 // win return on 1u. No price cited: assume -110 on a spread or total, exclude a moneyline.
 function payout(price, mt) {
   const p = num(price);
-  if (p !== null && p !== 0) return p > 0 ? p / 100 : 100 / Math.abs(p);
+  if (p !== null && p !== 0 && Math.abs(p) >= 100) return p > 0 ? p / 100 : 100 / Math.abs(p);
   return (mt || '').toUpperCase() === 'ML' ? null : 100 / 110;
 }
-function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
-function pct(v) { return Math.round(v * 100) + '%'; }
 function weekOf(r) {
-  // pick_id encodes the CFB week (W01-001); schedule week is authoritative where joined
   const m = /^W(\d{1,2})-/.exec(r.pick_id || '');
   if (m) return parseInt(m[1], 10);
   const w = num(r.week);
@@ -348,8 +322,40 @@ function weekOf(r) {
 function monthOf(dstr) { return /^\d{4}-\d{2}/.test(dstr) ? dstr.slice(0, 7) : null; }
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function monthLabel(m) { return MONTHS[parseInt(m.slice(5, 7), 10) - 1] + " '" + m.slice(2, 4); }
+
+// ---- intervals --------------------------------------------------------------
+// Student's t, two-sided 95%: 1.96 standard errors understates the spread of a small
+// cell (at n = 5 the multiplier is 2.78). Table to 30 degrees of freedom, then the
+// Cornish-Fisher series, which is within 0.001 of the exact value from there on.
+const T975 = [0, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131,
+  2.120, 2.110, 2.101, 2.093, 2.086, 2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042];
+function tcrit(df) {
+  if (df <= 30) return T975[df];
+  const z3 = Z * Z * Z, z5 = z3 * Z * Z;
+  return Z + (z3 + Z) / (4 * df) + (5 * z5 + 16 * z3 + 3 * Z) / (96 * df * df);
+}
+function meanCi(vals) {
+  const n = vals.length;
+  if (!n) return null;
+  const m = vals.reduce((a, b) => a + b, 0) / n;
+  if (n < 2) return { m: m, n: n, lo: null, hi: null };
+  const sd = Math.sqrt(vals.reduce((a, b) => a + (b - m) * (b - m), 0) / (n - 1));
+  const h = tcrit(n - 1) * sd / Math.sqrt(n);
+  return { m: m, n: n, lo: m - h, hi: m + h };
+}
+// Wilson score interval: honest at small n, never outside 0..1
+function wilson(w, n) {
+  if (!n) return null;
+  const p = w / n, z2 = Z * Z;
+  const c = (p + z2 / (2 * n)) / (1 + z2 / n);
+  const h = Z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n)) / (1 + z2 / n);
+  return { p: p, lo: Math.max(0, c - h), hi: Math.min(1, c + h), n: n };
+}
+function sgn2(v) { return Math.abs(v) < 0.005 ? '0.00' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(2); }
+function pct(v) { return Math.round(v * 100) + '%'; }
+
+// ---- the ratings model, kept as a reference column only -----------------------
 const MARGIN_SD = 16;
-// inverse normal CDF (Acklam)
 function probit(p) {
   if (!(p > 0) || !(p < 1)) return null;
   const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
@@ -365,10 +371,9 @@ function probit(p) {
 }
 function impliedProb(price) {
   const p = parseFloat(price);
-  if (isNaN(p) || p === 0) return null;
+  if (isNaN(p) || Math.abs(p) < 100) return null;
   return p > 0 ? 100 / (p + 100) : Math.abs(p) / (Math.abs(p) + 100);
 }
-// a cited moneyline price implies a fair margin; edge is then in the same points unit as a spread
 function fairMargin(price) {
   const ip = impliedProb(price);
   if (ip === null) return null;
@@ -376,16 +381,11 @@ function fairMargin(price) {
   return z === null ? null : MARGIN_SD * z;
 }
 const RK = s => String(s || '').toUpperCase().replace(/&/g, 'AND').replace(/[^A-Z0-9]/g, '');
-// Model constants. Fitted to the market by calibrate_model.py and carried in
-// BOARD.META.model; the 2.0 / 1.0 fallback is the original assumed pair, which
-// measurably tilts every game toward the away team. Read lazily - the bundle is
-// loaded in the helmet but the page must not hard-fail if it is not there yet.
 const MODEL_FALLBACK = { hfa: 2.0, scale: 1.0, fitted: false };
 function modelCfg() {
   const B = window.BOARD;
   return (B && B.META && B.META.model) || MODEL_FALLBACK;
 }
-
 function tokenMatches(tok, name) {
   const a = RK(tok), b = RK(name);
   if (!a || !b) return false;
@@ -406,23 +406,26 @@ let _gidx = null;
 function refTeam(s) {
   const R = window.REF;
   if (!R) return null;
-  const raw = String(s || '').replace(/\s*\([^)]*\)/g, '').trim();
-  return R.ALIAS[RK(raw)] || null;
+  // the full name first: "Miami (OH)" is its own school
+  const full = String(s || '').trim();
+  const raw = full.replace(/\s*\([^)]*\)/g, '').trim();
+  return R.ALIAS[RK(full)] || R.ALIAS[RK(raw)] || null;
 }
 function gameIndex() {
   const R = window.REF;
   if (!R) return {};
   if (_gidx) return _gidx;
   _gidx = {};
-  R.GAMES.forEach(g => { _gidx[RK(g.a) + '@' + RK(g.h)] = g; });
+  R.GAMES.forEach(g => { _gidx[g.id] = g; _gidx[RK(g.a) + '@' + RK(g.h)] = g; });
   return _gidx;
 }
-function refGame(matchup) {
-  const parts = String(matchup || '').split(/ at | vs\.? /i).map(x => x.trim());
+function refGame(r) {
+  const ix = gameIndex();
+  if (r.cfbd_game_id && ix[String(r.cfbd_game_id)]) return ix[String(r.cfbd_game_id)];
+  const parts = String(r.matchup || '').split(/ at | vs\.? /i).map(x => x.trim());
   if (parts.length !== 2) return null;
   const a = refTeam(parts[0]), h = refTeam(parts[1]);
   if (!a || !h) return null;
-  const ix = gameIndex();
   return ix[RK(a) + '@' + RK(h)] || ix[RK(h) + '@' + RK(a)] || null;
 }
 function modelMargin(g) {
@@ -433,15 +436,15 @@ function modelMargin(g) {
   const M = modelCfg();
   return M.scale * (ph.pr - pa.pr) + (g.nz ? 0 : M.hfa);
 }
-// signed model edge in points for a ledger row; null when unmodelable
+// signed model delta in points for a full-game side or moneyline; null otherwise
 function rowEdge(r) {
   const mt = (r.market_type || '').toUpperCase();
   if (mt !== 'SPREAD' && mt !== 'ML') return null;
-  const g = refGame(r.matchup);
+  // any period but the full game: the ledger writes Q1/Q3/Q4 and 1H
+  if ((r.period_norm || r.ext_period || 'FG').toUpperCase() !== 'FG') return null;
+  const g = refGame(r);
   const m = modelMargin(g);
   if (m === null) return null;
-  // halves and quarters are not priceable off a full-game rating
-  if (/\b(1H|2H|1Q|2Q|3Q|4Q)\b/i.test((r.ext_period || '') + ' ' + (r.side || ''))) return null;
   const side = String(r.side || '');
   const team = sideTeam(side.replace(/[-+]?\d.*$/, '').replace(/\bML\b|plus money|moneyline/gi, '').replace(/\([^)]*\)/g, '').trim(), g);
   if (!team) return null;
@@ -450,19 +453,17 @@ function rowEdge(r) {
   const teamModel = isHome ? m : -m;
   if (mt === 'ML') {
     const fm = fairMargin(r.price_cited);
-    if (fm === null) return null;
-    return teamModel - fm;
+    return fm === null ? null : teamModel - fm;
   }
-  const raw = /([+-]\d+(?:\.\d+)?)/.exec(side);
-  const n = raw ? parseFloat(raw[1]) : num(r.number_cited);
-  if (n === null || isNaN(n)) return null;
+  const n = num(r.number_cited);
+  if (n === null) return null;
   return teamModel + n;
 }
 
 function betKey(r, grain) {
   const mt = (r.market_type || '').toUpperCase();
   if (grain === 'market') return mt;
-  const per = (r.ext_period || 'FG').toUpperCase();
+  const per = (r.period_norm || r.ext_period || 'FG').toUpperCase();
   return mt + '·' + (per || 'FG');
 }
 function betLabelOf(k) {
@@ -487,22 +488,12 @@ function boxSt(on) {
     background: on ? INK : 'oklch(1 0 0)'
   };
 }
-function valSt(tone, weight) {
-  return { font: (weight || 400) + ' 12.5px/1.3 ' + MONO, color: tone === 'good' ? GOOD : tone === 'bad' ? BAD : tone === 'mute' ? MUT : INK };
-}
-
-// Live counts for the standfirst. Hard-coding them in the template is how the page
-// came to claim "78 of 105 resolved ... 3 where the team never resolved" after a fix
-// had taken those to 81 and zero.
-function perfSubtitle() {
-  const M = window.BOARD && window.BOARD.META;
-  return '';
-}
+const GRID = 'minmax(118px,1.3fr) minmax(150px,1.5fr) 44px minmax(84px,0.8fr) minmax(92px,0.9fr) minmax(64px,0.6fr) minmax(76px,0.7fr) 50px minmax(70px,0.7fr)';
 
 class Component extends DCLogic {
   state = {
-    rows: null, pickers: [], bets: [], show: 'all', tier: '0', grain: 'market',
-    span: 'week', metric: 'edge', preset: 'edge', sort: 'score', dir: -1, week: 'all',
+    rows: null, pickers: [], bets: [], show: 'all', tier: '0', grain: 'market', ent: 'host', pos: 'pick',
+    span: 'week', metric: 'clv', sort: 'clvN', dir: -1, week: 'all',
     pkOpen: false, btOpen: false
   };
 
@@ -528,10 +519,18 @@ class Component extends DCLogic {
     window.removeEventListener('keydown', this._esc);
   }
 
-  keep(r) {
+  // rows the current filters keep, before any per-picker grouping
+  scope(r) {
     const s = this.state;
+    if (s.ent === 'host' && !yes(r.in_host_baseline)) return false;
+    if (s.pos === 'pick' && String(r.ext_pick_or_lean || '').toUpperCase() === 'LEAN') return false;
     if (s.show !== 'all' && r.show !== s.show) return false;
     if (s.week !== 'all' && String(weekOf(r)) !== s.week) return false;
+    return true;
+  }
+  keep(r) {
+    const s = this.state;
+    if (!this.scope(r)) return false;
     if (s.pickers.length && s.pickers.indexOf(r.host) < 0) return false;
     if (s.tier !== '0' && s.tier.indexOf(String(r.confidence_tier)) < 0) return false;
     if (s.bets.length && s.bets.indexOf(betKey(r, s.grain)) < 0) return false;
@@ -544,88 +543,59 @@ class Component extends DCLogic {
       const host = r.host || '—';
       let o = m.get(host);
       if (!o) {
-        o = {
-          host: host, name: SHORT[host] || host, tag: TAG[host] || null,
-          n: 0, graded: 0, w: 0, l: 0, p: 0, units: 0, staked: 0,
-          clvN: 0, clvSum: 0, edgeN: 0, edgeSum: 0, edgePos: 0, mix: {}, per: {}, tiers: { 1: 0, 2: 0, 3: 0 }, hist: []
-        };
+        const et = String(r.entity_type || '').toUpperCase();
+        o = { host: host, name: SHORT[host] || host, tag: et && et !== 'HOST' ? et.toLowerCase().replace(/_/g, ' ') : null,
+              n: 0, w: 0, l: 0, p: 0, units: 0, staked: 0, clv: [], beat: 0, same: 0, worse: 0, disp: 0,
+              edgeN: 0, edgeSum: 0, mix: {} };
         m.set(host, o);
       }
       o.n++;
       const mt = (r.market_type || '').toUpperCase();
       o.mix[mt] = (o.mix[mt] || 0) + 1;
-      const per = (r.ext_period || 'FG').toUpperCase();
-      o.per[per] = (o.per[per] || 0) + 1;
-      const tk = String(r.confidence_tier);
-      if (o.tiers[tk] !== undefined) o.tiers[tk]++;
-      const c = num(r.clv_points);
-      if (c !== null) { o.clvN++; o.clvSum += c; }
-      const eg = rowEdge(r);
-      if (eg !== null) { o.edgeN++; o.edgeSum += eg; if (eg >= edgeFloor()) o.edgePos++; }
       const res = (r.result || '').toUpperCase().charAt(0);
-      o.hist.push({ date: r.game_date || r.episode_date || '', res: res });
-      if (res === 'W' || res === 'L' || res === 'P' || res === 'T') {
-        o.graded++;
+      if (res === 'W' || res === 'L' || res === 'P') {
         const ret = payout(r.price_cited, mt);
         if (res === 'W') { o.w++; if (ret !== null) { o.units += ret; o.staked++; } }
         else if (res === 'L') { o.l++; if (ret !== null) { o.units -= 1; o.staked++; } }
-        else { o.p++; }
+        else o.p++;
       }
+      const c = num(r.clv_points);
+      if (c !== null) {
+        if (yes(r.disputed)) o.disp++;
+        else { o.clv.push(c); if (c > 0) o.beat++; else if (c < 0) o.worse++; else o.same++; }
+      }
+      const eg = rowEdge(r);
+      if (eg !== null) { o.edgeN++; o.edgeSum += eg; }
     });
-    const list = [];
-    m.forEach(o => {
-      const dec = o.w + o.l;
-      o.winPct = dec ? o.w / dec : null;
-      o.clvAvg = o.clvN ? o.clvSum / o.clvN : null;
-      o.unitsPer = o.staked ? o.units / o.staked : null;
-      o.edgeAvg = o.edgeN ? o.edgeSum / o.edgeN : null;
-      o.hist.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-      list.push(o);
+    return Array.from(m.values()).map(o => {
+      o.clvCi = meanCi(o.clv);
+      o.winCi = wilson(o.w, o.w + o.l);
+      return o;
     });
-    return list;
-  }
-
-  score(o) {
-    if (!o.graded && o.clvN === 0 && o.edgeN === 0) return null;
-    const w = PRESETS[this.state.preset].w;
-    const cc = o.clvAvg === null ? 0 : clamp(o.clvAvg / 1.5, -1, 1);
-    const wc = o.winPct === null ? 0 : clamp((o.winPct - 0.5) / 0.15, -1, 1);
-    const uc = o.unitsPer === null ? 0 : clamp(o.unitsPer / 0.15, -1, 1);
-    const ec = o.edgeAvg === null ? 0 : clamp(o.edgeAvg / EDGE_CAP, -1, 1);
-    const wr = w.clv + w.win + w.units, we = w.edge;
-    const rawR = wr ? (w.clv * cc + w.win * wc + w.units * uc) / wr : 0;
-    const shrinkR = o.graded / (o.graded + SHRINK_K);
-    const shrinkE = o.edgeN / (o.edgeN + EDGE_K);
-    const blend = (wr * shrinkR * rawR + we * shrinkE * ec) / (wr + we);
-    return clamp(50 + 50 * blend, 0, 100);
   }
 
   renderVals() {
     const s = this.state, all = s.rows;
-    const preset = PRESETS[s.preset];
-
-    const presetTabs = ['edge', 'clv', 'bal', 'res'].map(k => ({
-      label: PRESETS[k].label, click: () => this.setState({ preset: k }), st: tabSt(s.preset === k)
-    }));
+    const META = (window.BOARD && window.BOARD.META) || {};
     const grainTabs = [['market', 'Market'], ['both', 'Market × period']].map(v => ({
       label: v[1], click: () => this.setState({ grain: v[0], bets: [] }), st: tabSt(s.grain === v[0])
     }));
     const spanTabs = [['week', 'Weekly'], ['month', 'Monthly'], ['season', 'All-time']].map(v => ({
       label: v[1], click: () => this.setState({ span: v[0] }), st: tabSt(s.span === v[0])
     }));
-    const metricTabs = [['volume', 'Volume'], ['edge', 'Edge'], ['clv', 'CLV'], ['units', 'Units'], ['win', 'Win%']].map(v => ({
+    const metricTabs = [['clv', 'CLV'], ['volume', 'Volume'], ['win', 'Win%'], ['units', 'Units'], ['edge', 'Model Δ']].map(v => ({
       label: v[1], click: () => this.setState({ metric: v[0] }), st: tabSt(s.metric === v[0])
     }));
     const COLS = [
-      ['name', 'Picker'], ['picks', 'Picks'], ['graded', 'Graded'], ['wlp', 'W–L–P'],
-      ['win', 'Win%'], ['units', 'Units'], ['clv', 'CLV'], ['edge', 'Edge'], ['score', 'Score']
+      ['name', 'Picker'], ['clv', 'CLV vs proxy · 95%'], ['clvN', 'n'], ['beat', 'Beat / same / worse'],
+      ['win', 'Win% · 95%'], ['wlp', 'W–L–P'], ['units', 'Units'], ['picks', 'Logged'], ['edge', 'Model Δ (ref)']
     ];
     const cols = COLS.map(c => ({
       label: c[1], arrow: s.sort === c[0] ? (s.dir === -1 ? ' ↓' : ' ↑') : '',
       click: () => this.setState(st => ({ sort: c[0], dir: st.sort === c[0] ? -st.dir : -1 })),
       st: {
         cursor: 'pointer', border: 0, background: 'transparent', padding: 0, textAlign: 'left',
-        font: (s.sort === c[0] ? 500 : 400) + ' 10px/1.2 ' + MONO, textTransform: 'uppercase',
+        font: (s.sort === c[0] ? 500 : 400) + ' 10px/1.25 ' + MONO, textTransform: 'uppercase',
         letterSpacing: '0.05em', color: s.sort === c[0] ? INK : MUT
       }
     }));
@@ -633,29 +603,32 @@ class Component extends DCLogic {
       label: MKT[k].label,
       st: { width: '9px', height: '9px', borderRadius: '2px', background: MKT[k].c, display: 'inline-block' }
     }));
+    const noise = modelCfg().resid_sd;
     const shell = {
-      hdrSub: perfSubtitle(),
-      presetTabs: presetTabs, presetNote: preset.note, grainTabs: grainTabs, spanTabs: spanTabs,
-      metricTabs: metricTabs, cols: cols, mixLegend: mixLegend,
-      metricDefault: s.metric,
+      // the build's standfirst opens with "Who to follow", which this page no longer claims to answer
+      hdrSub: String(META.perf_subtitle || '').replace(/^Who to follow, and on what\.\s*/, ''),
+      grainTabs: grainTabs, spanTabs: spanTabs, metricTabs: metricTabs, cols: cols, mixLegend: mixLegend,
+      headRowSt: { display: 'grid', gridTemplateColumns: GRID, gap: '0 10px', alignItems: 'end', padding: '9px 14px',
+                   background: 'oklch(0.968 0.006 250)', borderBottom: '1px solid oklch(0.895 0.006 250)' },
       pkOpen: s.pkOpen, btOpen: s.btOpen, pkExpanded: s.pkOpen ? 'true' : 'false', btExpanded: s.btOpen ? 'true' : 'false',
-      show: s.show, tier: s.tier, week: s.week,
+      show: s.show, tier: s.tier, week: s.week, ent: s.ent, pos: s.pos,
       onShow: e => this.setState({ show: e.target.value }),
       onWeek: e => this.setState({ week: e.target.value }),
       onTier: e => this.setState({ tier: e.target.value }),
+      onEnt: e => this.setState({ ent: e.target.value }),
+      onPos: e => this.setState({ pos: e.target.value }),
       onPkOpen: () => this.setState(st => ({ pkOpen: !st.pkOpen, btOpen: false })),
       onBtOpen: () => this.setState(st => ({ btOpen: !st.btOpen, pkOpen: false })),
       onPickerAll: () => this.setState({ pickers: [] }),
       onBetAll: () => this.setState({ bets: [] }),
-      footnote: 'Model edge is in points, from the preseason power ratings in ncaa-power-ratings.csv (home-field advantage ' + modelCfg().hfa.toFixed(2) + ', zero at neutral sites, ratings scaled by ' + modelCfg().scale.toFixed(3) + '\u2014both fitted to the market, not assumed). On a spread it is the model margin minus the number cited. On a moneyline the cited price is converted to a fair margin (normal margin model, sd ' + MARGIN_SD + ') and edge is the model margin minus that — so a big underdog at a long price is judged on the price, not punished for being an underdog; a moneyline with no price cited is n/a. Totals and team totals stay unmodelable: the ratings carry no pace number. The small number under each Edge value is modelable picks clearing the model\'s measured noise floor, over modelable picks. That floor is not a round number: it is the standard deviation of the model against the market, reported by calibrate_model.py. Read the whole Edge column against it. Where the model\'s error on real margins is larger than the market\'s, an apparent edge is more likely to be the model being wrong than the number being wrong, and Edge is a sanity check on the price rather than a source of edge. Score blends model edge with CLV, win% and units per pick, then shrinks each toward neutral by sample size (n / (n + ' + SHRINK_K + ')) so a 3-pick hot streak cannot outrank a graded body of work. Edge is a price test, not a results test: it says the number was good, not that the pick won. Units are 1u flat at the cited price; where no price is cited a spread or total is graded at -110 and a moneyline is excluded, since its return is unknowable without a number. Win% is decisions only — pushes removed.'
+      footnote: 'CLV is in points against CLOSE_PROXY, CFBD’s last recorded line, which has not yet been checked against a real close; until the manual closes are compared nobody here is ranked on it. The interval is the mean ± t standard errors (Student’s t with n − 1 degrees of freedom: 2.78 at n = 5, 2.01 at n = 50); with fewer than 5 CLV rows none is shown. Moneylines carry CLV only as a probability change and are not in the points mean. Win% is decisions only (pushes out) with a Wilson 95% interval. Units are 1u flat at the cited price; a spread or total with no price cited is graded at -110 and a moneyline with no price is left out. Disputed rows (LEDGER_DEFECTS.csv) keep their result and stay out of every CLV mean. Model Δ is the preseason-ratings model (home-field ' + modelCfg().hfa.toFixed(2) + ', scale ' + modelCfg().scale.toFixed(3) + ') minus the number cited, full-game sides and moneylines only; the model misses the market by ' + (noise ? noise.toFixed(2) : '?') + ' points (sd) and real margins by more than the market does, so the column is a reference, not an edge.'
     };
 
     if (!all) {
       return Object.assign(shell, {
         countLabel: 'loading', weekOpts: [], pickerLabel: 'All pickers', pickerOpts: [], betLabel: 'All bet types', betOpts: [],
-        board: [], boardEmpty: false, trendCols: [], trendRows: [], trendGridSt: { display: 'grid' },
-        trendNote: '', trendLegend: '', formRows: [], fadeRows: [], fadeEmpty: null,
-        tierRows: [], tierVerdict: '', printRows: [], fadeBasis: ''
+        board: [], boardEmpty: false, boardNote: '', trendCols: [], trendRows: [], trendGridSt: { display: 'grid' },
+        trendNote: '', trendLegend: '', tierRows: [], tierVerdict: '', printRows: [], evRows: [], evVerdict: ''
       });
     }
 
@@ -663,14 +636,14 @@ class Component extends DCLogic {
     all.forEach(r => { const w = weekOf(r); if (w !== null && weeks.indexOf(w) < 0) weeks.push(w); });
     weeks.sort((a, b) => a - b);
     const weekOpts = weeks.map(w => ({ value: String(w), label: 'Week ' + w }));
-    const scoped = all.filter(r => (s.show === 'all' || r.show === s.show));
+    const scoped = all.filter(r => this.scope(r));
     const pickerTally = {};
     scoped.forEach(r => { pickerTally[r.host] = (pickerTally[r.host] || 0) + 1; });
     const pickerNames = Object.keys(pickerTally).sort((a, b) => pickerTally[b] - pickerTally[a]);
     const pickerOpts = pickerNames.map(h => {
       const on = s.pickers.indexOf(h) >= 0;
       return {
-        label: SHORT[h] || h, mark: on ? '\u2713' : '', n: String(pickerTally[h] || ''), boxSt: boxSt(on),
+        label: SHORT[h] || h, mark: on ? '✓' : '', n: String(pickerTally[h] || ''), boxSt: boxSt(on),
         click: () => this.setState(st => ({ pickers: st.pickers.indexOf(h) >= 0 ? st.pickers.filter(x => x !== h) : st.pickers.concat([h]) }))
       };
     });
@@ -680,76 +653,78 @@ class Component extends DCLogic {
     const betOpts = betKeys.map(k => {
       const on = s.bets.indexOf(k) >= 0;
       return {
-        label: betLabelOf(k), mark: on ? '\u2713' : '', n: String(betTally[k]), boxSt: boxSt(on),
+        label: betLabelOf(k), mark: on ? '✓' : '', n: String(betTally[k]), boxSt: boxSt(on),
         click: () => this.setState(st => ({ bets: st.bets.indexOf(k) >= 0 ? st.bets.filter(x => x !== k) : st.bets.concat([k]) }))
       };
     });
 
     const rows = all.filter(r => this.keep(r));
-    const gradedTotal = rows.filter(r => /^[WLPT]/i.test(r.result || '')).length;
-    const clvTotal = rows.filter(r => num(r.clv_points) !== null).length;
+    const graded = rows.filter(r => /^[WLP]/i.test(r.result || '')).length;
+    const clvRows = rows.filter(r => num(r.clv_points) !== null && !yes(r.disputed)).length;
+    const disp = rows.filter(r => num(r.clv_points) !== null && yes(r.disputed)).length;
+    const leansOut = s.pos === 'pick' ? all.filter(r => String(r.ext_pick_or_lean).toUpperCase() === 'LEAN' && (s.ent !== 'host' || yes(r.in_host_baseline))).length : 0;
+    const nonhostOut = s.ent === 'host' ? all.filter(r => !yes(r.in_host_baseline)).length : 0;
     const list = this.agg(rows);
 
-    const dirMul = s.dir;
-    const key = s.sort;
+    const get = (o, key) => {
+      if (key === 'name') return o.name.toLowerCase();
+      if (key === 'picks') return o.n;
+      if (key === 'clvN') return o.clv.length;
+      if (key === 'clv') return o.clvCi ? o.clvCi.m : -999;
+      if (key === 'beat') return o.clv.length ? o.beat / o.clv.length : -1;
+      if (key === 'win') return o.winCi ? o.winCi.p : -1;
+      if (key === 'wlp') return o.w + o.l + o.p;
+      if (key === 'units') return o.staked ? o.units : -999;
+      if (key === 'edge') return o.edgeN ? o.edgeSum / o.edgeN : -999;
+      return 0;
+    };
     const sorted = list.slice().sort((a, b) => {
-      const get = o => {
-        if (key === 'name') return o.name.toLowerCase();
-        if (key === 'picks') return o.n;
-        if (key === 'graded') return o.graded;
-        if (key === 'wlp') return o.w;
-        if (key === 'win') return o.winPct === null ? -1 : o.winPct;
-        if (key === 'units') return o.staked ? o.units : -999;
-        if (key === 'clv') return o.clvAvg === null ? -999 : o.clvAvg;
-      if (key === 'edge') return o.edgeAvg === null ? -999 : o.edgeAvg;
-        const sc = this.score(o);
-        return sc === null ? -1 : sc;
-      };
-      const x = get(a), y = get(b);
-      if (typeof x === 'string') return x < y ? -dirMul : x > y ? dirMul : 0;
+      const x = get(a, s.sort), y = get(b, s.sort);
+      if (typeof x === 'string') return x < y ? -s.dir : x > y ? s.dir : 0;
       if (x === y) return b.n - a.n;
-      return x < y ? -dirMul : dirMul;
+      return x < y ? -s.dir : s.dir;
     });
-
     const mixBar = o => MKT_ORDER.filter(k => o.mix[k]).map(k => ({
       st: { width: (o.mix[k] / o.n * 100) + '%', background: MKT[k].c, display: 'block', height: '100%' }
     }));
-
+    const pos = v => 50 + 50 * Math.max(-1, Math.min(1, v / CI_SPAN));
     const board = sorted.map((o, i) => {
-      const sc = this.score(o);
+      const ci = o.clvCi, showCi = ci && ci.n >= 5 && ci.lo !== null;
       return {
-        rank: String(i + 1), name: o.name, tag: o.tag, mix: mixBar(o),
-        picks: String(o.n), graded: o.graded ? String(o.graded) : '0',
-        wlp: o.graded ? o.w + '–' + o.l + (o.p ? '–' + o.p : '') : '—',
-        win: o.winPct === null ? '—' : pct(o.winPct),
-        winSt: valSt(o.winPct === null ? 'mute' : o.winPct >= 0.524 ? 'good' : 'bad'),
-        units: o.staked ? (o.units >= 0 ? '+' : '') + o.units.toFixed(2) : '—',
-        unitsSt: valSt(!o.staked ? 'mute' : o.units >= 0 ? 'good' : 'bad'),
-        clv: o.clvAvg === null ? '—' : (o.clvAvg >= 0 ? '+' : '') + o.clvAvg.toFixed(2),
-        clvSt: valSt(o.clvAvg === null ? 'mute' : o.clvAvg >= 0 ? 'good' : 'bad'),
-        edge: o.edgeAvg === null ? '—' : (o.edgeAvg >= 0 ? '+' : '') + o.edgeAvg.toFixed(1),
-        edgeSt: valSt(o.edgeAvg === null ? 'mute' : o.edgeAvg >= 1 ? 'good' : o.edgeAvg <= -1 ? 'bad' : null, 500),
-        edgeSub: o.edgeN ? o.edgePos + '/' + o.edgeN : 'n/a',
-        score: sc === null ? '—' : String(Math.round(sc)),
-        scoreSt: { font: '500 13px/1.3 ' + MONO, color: sc === null ? MUT : INK, minWidth: '22px', textAlign: 'right' },
-        scoreBarSt: {
-          display: 'block', height: '100%', width: (sc === null ? 0 : sc) + '%',
-          background: sc === null ? 'transparent' : sc >= 55 ? GOOD : sc <= 45 ? BAD : 'oklch(0.60 0.02 258)'
-        },
+        name: o.name, tag: o.tag, mix: mixBar(o),
+        clv: ci ? sgn2(ci.m) : '—',
+        clvCi: showCi ? '[' + sgn2(ci.lo) + ', ' + sgn2(ci.hi) + ']' : (ci ? 'n too small' : ''),
+        clvN: String(o.clv.length),
+        ciTrackSt: { position: 'relative', display: 'block', height: '8px', width: '100%', maxWidth: '150px',
+                     borderRadius: '4px', background: 'oklch(0.955 0.004 250)' },
+        ciZeroSt: { position: 'absolute', left: '50%', top: '-1px', bottom: '-1px', width: '1px', background: 'oklch(0.70 0.01 250)' },
+        ciBarSt: showCi ? { position: 'absolute', top: '2px', height: '4px', borderRadius: '2px', background: 'oklch(0.62 0.05 258)',
+                            left: pos(ci.lo) + '%', width: Math.max(1, pos(ci.hi) - pos(ci.lo)) + '%' } : { display: 'none' },
+        ciDotSt: ci ? { position: 'absolute', top: '0', width: '8px', height: '8px', marginLeft: '-4px', borderRadius: '50%',
+                        background: INK, left: pos(ci.m) + '%' } : { display: 'none' },
+        beat: o.clv.length ? o.beat + ' / ' + o.same + ' / ' + o.worse : '—',
+        win: o.winCi ? pct(o.winCi.p) + ' · n ' + o.winCi.n : '—',
+        winCi: o.winCi && o.winCi.n >= 5 ? '[' + pct(o.winCi.lo) + ', ' + pct(o.winCi.hi) + ']' : '',
+        wlp: (o.w + o.l + o.p) ? o.w + '–' + o.l + (o.p ? '–' + o.p : '') : '—',
+        units: o.staked ? (o.units >= 0 ? '+' : '−') + Math.abs(o.units).toFixed(2) : '—',
+        unitsSub: o.staked ? 'n ' + o.staked : '',
+        picks: String(o.n),
+        edge: o.edgeN ? (o.edgeSum / o.edgeN >= 0 ? '+' : '−') + Math.abs(o.edgeSum / o.edgeN).toFixed(1) : '—',
+        edgeSub: o.edgeN ? 'n ' + o.edgeN : '',
         rowSt: {
-          display: 'grid',
-          gridTemplateColumns: '26px minmax(104px,1.35fr) repeat(7,minmax(42px,0.58fr)) 82px',
-          gap: '0 8px', alignItems: 'center', padding: '10px 14px',
-          borderBottom: '1px solid oklch(0.945 0.006 250)',
-          background: i % 2 ? 'oklch(0.988 0.004 250)' : 'oklch(1 0 0)'
+          display: 'grid', gridTemplateColumns: GRID, gap: '0 10px', alignItems: 'center', padding: '10px 14px',
+          borderBottom: '1px solid oklch(0.945 0.006 250)', background: i % 2 ? 'oklch(0.988 0.004 250)' : 'oklch(1 0 0)'
         }
       };
     });
+    const boardNote = 'Not a ranking. Sorted by ' + (COLS.filter(c => c[0] === s.sort)[0] || COLS[2])[1].toLowerCase() +
+      '. Bar: CLV mean (dot) and 95% interval against zero, ±' + CI_SPAN + ' pts wide.' +
+      (disp ? ' ' + disp + ' disputed row' + (disp === 1 ? '' : 's') + ' out of CLV.' : '');
 
+    // --- over time
     const bucketOf = r => {
       const d = r.game_date || r.episode_date || '';
       if (s.span === 'season') return '2026';
-
       if (s.span === 'month') return monthOf(d);
       const w = weekOf(r);
       return w === null ? null : 'W' + (w < 10 ? '0' + w : w);
@@ -762,9 +737,9 @@ class Component extends DCLogic {
     rows.forEach(r => {
       const b = bucketOf(r); if (!b) return;
       const k = r.host + '|' + b;
-      const o = cellMap[k] || (cellMap[k] = { n: 0, w: 0, l: 0, units: 0, staked: 0, clvN: 0, clvSum: 0, edgeN: 0, edgeSum: 0 });
+      const o = cellMap[k] || (cellMap[k] = { n: 0, w: 0, l: 0, units: 0, staked: 0, clv: [], edgeN: 0, edgeSum: 0 });
       o.n++;
-      const c = num(r.clv_points); if (c !== null) { o.clvN++; o.clvSum += c; }
+      const c = num(r.clv_points); if (c !== null && !yes(r.disputed)) o.clv.push(c);
       const eg = rowEdge(r); if (eg !== null) { o.edgeN++; o.edgeSum += eg; }
       const res = (r.result || '').toUpperCase().charAt(0);
       const ret = payout(r.price_cited, (r.market_type || '').toUpperCase());
@@ -773,13 +748,25 @@ class Component extends DCLogic {
     });
     const maxVol = Math.max(1, ...Object.keys(cellMap).map(k => cellMap[k].n));
     const cellFor = o => {
-      if (!o) return { txt: '·', tone: 'empty', v: null };
-      if (s.metric === 'volume') return { txt: String(o.n), tone: 'vol', v: o.n / maxVol };
-      if (s.metric === 'edge') return o.edgeN ? { txt: (o.edgeSum / o.edgeN >= 0 ? '+' : '') + (o.edgeSum / o.edgeN).toFixed(1), tone: 'sign', v: clamp((o.edgeSum / o.edgeN) / EDGE_CAP, -1, 1) } : { txt: '—', tone: 'empty', v: null };
-      if (s.metric === 'clv') return o.clvN ? { txt: (o.clvSum / o.clvN >= 0 ? '+' : '') + (o.clvSum / o.clvN).toFixed(1), tone: 'sign', v: clamp((o.clvSum / o.clvN) / 1.5, -1, 1) } : { txt: '—', tone: 'empty', v: null };
-      if (s.metric === 'units') return o.staked ? { txt: (o.units >= 0 ? '+' : '') + o.units.toFixed(1), tone: 'sign', v: clamp(o.units / (o.staked * 0.5), -1, 1) } : { txt: '—', tone: 'empty', v: null };
+      if (!o) return { txt: '·', n: '', tone: 'empty', v: null, small: false };
+      if (s.metric === 'volume') return { txt: String(o.n), n: '', tone: 'vol', v: o.n / maxVol, small: false };
+      if (s.metric === 'clv') {
+        if (!o.clv.length) return { txt: '—', n: '', tone: 'empty', v: null, small: false };
+        const m = o.clv.reduce((a, b) => a + b, 0) / o.clv.length;
+        return { txt: (m >= 0 ? '+' : '−') + Math.abs(m).toFixed(1), n: o.clv.length, tone: 'sign', v: Math.max(-1, Math.min(1, m / 1.5)), small: o.clv.length < 5 };
+      }
+      if (s.metric === 'edge') {
+        if (!o.edgeN) return { txt: '—', n: '', tone: 'empty', v: null, small: false };
+        const m = o.edgeSum / o.edgeN;
+        return { txt: (m >= 0 ? '+' : '−') + Math.abs(m).toFixed(1), n: o.edgeN, tone: 'ref', v: null, small: true };
+      }
+      if (s.metric === 'units') {
+        if (!o.staked) return { txt: '—', n: '', tone: 'empty', v: null, small: false };
+        return { txt: (o.units >= 0 ? '+' : '−') + Math.abs(o.units).toFixed(1), n: o.staked, tone: 'sign', v: Math.max(-1, Math.min(1, o.units / (o.staked * 0.5))), small: o.staked < 5 };
+      }
       const dec = o.w + o.l;
-      return dec ? { txt: Math.round(o.w / dec * 100) + '', tone: 'sign', v: clamp((o.w / dec - 0.5) / 0.15, -1, 1) } : { txt: '—', tone: 'empty', v: null };
+      return dec ? { txt: Math.round(o.w / dec * 100) + '', n: dec, tone: 'sign', v: Math.max(-1, Math.min(1, (o.w / dec - 0.5) / 0.15)), small: dec < 5 }
+                 : { txt: '—', n: '', tone: 'empty', v: null, small: false };
     };
     const trendRows = sorted.map(o => ({
       name: o.name,
@@ -787,146 +774,146 @@ class Component extends DCLogic {
         const c = cellFor(cellMap[o.host + '|' + b]);
         let bg = 'oklch(0.972 0.004 250)', fg = MUT;
         if (c.tone === 'vol') { bg = 'oklch(' + (0.97 - 0.30 * c.v) + ' ' + (0.01 + 0.09 * c.v) + ' 258)'; fg = c.v > 0.55 ? 'oklch(0.99 0 0)' : INK; }
-        else if (c.tone === 'sign' && c.v !== null) {
+        else if (c.tone === 'sign' && c.v !== null && !c.small) {
+          // a muted wash, not a traffic light: a week is a handful of picks
           const a = Math.abs(c.v);
-          bg = c.v >= 0 ? 'oklch(' + (0.965 - 0.30 * a) + ' ' + (0.02 + 0.10 * a) + ' 150)' : 'oklch(' + (0.965 - 0.28 * a) + ' ' + (0.02 + 0.14 * a) + ' 25)';
-          fg = a > 0.55 ? 'oklch(0.99 0 0)' : INK;
-        }
+          bg = c.v >= 0 ? 'oklch(' + (0.97 - 0.12 * a) + ' ' + (0.01 + 0.04 * a) + ' 150)' : 'oklch(' + (0.97 - 0.12 * a) + ' ' + (0.01 + 0.05 * a) + ' 25)';
+          fg = INK;
+        } else if (c.tone === 'sign' || c.tone === 'ref') { fg = SEC; }
         return {
-          txt: c.txt,
-          st: {
-            font: '400 11.5px/1 ' + MONO, textAlign: 'center', padding: '9px 4px',
-            borderRadius: '3px', background: bg, color: fg, minWidth: '38px'
-          }
+          txt: c.txt, n: c.n !== '' ? ' ' + c.n : '',
+          nSt: { font: '400 9px/1 ' + MONO, color: MUT, marginLeft: '2px' },
+          st: { font: '400 11.5px/1 ' + MONO, textAlign: 'center', padding: '9px 4px', borderRadius: '3px', background: bg, color: fg, minWidth: '44px', whiteSpace: 'nowrap' }
         };
       })
     }));
     const trendGridSt = {
       display: 'grid',
-      gridTemplateColumns: 'minmax(84px,132px) repeat(' + Math.max(buckets.length, 1) + ',minmax(40px,1fr))',
-      gap: '3px', alignItems: 'center', minWidth: (140 + buckets.length * 44) + 'px'
+      gridTemplateColumns: 'minmax(84px,132px) repeat(' + Math.max(buckets.length, 1) + ',minmax(48px,1fr))',
+      gap: '3px', alignItems: 'center', minWidth: (140 + buckets.length * 52) + 'px'
     };
-    const trendNote = s.span === 'season' ? 'one column — all of 2026 pooled'
+    const trendNote = s.span === 'season' ? 'one column: all of 2026 pooled'
       : buckets.length <= 1 ? buckets.length + ' period in the ledger so far' : buckets.length + ' periods';
-    const trendLegend = s.metric === 'edge'
-      ? 'Cell = average model edge in points. Spread edge is model margin minus the number; moneyline edge is model margin minus the fair margin implied by the cited price. Green means the ratings liked the price.'
-      : s.metric === 'volume'
-      ? 'Cell = picks logged. Darker is more volume. Volume is not skill — read it next to edge.'
-      : s.metric === 'win' ? 'Cell = win% against the number, decisions only. Green above 50, red below.'
-      : s.metric === 'units' ? 'Cell = units at cited prices, 1u flat. Blank where no price was cited.'
-      : 'Cell = average CLV in points. Green beat the close, red got the worse number.';
+    const trendLegend = s.metric === 'clv'
+      ? 'Cell = mean CLV in points against CLOSE_PROXY, small number = n. Cells with n under 5 are not shaded.'
+      : s.metric === 'volume' ? 'Cell = positions logged. Volume is not skill.'
+      : s.metric === 'win' ? 'Cell = win% against the number, decisions only, small number = n. Cells with n under 5 are not shaded.'
+      : s.metric === 'units' ? 'Cell = units at cited prices, 1u flat, small number = n graded with a price or an assumed -110.'
+      : 'Cell = mean model Δ in points, small number = n. Reference only: the ratings are the preseason set and the model misses the market by about ' + (noise ? noise.toFixed(1) : '?') + ' points.';
 
-    const PIP = { W: GOOD, L: BAD, P: 'oklch(0.72 0.01 250)', T: 'oklch(0.72 0.01 250)' };
-    const formRows = sorted.slice(0, 10).map(o => {
-      const last = o.hist.slice(-10);
-      const graded = last.filter(h => PIP[h.res]);
-      const w = graded.filter(h => h.res === 'W').length, l = graded.filter(h => h.res === 'L').length;
-      let run = 0, runType = '';
-      for (let i = o.hist.length - 1; i >= 0; i--) {
-        const r = o.hist[i].res;
-        if (r !== 'W' && r !== 'L') continue;
-        if (!runType) { runType = r; run = 1; continue; }
-        if (r === runType) run++; else break;
-      }
-      const label = !graded.length ? 'ungraded' : (w + '–' + l) + (run > 1 ? ' · ' + run + runType : '');
-      return {
-        name: o.name,
-        pips: last.map(h => ({
-          st: {
-            width: '9px', height: '16px', borderRadius: '2px', display: 'inline-block',
-            background: PIP[h.res] || 'transparent',
-            boxShadow: PIP[h.res] ? 'none' : 'inset 0 0 0 1px oklch(0.86 0.008 250)'
-          }
-        })),
-        label: label,
-        st: { flex: 'none', minWidth: '58px', textAlign: 'right', font: '400 11.5px/1.3 ' + MONO, color: !graded.length ? MUT : w > l ? GOOD : w < l ? BAD : SEC }
-      };
-    });
-
-    const useClv = clvTotal > 0;
-    const fadeSrc = useClv
-      ? list.filter(o => o.clvAvg !== null && o.clvAvg < 0).sort((a, b) => a.clvAvg - b.clvAvg)
-      : list.filter(o => o.edgeAvg !== null && o.edgeAvg < 0 && o.edgeN >= 2).sort((a, b) => a.edgeAvg - b.edgeAvg);
-    const fadeRows = fadeSrc.slice(0, 8).map(o => ({
-      name: o.name + '  ·  ' + (useClv ? o.clvN + ' priced' : o.edgeN + ' modelable'),
-      value: useClv ? o.clvAvg.toFixed(2) : o.edgeAvg.toFixed(1),
-      st: { flex: 'none', font: '500 12.5px/1.3 ' + MONO, color: BAD }
-    }));
-    const fadeEmpty = fadeRows.length ? null
-      : (useClv
-        ? 'No picker is negative on CLV under these filters.'
-        : 'No closing lines are logged, so this ranks on model edge instead — and nobody with 2+ modelable picks is negative under these filters.');
-
-    const tierAgg = { 1: null, 2: null, 3: null };
-    [1, 2, 3].forEach(t => { tierAgg[t] = { n: 0, w: 0, l: 0, clvN: 0, clvSum: 0, edgeN: 0, edgeSum: 0 }; });
+    // --- stated confidence, split by show
+    const tierRows = [];
+    const shows = s.show === 'all' ? ['Cover 3', 'BBOC', 'Pick Em'] : [s.show];
+    const tierAgg = {};
     rows.forEach(r => {
-      const t = tierAgg[String(r.confidence_tier)];
-      if (!t) return;
+      const k = r.show + '|' + r.confidence_tier;
+      const t = tierAgg[k] || (tierAgg[k] = { n: 0, w: 0, l: 0, clv: [] });
       t.n++;
-      const c = num(r.clv_points); if (c !== null) { t.clvN++; t.clvSum += c; }
-      const eg = rowEdge(r); if (eg !== null) { t.edgeN++; t.edgeSum += eg; }
+      const c = num(r.clv_points); if (c !== null && !yes(r.disputed)) t.clv.push(c);
       const res = (r.result || '').toUpperCase().charAt(0);
       if (res === 'W') t.w++; else if (res === 'L') t.l++;
     });
-    const tierTotal = tierAgg[1].n + tierAgg[2].n + tierAgg[3].n;
-    const TIERW = { 1: '1px', 2: '2px', 3: '4px' };
-    const tierRows = [3, 2, 1].map(t => {
-      const o = tierAgg[t], dec = o.w + o.l;
+    let separated = [];
+    shows.forEach(sh => {
+      [3, 2, 1].forEach(t => {
+        const o = tierAgg[sh + '|' + t];
+        if (!o) return;
+        const ci = meanCi(o.clv), wc = wilson(o.w, o.w + o.l);
+        tierRows.push({
+          label: sh + ' · ' + t + (t === 3 ? ' ★' : ''),
+          labelSt: { font: (t === 3 ? 600 : 400) + " 12.5px/1.25 'IBM Plex Sans',system-ui,sans-serif", color: INK },
+          picks: String(o.n), basis: (TIER_BASIS[sh] || {})[t] || '',
+          clv: ci ? 'n ' + ci.n + '  ' + sgn2(ci.m) + (ci.n >= 5 && ci.lo !== null ? ' [' + sgn2(ci.lo) + ', ' + sgn2(ci.hi) + ']' : '') : '—',
+          win: wc ? 'n ' + wc.n + '  ' + pct(wc.p) + (wc.n >= 5 ? ' [' + pct(wc.lo) + ', ' + pct(wc.hi) + ']' : '') : '—'
+        });
+        o.ci = ci; o.wc = wc;
+      });
+      // a claim only when the top tier's interval clears the rest of that show's
+      const top = tierAgg[sh + '|3'];
+      const restW = [1, 2].reduce((a, t) => a + ((tierAgg[sh + '|' + t] || {}).w || 0), 0);
+      const restL = [1, 2].reduce((a, t) => a + ((tierAgg[sh + '|' + t] || {}).l || 0), 0);
+      const rest = wilson(restW, restW + restL);
+      if (top && top.wc && top.wc.n >= 10 && rest && rest.n >= 10 && (top.wc.lo > rest.hi || top.wc.hi < rest.lo)) {
+        separated.push(sh + ': tier 3 ' + (top.wc.lo > rest.hi ? 'above' : 'below') + ' tiers 1–2 on win rate');
+      }
+    });
+    const tierVerdict = separated.length
+      ? 'Intervals separate for ' + separated.join('; ') + '. Still one season of a handful of picks per tier: treat it as a question to watch, not a finding.'
+      : 'No show’s top tier is separable from its lower tiers at these sample sizes: every 95% interval overlaps. Tier 3 is stated on air for Cover 3 and Pick Em and mostly inferred for BBOC, so the shows are not pooled.';
+
+    // --- evidence grade (DESIGN_BRIEF 4): whether a *type* of argument beats the
+    // market is answerable within a season; whether a host does is not
+    const EV_ORDER = ['CHARTED', 'STAT_CITED', 'BASE_RATE', 'ROSTER', 'SCHEME', 'MARKET', 'MOTIVATION', 'ASSERTION', 'NONE'];
+    const EV_LABEL = { CHARTED: 'Charted', STAT_CITED: 'Stat cited', BASE_RATE: 'Base rate', ROSTER: 'Roster', SCHEME: 'Scheme', MARKET: 'Market', MOTIVATION: 'Motivation', ASSERTION: 'Assertion', NONE: 'None offered' };
+    const EV_SHORT = { CHARTED: 'chart', STAT_CITED: 'stat', BASE_RATE: 'base', ROSTER: 'roster', SCHEME: 'scheme', MARKET: 'mkt', MOTIVATION: 'motiv', ASSERTION: 'assert', NONE: 'none' };
+    const EV_TONE = { CHARTED: 'strong', STAT_CITED: 'strong', BASE_RATE: 'ok', ROSTER: 'ok', SCHEME: 'ok', MARKET: 'ok', MOTIVATION: 'weak', ASSERTION: 'weak', NONE: 'weak' };
+    const evAgg = {};
+    rows.forEach(r => {
+      const k = String(r.evidence_grade || '').toUpperCase() || 'UNGRADED';
+      const t = evAgg[k] || (evAgg[k] = { n: 0, w: 0, l: 0, clv: [], beat: 0, same: 0, worse: 0 });
+      t.n++;
+      const c = num(r.clv_points);
+      if (c !== null && !yes(r.disputed)) { t.clv.push(c); if (c > 0) t.beat++; else if (c < 0) t.worse++; else t.same++; }
+      const res = (r.result || '').toUpperCase().charAt(0);
+      if (res === 'W') t.w++; else if (res === 'L') t.l++;
+    });
+    const evKeys = EV_ORDER.filter(k => evAgg[k]).concat(Object.keys(evAgg).filter(k => EV_ORDER.indexOf(k) < 0));
+    const evSep = [];
+    const evRows = evKeys.map(k => {
+      const o = evAgg[k], ci = meanCi(o.clv), wc = wilson(o.w, o.w + o.l);
+      const others = [];
+      evKeys.forEach(j => { if (j !== k) others.push.apply(others, evAgg[j].clv); });
+      const rest = meanCi(others);
+      if (ci && ci.n >= 10 && ci.lo !== null && rest && rest.lo !== null && (ci.lo > rest.hi || ci.hi < rest.lo)) {
+        evSep.push((EV_LABEL[k] || k) + ' ' + (ci.lo > rest.hi ? 'above' : 'below') + ' the other grades on CLV');
+      }
+      const tone = EV_TONE[k] || 'weak';
       return {
-        label: 'Tier ' + t + (t === 3 ? ' ★' : ''),
-        edgeSt: { flex: 'none', width: TIERW[t], height: '15px', borderRadius: '1px', background: INK, display: 'inline-block' },
+        label: EV_LABEL[k] || k.toLowerCase(),
+        tag: EV_SHORT[k] || k.toLowerCase().slice(0, 6),
+        tagSt: Object.assign({ font: '600 9px/1 ' + MONO, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '2px 4px', borderRadius: '3px', marginRight: '7px' },
+          tone === 'strong' ? { background: 'oklch(0.30 0.02 258)', color: 'oklch(0.98 0 0)', border: '1px solid oklch(0.30 0.02 258)' }
+            : tone === 'ok' ? { background: 'oklch(1 0 0)', color: SEC, border: '1px solid oklch(0.62 0.01 250)' }
+              : { background: 'transparent', color: MUT, border: '1px dashed oklch(0.60 0.01 250)', fontWeight: 500 }),
+        labelSt: { font: "400 12.5px/1.25 'IBM Plex Sans',system-ui,sans-serif", color: INK, whiteSpace: 'nowrap' },
         picks: String(o.n),
-        share: tierTotal ? Math.round(o.n / tierTotal * 100) + '%' : '—',
-        edge: o.edgeN ? ((o.edgeSum / o.edgeN >= 0 ? '+' : '') + (o.edgeSum / o.edgeN).toFixed(1)) : '—',
-        edgeSt: valSt(o.edgeN ? (o.edgeSum / o.edgeN >= 1 ? 'good' : o.edgeSum / o.edgeN <= -1 ? 'bad' : null) : 'mute', 500),
-        win: dec ? Math.round(o.w / dec * 100) + '%' : '—',
-        winSt: valSt(dec ? (o.w / dec >= 0.524 ? 'good' : 'bad') : 'mute'),
-        clv: o.clvN ? ((o.clvSum / o.clvN >= 0 ? '+' : '') + (o.clvSum / o.clvN).toFixed(2)) : '—',
-        clvSt: valSt(o.clvN ? (o.clvSum / o.clvN >= 0 ? 'good' : 'bad') : 'mute')
+        clv: ci ? 'n ' + ci.n + '  ' + sgn2(ci.m) + (ci.n >= 5 && ci.lo !== null ? ' [' + sgn2(ci.lo) + ', ' + sgn2(ci.hi) + ']' : '') : '\u2014',
+        bsw: o.clv.length ? o.beat + ' / ' + o.same + ' / ' + o.worse : '\u2014',
+        win: wc ? 'n ' + wc.n + '  ' + pct(wc.p) + (wc.n >= 5 ? ' [' + pct(wc.lo) + ', ' + pct(wc.hi) + ']' : '') : '\u2014'
       };
     });
-    const t3 = tierAgg[3], t12 = { w: tierAgg[1].w + tierAgg[2].w, l: tierAgg[1].l + tierAgg[2].l };
-    let tierVerdict;
-    if (t3.w + t3.l === 0) {
-      const e3 = tierAgg[3].edgeN ? tierAgg[3].edgeSum / tierAgg[3].edgeN : null;
-      const eLowN = tierAgg[1].edgeN + tierAgg[2].edgeN;
-      const eLow = eLowN ? (tierAgg[1].edgeSum + tierAgg[2].edgeSum) / eLowN : null;
-      const share = tierTotal ? Math.round(t3.n / tierTotal * 100) : 0;
-      if (e3 === null || eLow === null) {
-        tierVerdict = 'Nothing graded and too few modelable picks to test calibration. Today this shows appetite only: ' + share + '% of picks under these filters are tier 3.';
-      } else if (e3 > eLow) {
-        tierVerdict = 'No results yet, but the model agrees with the hosts: tier 3 carries ' + e3.toFixed(1) + ' pts of average edge against ' + eLow.toFixed(1) + ' for tier 1–2. Their loudest plays are also their best-priced ones. ' + share + '% of picks are tier 3.';
-      } else {
-        tierVerdict = 'No results yet, and the model disagrees with the hosts: tier 3 carries ' + e3.toFixed(1) + ' pts of average edge against ' + eLow.toFixed(1) + ' for tier 1–2 — conviction is not tracking price. ' + share + '% of picks are tier 3.';
-      }
-    } else {
-      const a = t3.w / (t3.w + t3.l), b = (t12.w + t12.l) ? t12.w / (t12.w + t12.l) : null;
-      tierVerdict = b === null
-        ? 'Tier 3 is hitting ' + pct(a) + '. No graded tier 1–2 picks to compare against yet.'
-        : a > b
-          ? 'Confidence is calibrated: tier 3 hits ' + pct(a) + ' against ' + pct(b) + ' for tier 1–2. Weight the loud plays.'
-          : 'Confidence is inverted: tier 3 hits ' + pct(a) + ' against ' + pct(b) + ' for tier 1–2. The stated best bets are not the best bets.';
-    }
+    // only a grade with 10+ CLV rows is tested against the pooled rest; the others are named
+    const evTested = evKeys.filter(k => evAgg[k].clv.length >= 10);
+    const evSmall = evKeys.filter(k => evAgg[k].clv.length < 10).map(k => (EV_LABEL[k] || k).toLowerCase() + ' (n ' + evAgg[k].clv.length + ')');
+    const evNs = evTested.map(k => evAgg[k].clv.length);
+    const evVerdict = (evSep.length
+      ? 'Intervals separate for ' + evSep.join('; ') + '. One season, small cells: a question to watch, not a finding.'
+      : evTested.length
+        ? 'No grade with 10 or more CLV rows separates from the other grades pooled (' + evTested.length + ' tested, CLV n ' + Math.min.apply(null, evNs) + ' to ' + Math.max.apply(null, evNs) + ').'
+        : 'No grade has 10 CLV rows yet, so none is tested.')
+      + (evSmall.length ? ' Too few CLV rows to test: ' + evSmall.join(', ') + '.' : '')
+      + ' CLV is against CLOSE_PROXY, which has not been checked against a real close.';
 
-    const printRows = sorted.map(o => {
-      const per = Object.keys(o.per).sort((a, b) => o.per[b] - o.per[a])
-        .map(k => k.toLowerCase() + ' ' + Math.round(o.per[k] / o.n * 100) + '%').join(' · ');
-      return { name: o.name, meta: o.n + (o.n === 1 ? ' pick · ' : ' picks · ') + per, mix: mixBar(o) };
-    });
+    const printRows = sorted.map(o => ({
+      name: o.name, meta: o.n + (o.n === 1 ? ' position' : ' positions'), mix: mixBar(o)
+    }));
 
     const filtersOn = s.pickers.length || s.bets.length || s.tier !== '0' || s.show !== 'all' || s.week !== 'all';
+    const outBits = [];
+    if (nonhostOut) outBits.push(nonhostOut + ' non-host out');
+    if (leansOut) outBits.push(leansOut + ' leans out');
     return Object.assign(shell, {
       weekOpts: weekOpts,
-      countLabel: (filtersOn ? rows.length + ' of ' + all.length + ' picks' : all.length + ' picks · ' + list.length + ' pickers') + ' · ' + gradedTotal + ' graded',
+      countLabel: (filtersOn ? rows.length + ' of ' + scoped.length : rows.length) + ' positions · ' + graded + ' graded · ' + clvRows + ' with CLV' + (outBits.length ? ' · ' + outBits.join(' · ') : ''),
       pickerLabel: !s.pickers.length ? 'All pickers' : s.pickers.length === 1 ? (SHORT[s.pickers[0]] || s.pickers[0]) : s.pickers.length + ' pickers',
       pickerOpts: pickerOpts,
       betLabel: !s.bets.length ? 'All bet types' : s.bets.length === 1 ? betLabelOf(s.bets[0]) : s.bets.length + ' bet types',
       betOpts: betOpts,
-      board: board, boardEmpty: board.length === 0,
+      board: board, boardEmpty: board.length === 0, boardNote: boardNote,
       trendCols: trendCols, trendRows: trendRows, trendGridSt: trendGridSt,
       trendNote: trendNote, trendLegend: trendLegend,
-      formRows: formRows, fadeRows: fadeRows, fadeEmpty: fadeEmpty, fadeBasis: useClv ? 'negative CLV' : 'negative model edge',
-      tierRows: tierRows, tierVerdict: tierVerdict, printRows: printRows
+      tierRows: tierRows, tierVerdict: tierVerdict, printRows: printRows,
+      evRows: evRows, evVerdict: evVerdict
     });
   }
 }
