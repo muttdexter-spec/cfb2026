@@ -8,9 +8,10 @@ The board is an observational tracker, not a tipping service. Two rules shape al
 
 - **CLV is measured against `CLOSE_PROXY`**, the last line CFBD recorded, not a verified close. No
   picker is ranked on it until the manual Saturday closes have been compared against it.
-- **The ratings model does not beat the market.** Fitted on 223 games (home-field 4.07, scale 1.306),
-  it misses the market by 7.61 points (sd) and misses real margins by more than the market does
-  (MAE 12.88 against 10.98 on 157 finished games). Its number is shown as a delta, never as an edge.
+- **The ratings model does not beat the market.** Fitted on 276 games (home-field 3.95, scale 1.254;
+  2 Oct), it misses the market by 7.72 points (sd) and misses real margins by more than the market
+  does (MAE 13.39 against 11.04 on 217 finished games). Its number is shown as a delta, never as an
+  edge.
 
 ## Pages
 
@@ -32,9 +33,9 @@ be made to the other; see "Known issues".
 | `board-bundle.js` | `window.BOARD`: the hand-authored `G` pick grid and episode labels, then `META` and the inlined ledger, reasoning, conditions, lines and results CSVs | top by hand; `META` and CSVs by `make_site_data.py` (menu 14) |
 | `ref-data.js` | `window.REF`: schedule, team aliases, PFF power ratings | external PFF generator (last run 5 Sep; see Known issues) |
 | `odds-data.js` | `window.ODDS`: sportsbook consensus and per-book prices for the current week's games, keyed on `cfbd_game_id`. Loaded with the page | `make_odds_data.py` (menu 16) |
-| `odds-props.js` | `window.ODDS_P`: the player props, once the build writes them to their own file (`ODDS.props_file` names it). Loaded when a markets panel first opens. Not there yet: today the props are still inside `odds-data.js`, and the board reads them from either place | patched `make_odds_data.py` (menu 16) |
+| `odds-props.js` | `window.ODDS_P`: the full-game player props, split out of `odds-data.js` (`ODDS.props_file` names it). Loaded when a markets panel first opens. First built 2 Oct for Week 5 | `make_odds_data.py` (menu 16) |
 | `model-data.js` | `window.MODEL`: team environment and player prop projections from `prop_projections.py`. Loaded when a markets panel first opens; the pages read only its environment card | `make_odds_data.py` (menu 16) |
-| `intel-data.js` | `window.INTEL`: the injury tracker and the prop card for the current week, joined to the schedule | `make_intel_data.py` (new) |
+| `intel-data.js` | `window.INTEL`: the injury tracker and the prop card for the current week, joined to the schedule. One week at a time: Week 5 replaced Week 4's card on 2 Oct | `make_intel_data.py` |
 | `odds-view.js` | view layer for prices: de-vig, consensus, best price, line move, prop grids | by hand |
 | `intel-view.js` | view layer for the injury tracker and the prop card | by hand |
 | `support.js` | the page runtime (loads React from unpkg) | generated, never edit |
@@ -47,8 +48,8 @@ The data files are plain `<script>` tags in the page's `<head>`, not in the runt
 already run them once while parsing, so a data file in the helmet is downloaded and evaluated
 twice. Keep new data files in `<head>`.
 
-`model-data.js` (818 KB) and, once the build splits them out, the player props (91% of the
-odds file) are fetched by `odds-view.js` the first time a markets panel opens. Until they land the
+`model-data.js` (763 KB) and the player props (`odds-props.js`, 1.9 MB) are fetched by
+`odds-view.js` the first time a markets panel opens. Until they land the
 panel shows the game markets and a "Loading props..." tab; if the props file is missing the tab
 says "Props unavailable". In a headless Chromium test at 4x CPU slowdown on an emulated 4G
 connection, this took the phone board's first render from about 2.7 s to 2.4 s, its script requests
@@ -165,21 +166,31 @@ Saturday that is usually the night before).
 
 ## Known issues
 
-- **First-half player props.** `make_odds_data.py` keys props without SGO's `period_id`, so a 1H line
+- **First-half player props (fixed 2 Oct).** The menu 16 run for Week 5 used the patched
+  `make_odds_data.py`: full-game props only (9,267 rows kept; 1,619 1H and 1,774 1Q rows dropped),
+  `periods: "game"`, props in `odds-props.js`. The history: `make_odds_data.py` keyed props without SGO's `period_id`, so a 1H line
   arrived as a second full-game row (DeSean Bishop 79.5 rush yards and his 1H 40.5), and a yes/no
   market with no line (anytime TD) can mix its 1H and full-game quotes in one row: in the 26 Sep MID
   snapshot 240 of 1,874 yes/no rows quoted by two or more books have books 1.8 times or more apart
   (Dallas Wilson: FanDuel +145, BetMGM +115, Bovada +150, DraftKings +600). The board keeps one
   over/under row per player and stat, says how many it hid, and flags the yes/no and touchdown rows
   until the build sets `periods`. The fix is in the patched `make_odds_data.py` (full-game props only,
-  `periods: "game"`, and the props split into `odds-props.js`); it needs a menu 16 run.
+  `periods: "game"`, and the props split into `odds-props.js`), applied by the 2 Oct menu 16 run.
 - **`ref-data.js` is the 5 Sep generation**: preseason (2026W0) ratings, and 41 of 71 Week 4 and 41 of
   59 Week 5 games still flagged TBD. The board works around the kickoffs; the ratings need the
   generator, which is not in `Scraper\`.
 - **`model-data.js` is the original projection run**, not the fine-tuned overlay, and carries no run
-  id or timestamp.
+  id or timestamp. Week 5: `prop_projections.py` run `20261003T001701Z`, fitted through Week 4.
+- **SportsGameOdds' DraftKings main line is not always DraftKings' live line.** In the 2 Oct OPEN
+  snapshot, 69 DraftKings mains disagree with DraftKings' own alt ladder in the same file (for example
+  Chris Marshall: main 68.5 at -110, ladder 78.5 at -118 and 79.5 at -114). Every "DraftKings below
+  the consensus" play on the Week 5 card is therefore marked CHECK DK: it stands only if the
+  DraftKings app shows that number. The same pattern sits under the Week 4 price plays.
 - **Weather.** `game_conditions.csv` stores `kickoff_iso` in the venue's local time; the board now
-  asks Open-Meteo for venue-local hours. Week 3 has no rows.
+  asks Open-Meteo for venue-local hours. Week 3 has no rows. Week 5 rows are added with the Week 5
+  picks.
+- **Week 5 injury tracker is empty.** No injury pass has run for Week 5 (`injury_status_CFB_WK05.csv`
+  does not exist), so the panel shows nothing tracked. That means not tracked, not healthy.
 - **Two copies of the board logic.** Desktop and phone pages duplicate their data and join functions.
   Moving them into a shared file like `odds-view.js` is the next structural fix.
 - **Still open, small:** the CFBD market chip takes every field from the best-ranked line row, so a
