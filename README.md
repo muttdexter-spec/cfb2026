@@ -8,10 +8,12 @@ The board is an observational tracker, not a tipping service. Two rules shape al
 
 - **CLV is measured against `CLOSE_PROXY`**, the last line CFBD recorded, not a verified close. No
   picker is ranked on it until the manual Saturday closes have been compared against it.
-- **The ratings model does not beat the market.** Fitted on 276 games (home-field 3.95, scale 1.254;
-  2 Oct), it misses the market by 7.72 points (sd) and misses real margins by more than the market
-  does (MAE 13.39 against 11.04 on 217 finished games). Its number is shown as a delta, never as an
-  edge.
+- **The ratings model does not beat the market.** Since 2 Oct each game is priced with the newest PFF
+  export published before its week (vintages 2026W0, 2026W1, 2026W4), each with its own fitted
+  constants. The current vintage (2026W4: home-field 2.08, scale 0.969, fitted on 56 Week 5 games)
+  misses the market by 4.74 points (sd). On 217 finished games, each priced by the vintage published
+  before it, the model misses real margins by more than the market does (MAE 12.98 against 11.04).
+  Its number is shown as a delta, never as an edge.
 
 ## Pages
 
@@ -31,7 +33,7 @@ be made to the other; see "Known issues".
 | File | Holds | Built by |
 | --- | --- | --- |
 | `board-bundle.js` | `window.BOARD`: the hand-authored `G` pick grid and episode labels, then `META` and the inlined ledger, reasoning, conditions, lines and results CSVs | top by hand; `META` and CSVs by `make_site_data.py` (menu 14) |
-| `ref-data.js` | `window.REF`: schedule, team aliases, PFF power ratings | external PFF generator (last run 5 Sep; see Known issues) |
+| `ref-data.js` | `window.REF`: schedule, team aliases, and the 5 Sep PFF ratings, which the model no longer reads (the PFF vintages ride in `BOARD.META.model`) | external PFF generator (last run 5 Sep; see Known issues) |
 | `odds-data.js` | `window.ODDS`: sportsbook consensus and per-book prices for the current week's games, keyed on `cfbd_game_id`. Loaded with the page | `make_odds_data.py` (menu 16) |
 | `odds-props.js` | `window.ODDS_P`: the full-game player props, split out of `odds-data.js` (`ODDS.props_file` names it). Loaded when a markets panel first opens. First built 2 Oct for Week 5 | `make_odds_data.py` (menu 16) |
 | `model-data.js` | `window.MODEL`: team environment and player prop projections from `prop_projections.py`. Loaded when a markets panel first opens; the pages read only its environment card | `make_odds_data.py` (menu 16) |
@@ -63,6 +65,9 @@ split, when the build makes it, takes about 270 KB more off.
 2. New week's picks: extract, append to `CFB Picks\`, add the week's day blocks to `G` in
    `board-bundle.js` and its rows to `reasoning.csv` and `game_conditions.csv`.
 3. Menu **6** if a ledger changed, **14**, **15**, **16**, **14** again, **7** (the gate).
+   A new PFF export first: save it as `ncaa-power-ratings-pff_2026Wn.csv` in the root, then
+   `py -3 "CFB Picks\add_pff_vintage.py" "C:\Users\alexa\Downloads\CFB 2026" ncaa-power-ratings-pff_2026Wn.csv --vintage 2026Wn --as-of YYYY-MM-DD --through-week n`
+   (n is the last week whose results the export has absorbed), then menus **15** and **14**.
 4. After the injury pass (`cfb_injury_pass.py merge`, `injury_tools.py flag-card`) and after each prop
    card update: `py -3 Scraper\make_intel_data.py` (week defaults to `current_week`). It reads the
    week's files in `Odds Scraper\cfb_edge\ref\` and `cfb_data\projections_v1\finetune_WKnn\` and writes
@@ -79,9 +84,10 @@ as finished whatever the clock says.
 
 **Positions.** One chip per host position. After the game is graded the chip carries the result
 (W / L / P) from the ledger; the detail panel shows margin, CLV against `CLOSE_PROXY` and the pick id.
-The grid has no `pick_id`, so the join is by picker, game and market signature; 527 of 533 grid
-positions resolve to exactly one ledger row, and the rest show "no ledger row joined".
-The `Δ` beside a position is the ratings model minus the cited number. It is not coloured as an edge.
+The grid has no `pick_id`, so the join is by picker, game and market signature; 642 of 648 grid
+positions resolve to exactly one ledger row (all 115 in Week 5), and the rest show "no ledger row joined".
+The `Δ` beside a position is the ratings model minus the cited number, the game priced by the newest PFF
+vintage published before its week; the detail panel names the vintage. It is not coloured as an edge.
 The `⇄` marker, the Opposed filter and the "split" note pair positions on the same bet: opposite
 teams on the full-game side (spread or moneyline), over against under on one total, or the same
 period's derivative. A game-total over and a team-total under can both win, so they do not pair.
@@ -176,9 +182,10 @@ Saturday that is usually the night before).
   over/under row per player and stat, says how many it hid, and flags the yes/no and touchdown rows
   until the build sets `periods`. The fix is in the patched `make_odds_data.py` (full-game props only,
   `periods: "game"`, and the props split into `odds-props.js`), applied by the 2 Oct menu 16 run.
-- **`ref-data.js` is the 5 Sep generation**: preseason (2026W0) ratings, and 41 of 71 Week 4 and 41 of
-  59 Week 5 games still flagged TBD. The board works around the kickoffs; the ratings need the
-  generator, which is not in `Scraper\`.
+- **`ref-data.js` is the 5 Sep generation**: 41 of 71 Week 4 and 41 of 59 Week 5 games are still
+  flagged TBD there, and the board takes their kickoffs from the line captures. Its preseason (2026W0)
+  ratings no longer feed the model: since 2 Oct `calibrate_model.py` reads every vintage in
+  `CFB Picks\pff_ratings_vintages.csv` and `make_site_data.py` carries them in `BOARD.META.model`.
 - **`model-data.js` is the original projection run**, not the fine-tuned overlay, and carries no run
   id or timestamp. Week 5: `prop_projections.py` run `20261003T001701Z`, fitted through Week 4.
 - **SportsGameOdds' DraftKings main line is not always DraftKings' live line.** In the 2 Oct OPEN
@@ -187,10 +194,10 @@ Saturday that is usually the night before).
   the consensus" play on the Week 5 card is therefore marked CHECK DK: it stands only if the
   DraftKings app shows that number. The same pattern sits under the Week 4 price plays.
 - **Weather.** `game_conditions.csv` stores `kickoff_iso` in the venue's local time; the board now
-  asks Open-Meteo for venue-local hours. Week 3 has no rows. Week 5 rows are added with the Week 5
-  picks.
-- **Week 5 injury tracker is empty.** No injury pass has run for Week 5 (`injury_status_CFB_WK05.csv`
-  does not exist), so the panel shows nothing tracked. That means not tracked, not healthy.
+  asks Open-Meteo for venue-local hours. Week 3 has no rows. Week 5 rows (44 games) were added on
+  2 Oct with the Week 5 picks.
+- **Week 5 injury tracker.** The injury pass ran on 2 Oct (merged 8:46 PM ET; 102 players tracked in
+  51 games). No chip on a game means nothing tracked was listed, not that the team is healthy.
 - **Two copies of the board logic.** Desktop and phone pages duplicate their data and join functions.
   Moving them into a shared file like `odds-view.js` is the next structural fix.
 - **Still open, small:** the CFBD market chip takes every field from the best-ranked line row, so a

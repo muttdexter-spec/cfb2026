@@ -775,14 +775,40 @@ function sideTeam(tok, g) {
   if (tokenMatches(tok, g.a)) return g.a;
   return null;
 }
+// PFF vintage that prices a game: the newest export whose results horizon (tw, the
+// last week it has absorbed) is before the game's week, so no rating that already
+// knows a result prices that game (calibrate_model.py, vintage_guard.py). null when
+// the build carries no vintages, which is an older bundle.
+function vintageFor(g) {
+  const V = modelCfg().by_vintage;
+  if (!V || !V.length || !g || !g.wk) return null;
+  const wk = Number(g.wk);
+  let best = null;
+  for (const v of V) if (v.tw < wk && (!best || v.tw > best.tw)) best = v;
+  return best;
+}
+// that vintage's fitted constants; the top-level pair when the build has no vintages
+function modelCfgFor(g) {
+  const v = vintageFor(g);
+  return v ? { hfa: v.hfa, scale: v.scale, resid_sd: v.resid_sd, fitted: true, v: v.v, tw: v.tw } : modelCfg();
+}
+// a team's rating in the vintage pricing this game; REF.RATINGS only for an older bundle
+function ratingOf(g, team) {
+  const V = modelCfg().by_vintage;
+  if (V && V.length) {
+    const v = vintageFor(g), x = v ? v.R[team] : undefined;
+    return (x === undefined || x === null) ? null : x;
+  }
+  const r = window.REF && window.REF.RATINGS[team];
+  return (r && r.pr !== null && r.pr !== undefined) ? r.pr : null;
+}
 // points the home team is expected to win by
 function modelMargin(g) {
-  const R = window.REF;
-  if (!R || !g) return null;
-  const ph = R.RATINGS[g.h], pa = R.RATINGS[g.a];
-  if (!ph || !pa || ph.pr === null || pa.pr === null) return null;
-  const M = modelCfg();
-  return M.scale * (ph.pr - pa.pr) + (g.nz ? 0 : M.hfa);
+  if (!window.REF || !g) return null;
+  const ph = ratingOf(g, g.h), pa = ratingOf(g, g.a);
+  if (ph === null || pa === null) return null;
+  const M = modelCfgFor(g);
+  return M.scale * (ph - pa) + (g.nz ? 0 : M.hfa);
 }
 // edge in points for a cited pick; null when unmodelable
 function teamShort(name) {
@@ -823,12 +849,17 @@ function modelEdge(p, g) {
   }
   return null;
 }
-// The ratings model's measured error against the market (calibrate_model.py). A
-// delta inside it is noise, and the ratings are the preseason set, so the board shows
-// the number as a delta and never marks it as an edge.
-function modelNoise() {
-  const M = modelCfg();
+// The ratings model's measured error against the market (calibrate_model.py) for the
+// PFF vintage pricing this game. A delta inside it is noise, so the board shows the
+// number as a delta and never marks it as an edge. No game: the current vintage's.
+function modelNoise(g) {
+  const M = g ? modelCfgFor(g) : modelCfg();
   return (M && M.fitted && M.resid_sd) ? M.resid_sd : null;
+}
+// "PFF 2026W4 · results through wk 4" for the detail panel and the legend
+function vintageTxt(g) {
+  const M = modelCfgFor(g);
+  return M.v ? 'PFF ' + M.v + ' · results through wk ' + M.tw : 'power ratings';
 }
 function deltaTxt(pts) { return '\u0394' + (pts >= 0 ? '+' : '\u2212') + Math.abs(pts).toFixed(1); }
 // The episode's date from its label ("Cover 3 LOCKS Week 4 \u00b7 24 Sep \u00b7 ...") as YYYY-MM-DD.
@@ -941,7 +972,7 @@ const SR_ONLY = { position: 'absolute', width: '1px', height: '1px', padding: 0,
 // The chip key, behind a toggle so the legend stays short. The one
 // caveat that must always show (the model delta is noise) stays in legend2.
 const KEY_ROWS = [
-  { term: 'MODEL', def: 'the spread from the preseason power ratings' },
+  { term: 'MODEL', def: 'the spread from the newest PFF power ratings published before the game\'s week' },
   { term: 'MARKET · OPEN', def: 'the consensus number in the odds snapshot and where it opened (Markets gives the snapshot time); without odds, CFBD’s line, where close~ is CLOSE_PROXY' },
   { term: '★ and the bar', def: 'confidence tier: a thick bar and ★ for tier 3, thinner for 2 and 1. Stated on air for Cover 3 and Pick Em, mostly inferred for BBOC' },
   { term: 'Outlined chip', def: 'a moneyline, in By side colours' },
@@ -2118,7 +2149,7 @@ class Component extends DCLogic {
             const eg = modelEdge(p, sg);
             // Model delta only. The old \u2713\u2713 fired at 1 point with tier 2+, which is
             // neither condition (a) (the model's error is ~7.6 pts) nor condition (b).
-            const noise = modelNoise();
+            const noise = modelNoise(sg);
             const beyond = !!(eg && noise !== null && Math.abs(eg.pts) >= noise);
             const ent = pickEntry(p, g[1], reasonRows, ledgerRows);
             const led = ent ? ent.led : null;
@@ -2194,8 +2225,8 @@ class Component extends DCLogic {
               model: mm === null
                 ? (sg ? 'No rating: FCS opponent' : 'Game not on the schedule')
                 : (mm >= 0 ? sg.h + ' by ' + mm.toFixed(1) : sg.a + ' by ' + (-mm).toFixed(1)),
-              modelNote: mm === null ? 'unmodelable' : 'power ratings · scale ' + modelCfg().scale.toFixed(2) + ' · HFA ' + (sg.nz ? '0 (neutral)' : modelCfg().hfa.toFixed(2)) + (eDet && eDet.kind === 'ml' ? ' · price implies ' + eDet.fair.toFixed(1) : ''),
-              edgeTxt: eDet ? (deltaTxt(eDet.pts) + ' pts vs the number' + (modelNoise() !== null ? (Math.abs(eDet.pts) >= modelNoise() ? ' \u00b7 outside the \u00b1' + modelNoise().toFixed(1) + ' noise band' : ' \u00b7 inside the \u00b1' + modelNoise().toFixed(1) + ' noise band') : '')) : (mm === null ? null : 'no model number for this market'),
+              modelNote: mm === null ? 'unmodelable' : vintageTxt(sg) + ' · scale ' + modelCfgFor(sg).scale.toFixed(2) + ' · HFA ' + (sg.nz ? '0 (neutral)' : modelCfgFor(sg).hfa.toFixed(2)) + (eDet && eDet.kind === 'ml' ? ' · price implies ' + eDet.fair.toFixed(1) : ''),
+              edgeTxt: eDet ? (deltaTxt(eDet.pts) + ' pts vs the number' + (modelNoise(sg) !== null ? (Math.abs(eDet.pts) >= modelNoise(sg) ? ' \u00b7 outside the \u00b1' + modelNoise(sg).toFixed(1) + ' noise band' : ' \u00b7 inside the \u00b1' + modelNoise(sg).toFixed(1) + ' noise band') : '')) : (mm === null ? null : 'no model number for this market'),
               edgeChipSt: {
                 font: '500 11.5px/1 ' + MONO, padding: '5px 8px', borderRadius: '4px',
                 background: 'oklch(0.94 0.006 250)', color: SEC
@@ -2357,7 +2388,7 @@ class Component extends DCLogic {
       legend: legendOut, days: days, empty: gamesShown === 0,
       colorTabs: colorTabs,
       keyBtn: keyBtn, keyRows: s.keyOpen ? KEY_ROWS : null, keyLegend: s.keyOpen ? TIER_LEGEND.slice(1).filter(l => colorBy !== 'clv' || l.label !== 'moneyline') : null,
-      legend2: '\u0394: preseason-ratings model minus the cited number; the model misses the market by ' + (modelNoise() !== null ? modelNoise().toFixed(1) : '?') + ' pts, so it is noise, not an edge.',
+      legend2: '\u0394: ratings model (' + vintageTxt({ wk: week }) + ') minus the cited number; that vintage misses the market by ' + (modelNoise({ wk: week }) !== null ? modelNoise({ wk: week }).toFixed(1) : '?') + ' pts, so it is noise, not an edge.',
       intel: this.intelPanel(week, true),
       countLabel: gamesShown + (gamesShown === 1 ? ' game' : ' games') + ' · '
         + count + (count === 1 ? ' position' : ' positions'),

@@ -428,13 +428,40 @@ function refGame(r) {
   if (!a || !h) return null;
   return ix[RK(a) + '@' + RK(h)] || ix[RK(h) + '@' + RK(a)] || null;
 }
+// PFF vintage that prices a game: the newest export whose results horizon (tw, the
+// last week it has absorbed) is before the game's week, so no rating that already
+// knows a result prices that game (calibrate_model.py, vintage_guard.py). null when
+// the build carries no vintages, which is an older bundle.
+function vintageFor(g) {
+  const V = modelCfg().by_vintage;
+  if (!V || !V.length || !g || !g.wk) return null;
+  const wk = Number(g.wk);
+  let best = null;
+  for (const v of V) if (v.tw < wk && (!best || v.tw > best.tw)) best = v;
+  return best;
+}
+// that vintage's fitted constants; the top-level pair when the build has no vintages
+function modelCfgFor(g) {
+  const v = vintageFor(g);
+  return v ? { hfa: v.hfa, scale: v.scale, resid_sd: v.resid_sd, fitted: true, v: v.v, tw: v.tw } : modelCfg();
+}
+// a team's rating in the vintage pricing this game; REF.RATINGS only for an older bundle
+function ratingOf(g, team) {
+  const V = modelCfg().by_vintage;
+  if (V && V.length) {
+    const v = vintageFor(g), x = v ? v.R[team] : undefined;
+    return (x === undefined || x === null) ? null : x;
+  }
+  const r = window.REF && window.REF.RATINGS[team];
+  return (r && r.pr !== null && r.pr !== undefined) ? r.pr : null;
+}
+// points the home team is expected to win by
 function modelMargin(g) {
-  const R = window.REF;
-  if (!R || !g) return null;
-  const ph = R.RATINGS[g.h], pa = R.RATINGS[g.a];
-  if (!ph || !pa || ph.pr === null || pa.pr === null) return null;
-  const M = modelCfg();
-  return M.scale * (ph.pr - pa.pr) + (g.nz ? 0 : M.hfa);
+  if (!window.REF || !g) return null;
+  const ph = ratingOf(g, g.h), pa = ratingOf(g, g.a);
+  if (ph === null || pa === null) return null;
+  const M = modelCfgFor(g);
+  return M.scale * (ph - pa) + (g.nz ? 0 : M.hfa);
 }
 // signed model delta in points for a full-game side or moneyline; null otherwise
 function rowEdge(r) {
@@ -621,7 +648,7 @@ class Component extends DCLogic {
       onBtOpen: () => this.setState(st => ({ btOpen: !st.btOpen, pkOpen: false })),
       onPickerAll: () => this.setState({ pickers: [] }),
       onBetAll: () => this.setState({ bets: [] }),
-      footnote: 'CLV is in points against CLOSE_PROXY, CFBD’s last recorded line, which has not yet been checked against a real close; until the manual closes are compared nobody here is ranked on it. The interval is the mean ± t standard errors (Student’s t with n − 1 degrees of freedom: 2.78 at n = 5, 2.01 at n = 50); with fewer than 5 CLV rows none is shown. Moneylines carry CLV only as a probability change and are not in the points mean. Win% is decisions only (pushes out) with a Wilson 95% interval. Units are 1u flat at the cited price; a spread or total with no price cited is graded at -110 and a moneyline with no price is left out. Disputed rows (LEDGER_DEFECTS.csv) keep their result and stay out of every CLV mean. Model Δ is the preseason-ratings model (home-field ' + modelCfg().hfa.toFixed(2) + ', scale ' + modelCfg().scale.toFixed(3) + ') minus the number cited, full-game sides and moneylines only; the model misses the market by ' + (noise ? noise.toFixed(2) : '?') + ' points (sd) and real margins by more than the market does, so the column is a reference, not an edge.'
+      footnote: 'CLV is in points against CLOSE_PROXY, CFBD’s last recorded line, which has not yet been checked against a real close; until the manual closes are compared nobody here is ranked on it. The interval is the mean ± t standard errors (Student’s t with n − 1 degrees of freedom: 2.78 at n = 5, 2.01 at n = 50); with fewer than 5 CLV rows none is shown. Moneylines carry CLV only as a probability change and are not in the points mean. Win% is decisions only (pushes out) with a Wilson 95% interval. Units are 1u flat at the cited price; a spread or total with no price cited is graded at -110 and a moneyline with no price is left out. Disputed rows (LEDGER_DEFECTS.csv) keep their result and stay out of every CLV mean. Model Δ is the PFF-ratings model minus the number cited, full-game sides and moneylines only, each game priced by the newest PFF vintage published before its week with that vintage\'s own fitted constants (current vintage ' + (modelCfg().current_vintage || 'n/a') + ': home-field ' + modelCfg().hfa.toFixed(2) + ', scale ' + modelCfg().scale.toFixed(3) + '); the current vintage misses the market by ' + (noise ? noise.toFixed(2) : '?') + ' points (sd) and real margins by more than the market does, so the column is a reference, not an edge.'
     };
 
     if (!all) {
@@ -799,7 +826,7 @@ class Component extends DCLogic {
       : s.metric === 'volume' ? 'Cell = positions logged. Volume is not skill.'
       : s.metric === 'win' ? 'Cell = win% against the number, decisions only, small number = n. Cells with n under 5 are not shaded.'
       : s.metric === 'units' ? 'Cell = units at cited prices, 1u flat, small number = n graded with a price or an assumed -110.'
-      : 'Cell = mean model Δ in points, small number = n. Reference only: the ratings are the preseason set and the model misses the market by about ' + (noise ? noise.toFixed(1) : '?') + ' points.';
+      : 'Cell = mean model Δ in points, small number = n. Reference only: each game is priced by the newest PFF vintage published before it, and the current vintage misses the market by about ' + (noise ? noise.toFixed(1) : '?') + ' points.';
 
     // --- stated confidence, split by show
     const tierRows = [];

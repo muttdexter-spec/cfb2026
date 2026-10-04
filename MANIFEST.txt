@@ -1,4 +1,4 @@
-cfb2026 - complete site, 2026-10-03.
+cfb2026 - complete site, 2026-10-02.
 
 Pushed with git from cfb2026_upload (git pull first, then add, commit, push).
 
@@ -6,21 +6,21 @@ Files:
 
   index.html                 2,802 bytes
   support.js                 69,150 bytes
-  board-bundle.js            1,116,496 bytes
+  board-bundle.js            1,357,697 bytes
   ref-data.js                289,785 bytes
   odds-data.js               214,250 bytes
   odds-props.js              1,917,065 bytes
   model-data.js              763,389 bytes
   odds-view.js               53,041 bytes
-  intel-data.js              15,177 bytes
+  intel-data.js              10,496 bytes
   intel-view.js              14,439 bytes
-  Pick Board.dc.html         147,420 bytes
-  Pick Board Mobile.dc.html  144,746 bytes
-  Picker Performance.dc.html 58,442 bytes
-  host_pick_ledger.csv       325,851 bytes
+  Pick Board.dc.html         149,082 bytes
+  Pick Board Mobile.dc.html  146,321 bytes
+  Picker Performance.dc.html 59,908 bytes
+  host_pick_ledger.csv       407,185 bytes
   market_lines.csv           293,417 bytes
-  reasoning.csv              248,117 bytes
-  game_conditions.csv        11,283 bytes
+  reasoning.csv              337,441 bytes
+  game_conditions.csv        15,747 bytes
   results.csv                39,085 bytes
   README.md                  (documentation, optional)
 
@@ -30,7 +30,7 @@ In this folder but NOT part of the upload (build inputs only):
 19 files total (18 + README). Vercel serves the repo root as-is; no build step.
 
 Sanity check after pushing:
-  board-bundle.js must read 1,116,496 bytes on GitHub. A smaller number means the
+  board-bundle.js must read 1,357,697 bytes on GitHub. A smaller number means the
   upload did not replace it and the site is showing stale data.
   host_pick_ledger.csv must have 61 columns.
   intel-data.js is written by Scraper\make_intel_data.py; without it the board shows
