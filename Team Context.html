@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFB 2026 team context</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./team-data.js"></script>
+<style>
+:root{--ink:oklch(0.23 0.02 258);--sec:oklch(0.44 0.015 255);--mut:oklch(0.505 0.014 255);--line:oklch(0.895 0.006 250);--bg:oklch(0.985 0.003 250);--card:oklch(1 0 0);
+--link:oklch(0.42 0.16 258);--out-bg:oklch(0.945 0.05 25);--out-fg:oklch(0.42 0.18 25);--q-bg:oklch(0.955 0.06 78);--q-fg:oklch(0.44 0.12 62);--p-bg:oklch(0.945 0.006 250);
+--pos-bg:oklch(0.95 0.04 150);--pos-fg:oklch(0.38 0.11 150);--neg-bg:oklch(0.945 0.05 25);--neg-fg:oklch(0.42 0.18 25);--neu-bg:oklch(0.955 0.03 220);--neu-fg:oklch(0.40 0.10 220);
+--stale-bg:oklch(0.97 0.03 78);--stale-line:oklch(0.82 0.09 72);--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'IBM Plex Sans',system-ui,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);color-scheme:light;-webkit-font-smoothing:antialiased;font-family:var(--sans)}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 80px}
+h1{font:600 20px/1.25 var(--sans);margin:0 0 4px;letter-spacing:-0.01em}
+.lede{font:400 13px/1.55 var(--sans);color:var(--sec);margin:0 0 14px}
+.fine{font:400 11.5px/1.55 var(--mono);color:var(--mut);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px}
+input,select{font:400 13px var(--sans);padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)}
+input{min-width:220px}
+button{font:500 12px var(--sans);padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--sec);cursor:pointer}
+button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.card{min-width:0;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:14px 16px;margin:0 0 14px}
+.card h2{font:600 15px/1.3 var(--sans);margin:0 0 6px}
+.card h3{font:600 13px/1.3 var(--sans);margin:14px 0 6px}
+.stamp{display:inline-block;font:400 11px var(--mono);color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.stamp.stale{background:var(--stale-bg);border-color:var(--stale-line);color:var(--q-fg)}
+.stamp.vol{background:var(--q-bg);border-color:var(--stale-line);color:var(--q-fg)}
+table{border-collapse:collapse;width:100%;font:400 12.5px/1.4 var(--sans)}
+th{font:500 11px var(--mono);text-align:left;color:var(--mut);border-bottom:1px solid var(--line);padding:6px 6px;white-space:nowrap;cursor:pointer}
+td{border-bottom:1px solid var(--line);padding:6px 6px;vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--mono);font-size:12px}
+tr.clk{cursor:pointer}tr.clk:hover td{background:oklch(0.97 0.006 250)}
+.chip{display:inline-block;font:500 10.5px var(--mono);padding:1px 6px;border-radius:5px;border:1px solid var(--line);margin-right:4px;white-space:nowrap}
+.chip.out{background:var(--out-bg);color:var(--out-fg);border-color:oklch(0.80 0.09 25)}
+.chip.q{background:var(--q-bg);color:var(--q-fg);border-color:var(--stale-line)}
+.chip.p{background:var(--p-bg);color:var(--sec)}
+.chip.pos{background:var(--pos-bg);color:var(--pos-fg)}.chip.neg{background:var(--neg-bg);color:var(--neg-fg)}.chip.neu{background:var(--neu-bg);color:var(--neu-fg)}
+.chip.tier{background:oklch(0.95 0.03 300);color:oklch(0.40 0.12 300)}
+.kv{display:flex;flex-wrap:wrap;gap:10px 22px;font:400 12.5px var(--sans);color:var(--sec);margin:4px 0 8px}
+.kv b{color:var(--ink);font-weight:500}
+.claim{padding:7px 0;border-bottom:1px solid var(--line);font:400 13px/1.45 var(--sans)}
+.claim .m{font:400 11px var(--mono);color:var(--mut);margin-top:2px}
+.claim q{color:var(--sec);font-style:italic}
+details summary{cursor:pointer;font:500 13px var(--sans);color:var(--sec);padding:4px 0}
+.prior p{white-space:pre-wrap;font:400 13px/1.5 var(--sans);margin:0 0 8px}
+.banner{background:var(--stale-bg);border:1px solid var(--stale-line);border-radius:7px;padding:8px 10px;font:400 12px/1.5 var(--sans);color:var(--q-fg);margin:0 0 10px}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:900px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.hide{display:none}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.small{font:400 11.5px/1.5 var(--mono);color:var(--mut)}
+.wk{font:500 12px var(--mono);color:var(--sec);margin:10px 0 2px;border-top:1px dashed var(--line);padding-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>CFB 2026 team context</h1>
+<p class="lede">One page per team: season log and ATS against CLOSE_PROXY, the PFF rating vintages as pointers, the attrition ledger from the injury pipeline, what Cover 3 and BBOC have said week by week, and the preseason Summer School prior with its falsifiers. Every section carries its own as-of stamp.</p>
+<p class="fine" id="meta"></p>
+<div class="bar">
+  <input id="q" placeholder="Find a team (name, code, conference)" autocomplete="off">
+  <select id="conf"><option value="">All conferences</option></select>
+  <button id="back" class="hide">← All teams</button>
+  <a href="./index.html" style="margin-left:auto;font:400 12px var(--mono)">pick board</a>
+</div>
+<div id="index"></div>
+<div id="team" class="hide"></div>
+</div>
+<script>
+(function(){
+'use strict';
+var D = window.TEAMCTX || null;
+var $ = function(id){return document.getElementById(id)};
+if(!D){ $('index').innerHTML='<div class="card">team-data.js did not load.</div>'; return; }
+var T = D.teams, names = Object.keys(T).sort();
+$('meta').textContent = 'built '+D.as_of+' · '+D.n_teams+' FBS teams · '+D.n_dossiers+' preseason dossiers · '+D.n_podcast_episodes+' podcast episodes extracted · ratings are pointers, never edges · CLV/ATS vs CLOSE_PROXY, not a verified close';
+var confs = {}; names.forEach(function(n){confs[T[n].conference]=1});
+Object.keys(confs).sort().forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;$('conf').appendChild(o)});
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function sevChip(s){ if(s>=3) return '<span class="chip out">'+esc(s)+'</span>'; if(s>=1) return '<span class="chip q">'+esc(s)+'</span>'; return '<span class="chip p">'+esc(s)+'</span>'; }
+function statusChip(s){ if(!s) return ''; var u=String(s).toUpperCase(); var cls = /OUT|DOUBT|DISMISS|SEASON/.test(u)?'out':/QUEST|GTD|WEEKS|GAME/.test(u)?'q':'p'; return '<span class="chip '+cls+'">'+esc(u.replace('_',' '))+'</span>'; }
+function dirChip(d){ var c=d==='POSITIVE'?'pos':d==='NEGATIVE'?'neg':'neu'; return '<span class="chip '+c+'">'+esc(d.slice(0,3))+'</span>'; }
+function staleStamp(asof,days,approx){ var cls = days>60?'stamp stale':'stamp'; return '<span class="'+cls+'">AS_OF '+esc(asof)+(approx?' (approx.)':'')+' · '+days+' days old</span>'; }
+var sortKey='team', sortDir=1;
+function renderIndex(){
+  var q=$('q').value.trim().toLowerCase(), cf=$('conf').value;
+  var rows = names.filter(function(n){ var t=T[n]; if(cf && t.conference!==cf) return false; if(!q) return true; return (n+' '+t.team_id+' '+t.conference+' '+(t.head_coach||'')).toLowerCase().indexOf(q)>=0; });
+  rows = rows.map(function(n){ var t=T[n]; var sev = (t.attrition&&t.attrition.players)?t.attrition.players.filter(function(p){return p.max_severity>=3}).length:0;
+    var v=t.ratings.vintages||{}; var w4=v['2026W4']?v['2026W4'].pr:null; var d=t.ratings.delta_W4_minus_W0;
+    return {team:n,conf:t.conference,hc:t.head_coach||'',rec:t.results.record,ats:t.results.ats,cm:t.results.avg_cover_margin,w4:w4,delta:(d==null?null:d),sev:sev,claims:t.podcast.n_claims,doss:t.prior?1:0,last:t.podcast.last_date||''}; });
+  rows.sort(function(a,b){ var x=a[sortKey],y=b[sortKey]; if(x==null)x=-1e9; if(y==null)y=-1e9; if(typeof x==='string'){return sortDir*x.localeCompare(y)} return sortDir*(x-y); });
+  var h='<div class="card"><div class="tw"><table><thead><tr>'+[['team','Team'],['conf','Conf'],['hc','HC'],['rec','W-L'],['ats','ATS*'],['cm','Avg cover'],['w4','PFF W4'],['delta','Δ W4−W0'],['sev','Out/D players'],['claims','Podcast claims'],['last','Last heard'],['doss','Dossier']].map(function(c){return '<th data-k="'+c[0]+'" class="'+(['cm','w4','delta','sev','claims'].indexOf(c[0])>=0?'num':'')+'">'+c[1]+(sortKey===c[0]?(sortDir>0?' ▲':' ▼'):'')+'</th>'}).join('')+'</tr></thead><tbody>';
+  rows.forEach(function(r){ h+='<tr class="clk" data-t="'+esc(r.team)+'"><td><b>'+esc(r.team)+'</b></td><td>'+esc(r.conf)+'</td><td>'+esc(r.hc)+'</td><td>'+r.rec+'</td><td>'+r.ats+'</td><td class="num">'+(r.cm==null?'':r.cm)+'</td><td class="num">'+(r.w4==null?'':r.w4)+'</td><td class="num">'+(r.delta==null?'':(r.delta>0?'+':'')+r.delta)+'</td><td class="num">'+(r.sev?sevChip(r.sev):'0')+'</td><td class="num">'+r.claims+'</td><td class="small">'+esc(r.last)+'</td><td>'+(r.doss?'<span class="chip tier">PRIOR</span>':'')+'</td></tr>'; });
+  h+='</tbody></table></div><p class="small">*ATS graded against CLOSE_PROXY, CFBD\'s last recorded number (DraftKings preferred), which is not a verified close. Out/D players counts players whose worst official or reported status was Out, Doubtful or season-ending. Podcast claims are host statements, not facts.</p></div>';
+  $('index').innerHTML=h;
+  Array.prototype.forEach.call($('index').querySelectorAll('th'),function(th){ th.onclick=function(){ var k=th.getAttribute('data-k'); if(sortKey===k) sortDir=-sortDir; else {sortKey=k; sortDir=(k==='team'||k==='conf'||k==='hc'||k==='rec'||k==='ats'||k==='last')?1:-1;} renderIndex(); }; });
+  Array.prototype.forEach.call($('index').querySelectorAll('tr.clk'),function(tr){ tr.onclick=function(){ location.hash='team='+encodeURIComponent(tr.getAttribute('data-t')); }; });
+}
+var filterType='';
+function renderTeam(n){
+  var t=T[n]; if(!t){ return renderIndex(); }
+  var h='';
+  // header
+  var v=t.ratings.vintages||{}; var vk=Object.keys(v).sort();
+  h+='<div class="card"><h2>'+esc(n)+' <span class="small">'+esc(t.conference)+' · '+esc(t.team_id)+'</span></h2>';
+  h+='<div class="kv"><span>HC <b>'+esc(t.head_coach||'?')+'</b></span><span>Record <b>'+t.results.record+'</b> ('+t.results.conf_record+' conf)</span><span>ATS <b>'+t.results.ats+'</b> <span class="small">vs CLOSE_PROXY</span></span><span>Avg margin <b>'+(t.results.avg_margin==null?'—':t.results.avg_margin)+'</b></span><span>Avg cover margin <b>'+(t.results.avg_cover_margin==null?'—':t.results.avg_cover_margin)+'</b></span>';
+  if(vk.length){ h+='<span>PFF pr '+vk.map(function(k){return esc(k.replace('2026',''))+' <b>'+v[k].pr+'</b> (#'+v[k].rank+')'}).join(' → ')+(t.ratings.delta_W4_minus_W0!=null?' <span class="small">Δ '+(t.ratings.delta_W4_minus_W0>0?'+':'')+t.ratings.delta_W4_minus_W0+'</span>':'')+'</span>'; }
+  if(t.attrition&&t.attrition.portal){ var po=t.attrition.portal; h+='<span>Portal 2026 <b>'+po.n_in+' in / '+po.n_out+' out</b> <span class="small">4★+ '+po.stars4plus_in+' in / '+po.stars4plus_out+' out</span></span>'; }
+  h+='</div><p class="small">Ratings are pointers to CFB Picks\\pff_ratings_vintages.csv with their vintage; the site never turns them into an edge. Season stamps: results AS_OF '+esc(t.results.as_of)+'.</p></div>';
+  // synthesis read (judgment layer)
+  var sy=t.synthesis;
+  if(sy){
+    var tr=sy.trend||'UNCLEAR'; var trc=tr==='IMPROVING'?'pos':tr==='DECLINING'?'neg':'neu';
+    h+='<div class="card"><h2>Read <span class="stamp">AS_OF '+esc(sy.as_of||D.as_of)+'</span> <span class="chip tier">JUDGMENT LAYER</span> <span class="chip '+trc+'">'+esc(tr)+'</span> <span class="chip">confidence '+esc(sy.confidence||'?')+'</span></h2>';
+    h+='<p style="font:400 14px/1.55 var(--sans);margin:4px 0 10px">'+esc(sy.read||'')+'</p>';
+    h+='<p style="font:400 13px/1.5 var(--sans);margin:0 0 8px"><b>Attrition:</b> '+esc(sy.attrition_read||'')+'</p>';
+    var hv=sy.host_view||{};
+    h+='<p style="font:400 13px/1.5 var(--sans);margin:0 0 4px"><b>Hosts agree:</b> '+esc(hv.consensus||'')+'</p><p style="font:400 13px/1.5 var(--sans);margin:0 0 8px"><b>Hosts disagree:</b> '+esc(hv.disputed||'')+'</p>';
+    if(hv.numbers_cited&&hv.numbers_cited.length) h+='<p class="small">Numbers cited in-season: '+hv.numbers_cited.map(esc).join(' · ')+'</p>';
+    if(hv.already_priced&&hv.already_priced.length) h+='<p class="small">Flagged as already priced: '+hv.already_priced.map(esc).join(' · ')+'</p>';
+    if(sy.prior_status&&sy.prior_status.length){
+      h+='<div class="tw"><table><thead><tr><th>Prior item</th><th>Kind</th><th>Status</th><th>Evidence</th></tr></thead><tbody>'+sy.prior_status.map(function(it){var st=it.status||''; var c=st==='FIRED'?'neg':st==='HOLDING'?'pos':'p'; return '<tr><td>'+esc(it.item)+'</td><td class="small">'+esc(it.kind)+'</td><td><span class="chip '+c+'">'+esc(st)+'</span></td><td class="small">'+esc(it.evidence)+'</td></tr>'}).join('')+'</tbody></table></div>';
+    }
+    if(sy.watch&&sy.watch.length) h+='<p style="font:400 13px/1.5 var(--sans);margin:8px 0 0"><b>Watch:</b> '+sy.watch.map(esc).join(' · ')+'</p>';
+    h+='<p class="small">'+esc(sy.confidence_why||'')+(sy.flags&&sy.flags.length?' · flags: '+sy.flags.map(esc).join(', '):'')+'. This card is Claude\'s synthesis of the layers below, labelled as judgment; every claim in it points at a row below.</p></div>';
+  }
+  h+='<div class="grid">';
+  // season log
+  h+='<div class="card"><h2>Season log <span class="stamp vol">AS_OF '+esc(t.results.as_of)+'</span></h2><div class="tw"><table><thead><tr><th>Wk</th><th>Date</th><th>Opp</th><th>Site</th><th>Res</th><th>Score</th><th class="num">Close*</th><th>ATS</th></tr></thead><tbody>';
+  t.results.games.forEach(function(g){ h+='<tr><td class="num">'+g.week+'</td><td class="small">'+esc(g.date)+'</td><td>'+esc(g.opp)+(g.opp_fbs?'':' <span class="small">FCS</span>')+'</td><td>'+g.site+'</td><td>'+(g.result||'—')+'</td><td class="num">'+(g.result?(g.pf+'-'+g.pa):'')+'</td><td class="num">'+(g.close_spread!=null?(g.close_spread>0?'+':'')+g.close_spread:'')+'</td><td>'+(g.ats?'<span class="chip '+(g.ats==='W'?'pos':g.ats==='L'?'neg':'p')+'">'+g.ats+'</span>':'')+'</td></tr>'; });
+  h+='</tbody></table></div><p class="small">*CLOSE_PROXY, team perspective (negative = this team favoured).</p></div>';
+  // attrition
+  var at=t.attrition;
+  h+='<div class="card"><h2>Attrition ledger <span class="stamp vol">AS_OF '+esc(D.as_of)+' · verify before use</span></h2>';
+  if(at&&at.players&&at.players.length){
+    h+='<p class="small">Evidence rows: official '+at.counts.official_rows+' · reported '+at.counts.reported_rows+' · podcast '+at.counts.podcast_rows+' · inferred '+at.counts.inferred_rows+'. OFFICIAL = conference availability report (conference games only). PODCAST = a host said it. INFERRED = missing from box scores, a weak signal.</p>';
+    h+='<div class="tw"><table><thead><tr><th>Player</th><th>Pos</th><th>Evidence</th><th>Worst</th><th>Weeks out</th><th>Latest official</th><th>Latest reported</th><th class="num">Value/g</th><th class="num">Unit share</th><th>247</th></tr></thead><tbody>';
+    at.players.slice(0,40).forEach(function(p){ var lo=p.latest_official, lr=p.latest_reported, val=p.value;
+      h+='<tr><td><b>'+esc(p.player)+'</b></td><td>'+esc(p.pos)+'</td><td><span class="chip tier">'+esc(p.evidence_tier)+'</span></td><td>'+sevChip(p.max_severity)+'</td><td class="small">'+esc((p.weeks_flagged_out||[]).join(', '))+'</td><td>'+(lo?statusChip(lo.status)+'<span class="small"> wk'+esc(lo.week)+'</span>':'')+'</td><td>'+(lr?statusChip(lr.status)+'<span class="small"> '+esc(lr.event)+' '+esc(lr.date)+'</span><div class="small">'+esc(lr.detail)+'</div>':'')+'</td><td class="num">'+(val?esc(val.value_pg):'')+'</td><td class="num">'+(val?esc(val.unit_share)+'<div class="small">'+esc(val.role)+' '+esc(val.unit)+'</div>':'')+'</td><td class="small">'+(p.stars_247?esc(p.stars_247.stars)+'★ '+esc(p.stars_247.composite):'pending')+'</td></tr>'; });
+    h+='</tbody></table></div>';
+    if(at.portal&&(at.portal.out.length||at.portal.in.length)){
+      h+='<details><summary>Portal 2026: '+at.portal.n_out+' out, '+at.portal.n_in+' in (stars from CFBD portal feed)</summary><div class="grid">';
+      h+='<div><h3>Out</h3>'+at.portal.out.slice(0,25).map(function(x){return '<div class="small">'+esc(x.player)+' '+esc(x.pos)+(x.stars?' '+esc(x.stars)+'★':'')+' → '+esc(x.other)+'</div>'}).join('')+'</div>';
+      h+='<div><h3>In</h3>'+at.portal.in.slice(0,25).map(function(x){return '<div class="small">'+esc(x.player)+' '+esc(x.pos)+(x.stars?' '+esc(x.stars)+'★':'')+' ← '+esc(x.other)+'</div>'}).join('')+'</div></div></details>';
+    }
+    h+='<p class="small">'+esc(at.coverage_note)+'</p>';
+  } else { h+='<p class="small">No attrition rows in any source for this team. That means nothing was reported or extracted, not that the roster is healthy.</p>'; }
+  h+='</div></div>';
+  // podcast
+  var pc=t.podcast;
+  h+='<div class="card"><h2>What the hosts have said <span class="stamp vol">AS_OF '+esc(pc.last_date||'n/a')+'</span> <span class="small">'+pc.n_claims+' claims · '+pc.n_episodes+' episodes</span></h2>';
+  if(pc.n_claims){
+    var types=Object.keys(pc.by_type).sort(function(a,b){return pc.by_type[b]-pc.by_type[a]});
+    h+='<div class="bar">'+['<button data-f="" class="'+(filterType===''?'on':'')+'">All</button>'].concat(types.map(function(k){return '<button data-f="'+k+'" class="'+(filterType===k?'on':'')+'">'+k+' '+pc.by_type[k]+'</button>'})).join('')+'</div>';
+    var cl=pc.claims.filter(function(c){return !filterType||c.claim_type===filterType}).slice().reverse();
+    var curwk=null;
+    cl.forEach(function(c){ var wk=c.week_ref||'undated'; if(wk!==curwk){ h+='<div class="wk">'+esc(wk)+'</div>'; curwk=wk; }
+      h+='<div class="claim">'+dirChip(c.direction)+'<span class="chip">'+esc(c.claim_type)+'</span>'+(c.priced_flag==='ALREADY_PRICED'?'<span class="chip q">priced</span>':'')+(c.consensus==='DISPUTED'?'<span class="chip q">disputed</span>':'')+esc(c.claim)+(c.number_cited?' <b>['+esc(c.number_cited)+']</b>':'')+'<div class="m">'+esc(c.speaker)+' · '+esc(c.show)+' '+esc(c.date)+' · '+esc(c.episode_id)+' @ '+esc(c.ts)+' · '+esc(c.evidence_grade)+(c.player?' · '+esc(c.player):'')+'</div><div class="m"><q>'+esc(c.quote)+'</q></div></div>'; });
+    h+='<p class="small">Newest first. Host claims are recorded as said; they are the qualitative layer and never overwrite a number. "priced" = the speaker said the market already reflects it.</p>';
+  } else { h+='<p class="small">No podcast claims extracted for this team yet.</p>'; }
+  h+='</div>';
+  // prior
+  var pr=t.prior;
+  h+='<div class="card prior"><h2>Preseason prior '+(pr?staleStamp(pr.as_of,pr.staleness_days,pr.as_of_approximate)+' <span class="chip tier">TIER '+esc(pr.tier)+'</span>':'')+'</h2>';
+  if(pr){
+    h+='<div class="banner">Cover 3 Summer School dossier, '+esc(pr.file)+'. This describes the world as of '+esc(pr.as_of)+' ('+pr.staleness_days+' days ago). Availability and market figures here are historical quotes, not current status. Use the sections above for anything that has happened since.</div>';
+    h+='<h3>Falsifiers (what would mean the prior was wrong)</h3>'+(pr.s11.falsifiers.length?'<ul>'+pr.s11.falsifiers.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'<p class="small">none listed</p>');
+    h+='<h3>Confirmers</h3>'+(pr.s11.confirmers.length?'<ul>'+pr.s11.confirmers.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'<p class="small">none listed</p>');
+    h+='<details><summary>Program state (S2)</summary><p>'+esc(pr.s2_program_state)+'</p></details>';
+    h+='<details><summary>Coaching &amp; scheme (S3)</summary><p>'+esc(pr.s3_coaching_scheme)+'</p></details>';
+    h+='<details><summary>X-factors (S9)</summary><p>'+esc(pr.s9_xfactors)+'</p></details>';
+    h+='<details><summary>Market layer as quoted then (S8, historical)</summary><p>'+esc(pr.s8_market_layer)+'</p></details>';
+    h+='<details><summary>Preseason availability watch (S10, '+pr.staleness_days+' days stale)</summary>'+(pr.s10_availability_watch.length?'<div class="tw"><table><tbody>'+pr.s10_availability_watch.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>':'<p class="small">none</p>')+'</details>';
+    h+='<details><summary>Open questions for the next source (S12)</summary><p>'+esc(pr.s12_open_questions)+'</p></details>';
+  } else { h+='<p class="small">No Summer School dossier for this team (not in the 68-team corpus). Season log, attrition and podcast sections still apply.</p>'; }
+  h+='</div>';
+  $('team').innerHTML=h;
+  Array.prototype.forEach.call($('team').querySelectorAll('button[data-f]'),function(b){ b.onclick=function(){ filterType=b.getAttribute('data-f'); renderTeam(n); window.scrollTo(0, $('team').querySelector('.card:nth-child(3)').offsetTop-10); }; });
+  document.title = n+' · CFB 2026 team context';
+}
+function route(){
+  var m=/team=([^&]+)/.exec(location.hash||'');
+  if(m){ var n=decodeURIComponent(m[1]); if(T[n]){ $('index').classList.add('hide'); $('team').classList.remove('hide'); $('back').classList.remove('hide'); filterType=''; renderTeam(n); window.scrollTo(0,0); return; } }
+  $('team').classList.add('hide'); $('index').classList.remove('hide'); $('back').classList.add('hide'); document.title='CFB 2026 team context'; renderIndex();
+}
+$('q').oninput=function(){ if(location.hash){ location.hash=''; } renderIndex(); };
+$('conf').onchange=function(){ if(location.hash){ location.hash=''; } renderIndex(); };
+$('back').onclick=function(){ location.hash=''; };
+window.addEventListener('hashchange',route);
+route();
+})();
+</script>
+</body>
+</html>
