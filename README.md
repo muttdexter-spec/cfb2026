@@ -10,10 +10,11 @@ The board is an observational tracker, not a tipping service. Two rules shape al
   picker is ranked on it until the manual Saturday closes have been compared against it.
 - **The ratings model does not beat the market.** Since 2 Oct each game is priced with the newest PFF
   export published before its week (vintages 2026W0, 2026W1, 2026W4), each with its own fitted
-  constants. The current vintage (2026W4: home-field 2.08, scale 0.969, fitted on 56 Week 5 games)
-  misses the market by 4.74 points (sd). On 217 finished games, each priced by the vintage published
-  before it, the model misses real margins by more than the market does (MAE 12.98 against 11.04).
-  Its number is shown as a delta, never as an edge.
+  constants. The current vintage (2026W4: home-field 2.63, scale 0.949, fitted on 113 Week 5 and 6
+  games on 8 Oct) misses the market by 5.42 points (sd). On 274 finished games, each priced by the
+  vintage published before it, the model misses real margins by more than the market does (MAE 13.07
+  against 11.45); on its own 56 Week 5 games 2026W4 trails the market by 0.63 points (13.80 against
+  13.18). Its number is shown as a delta, never as an edge.
 
 ## Pages
 
@@ -85,7 +86,8 @@ as finished whatever the clock says.
 **Positions.** One chip per host position. After the game is graded the chip carries the result
 (W / L / P) from the ledger; the detail panel shows margin, CLV against `CLOSE_PROXY` and the pick id.
 The grid has no `pick_id`, so the join is by picker, game and market signature; 642 of 648 grid
-positions resolve to exactly one ledger row (all 115 in Week 5), and the rest show "no ledger row joined".
+positions in Weeks 1-5 resolve to exactly one ledger row (all 115 in Week 5; all 74 in Week 6, added
+8 Oct), and the rest show "no ledger row joined".
 The `Δ` beside a position is the ratings model minus the cited number, the game priced by the newest PFF
 vintage published before its week; the detail panel names the vintage. It is not coloured as an edge.
 The `⇄` marker, the Opposed filter and the "split" note pair positions on the same bet: opposite
@@ -195,7 +197,11 @@ Saturday that is usually the night before).
   DraftKings app shows that number. The same pattern sits under the Week 4 price plays.
 - **Weather.** `game_conditions.csv` stores `kickoff_iso` in the venue's local time; the board now
   asks Open-Meteo for venue-local hours. Week 3 has no rows. Week 5 rows (44 games) were added on
-  2 Oct with the Week 5 picks.
+  2 Oct with the Week 5 picks, and Week 6 rows (39 games) on 8 Oct with the Week 6 picks.
+- **Week 6 markets and props not built yet (8 Oct).** `odds-data.js`, `odds-props.js`, `model-data.js`
+  and `intel-data.js` are still the Week 5 builds. The Week 6 picks, grades and model constants are
+  current; the Week 6 SportsGameOdds OPEN (8 Oct, 9:52 PM ET) has not been run through menu 16, so a Week 6
+  game shows either no sportsbook panel or the look-ahead prices from the 2 Oct pull until it is.
 - **Week 5 injury tracker.** The injury pass ran on 2 Oct (merged 8:46 PM ET; 102 players tracked in
   51 games). No chip on a game means nothing tracked was listed, not that the team is healthy.
 - **Two copies of the board logic.** Desktop and phone pages duplicate their data and join functions.
