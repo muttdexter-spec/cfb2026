@@ -4,7 +4,7 @@ Pushed with git from cfb2026_upload (git pull first, then add, commit, push).
 
 Files:
 
-  index.html                 2,802 bytes
+  index.html                 3,123 bytes
   support.js                 69,150 bytes
   board-bundle.js            1,638,681 bytes
   ref-data.js                289,785 bytes
@@ -14,8 +14,12 @@ Files:
   odds-view.js               53,041 bytes
   intel-data.js              10,496 bytes
   intel-view.js              14,439 bytes
-  Pick Board.dc.html         149,082 bytes
-  Pick Board Mobile.dc.html  146,321 bytes
+  team-view.js               16,715 bytes
+  team-brief.js              572,610 bytes
+  team-data.js               6,536,163 bytes
+  Team Context.html          22,145 bytes
+  Pick Board.dc.html         153,353 bytes
+  Pick Board Mobile.dc.html  150,663 bytes
   Picker Performance.dc.html 59,908 bytes
   host_pick_ledger.csv       496,431 bytes
   market_lines.csv           340,915 bytes
@@ -27,7 +31,7 @@ Files:
 In this folder but NOT part of the upload (build inputs only):
   model_calibration.json
 
-19 files total (18 + README). Vercel serves the repo root as-is; no build step.
+23 files total (22 + README). Vercel serves the repo root as-is; no build step.
 
 Sanity check after pushing:
   board-bundle.js must read 1,638,681 bytes on GitHub. A smaller number means the
@@ -36,3 +40,6 @@ Sanity check after pushing:
   intel-data.js is written by Scraper\make_intel_data.py; without it the board shows
   no injury or prop-card panel. model-data.js and odds-props.js load when a markets
   panel first opens.
+  team-brief.js and team-data.js are written by Scraper\make_team_data.py. The board
+  fetches team-brief.js after first paint for the Context button; team-data.js loads
+  only on Team Context.html.

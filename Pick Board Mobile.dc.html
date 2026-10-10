@@ -10,6 +10,7 @@
 <script src="./ref-data.js"></script>
 <script src="./intel-data.js"></script>
 <script src="./intel-view.js"></script>
+<script src="./team-view.js"></script>
 </head>
 <body>
 <x-dc>
@@ -225,7 +226,49 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent}
 <sc-if value="{{ g.oddsBtn }}" hint-placeholder-val="{{ false }}">
 <button type="button" onClick="{{ g.oddsBtn.click }}" aria-expanded="{{ g.oddsBtn.expanded }}" style="{{ g.oddsBtn.st }}">{{ g.oddsBtn.label }}<span style="font-size:9px;line-height:1">{{ g.oddsBtn.caret }}</span></button>
 </sc-if>
+<sc-if value="{{ g.ctxBtn }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ g.ctxBtn.click }}" aria-expanded="{{ g.ctxBtn.expanded }}" style="{{ g.ctxBtn.st }}">{{ g.ctxBtn.label }}<sc-if value="{{ g.ctxBtn.sub }}" hint-placeholder-val="{{ false }}"><span style="{{ g.ctxBtn.subSt }}">{{ g.ctxBtn.sub }}</span></sc-if><span style="font-size:9px;line-height:1">{{ g.ctxBtn.caret }}</span></button>
+</sc-if>
 
+<sc-if value="{{ g.ctx }}" hint-placeholder-val="{{ false }}">
+<div style="{{ g.ctx.wrapSt }}">
+<div style="{{ g.ctx.headSt }}">
+<span style="{{ g.ctx.titleSt }}">{{ g.ctx.title }}</span>
+<span style="{{ g.ctx.subSt }}">{{ g.ctx.sub }}</span>
+<span style="flex:1 1 8px"></span>
+<sc-for list="{{ g.ctx.links }}" as="lk" hint-placeholder-count="2"><a href="{{ lk.href }}" target="_blank" rel="noopener" style="{{ lk.st }}">{{ lk.label }}</a></sc-for>
+<button type="button" onClick="{{ g.ctx.close }}" aria-label="Close team context" style="{{ g.ctx.closeSt }}">×</button>
+</div>
+<sc-if value="{{ g.ctx.msg }}" hint-placeholder-val="{{ false }}"><p style="{{ g.ctx.msgSt }}">{{ g.ctx.msg }}</p></sc-if>
+<div style="{{ g.ctx.colsSt }}">
+<sc-for list="{{ g.ctx.cols }}" as="tc" hint-placeholder-count="2">
+<div style="{{ tc.st }}">
+<p style="{{ tc.nameSt }}">{{ tc.name }}<span style="{{ tc.metaSt }}">{{ tc.meta }}</span></p>
+<sc-for list="{{ tc.secs }}" as="tsec" hint-placeholder-count="2">
+<p style="{{ tsec.labelSt }}">{{ tsec.label }}</p>
+<sc-for list="{{ tsec.rows }}" as="trow" hint-placeholder-count="3"><div style="{{ trow.st }}" title="{{ trow.title }}"><sc-if value="{{ trow.tag }}" hint-placeholder-val="{{ false }}"><span style="{{ trow.tagSt }}">{{ trow.tag }}</span></sc-if><span style="{{ trow.textSt }}">{{ trow.text }}</span><sc-if value="{{ trow.meta }}" hint-placeholder-val="{{ false }}"><span style="{{ trow.metaSt }}">{{ trow.meta }}</span></sc-if></div></sc-for>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{ g.ctx.secs }}" as="gsec" hint-placeholder-count="2">
+<p style="{{ gsec.labelSt }}">{{ gsec.label }}</p>
+<sc-for list="{{ gsec.rows }}" as="grow" hint-placeholder-count="3"><div style="{{ grow.st }}" title="{{ grow.title }}"><sc-if value="{{ grow.tag }}" hint-placeholder-val="{{ false }}"><span style="{{ grow.tagSt }}">{{ grow.tag }}</span></sc-if><span style="{{ grow.textSt }}">{{ grow.text }}</span><sc-if value="{{ grow.meta }}" hint-placeholder-val="{{ false }}"><span style="{{ grow.metaSt }}">{{ grow.meta }}</span></sc-if></div></sc-for>
+</sc-for>
+<div style="{{ g.ctx.colsSt }}">
+<sc-for list="{{ g.ctx.cols2 }}" as="tc2" hint-placeholder-count="2">
+<div style="{{ tc2.st }}">
+<p style="{{ tc2.nameSt }}">{{ tc2.name }}</p>
+<sc-for list="{{ tc2.secs }}" as="tsec2" hint-placeholder-count="2">
+<p style="{{ tsec2.labelSt }}">{{ tsec2.label }}</p>
+<sc-for list="{{ tsec2.rows }}" as="trow2" hint-placeholder-count="3"><div style="{{ trow2.st }}" title="{{ trow2.title }}"><sc-if value="{{ trow2.tag }}" hint-placeholder-val="{{ false }}"><span style="{{ trow2.tagSt }}">{{ trow2.tag }}</span></sc-if><span style="{{ trow2.textSt }}">{{ trow2.text }}</span><sc-if value="{{ trow2.meta }}" hint-placeholder-val="{{ false }}"><span style="{{ trow2.metaSt }}">{{ trow2.meta }}</span></sc-if></div></sc-for>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<p style="{{ g.ctx.noteSt }}">{{ g.ctx.note }}</p>
+</div>
+</sc-if>
 <sc-if value="{{ g.odds }}" hint-placeholder-val="{{ false }}">
 <div style="margin:10px 0 2px;border:1px solid oklch(0.87 0.01 250);border-radius:9px;background:oklch(1 0 0)">
 <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:9px 10px;border-bottom:1px solid oklch(0.91 0.006 250);background:oklch(0.972 0.006 250);border-radius:9px 9px 0 0">
@@ -1369,7 +1412,7 @@ function etPartsOf(ko) {
 
 class Component extends DCLogic {
   state = { d: null, pickers: [], half: 'both', now: Date.now(), filters: 'closed', pastPanel: false, tier: '0', market: 'all', flag: 'all', ev: 'all', colorBy: 'auto', keyOpen: false, show: 'all', date: 'all', win: 'all', lens: 'all', scrolled: false, filtersOpen: false, open: null, rec: {}, cond: {}, wx: {}, lines: null, results: null, ledgerN: 0,
-    week: null, gameFilter: 'all', oddsOpen: null, oddsTab: 'GAME', allBooks: false, propSort: 'odds' };
+    week: null, gameFilter: 'all', oddsOpen: null, ctxOpen: null, oddsTab: 'GAME', allBooks: false, propSort: 'odds' };
 
   componentDidMount() {
     // collapse once, only after the filters are well out of view, and keep the content
@@ -2338,7 +2381,16 @@ class Component extends DCLogic {
             ticks: ticks, cons: cons,
             consSt: { font: '400 11px/1.4 ' + MONO, color: MUT, minWidth: 0, overflowWrap: 'break-word' },
             chips: chips,
-            intel: sg && window.IV && IV.forWeek(week) ? IV.gameItems(sg.id) : null
+            intel: sg && window.IV && IV.forWeek(week) ? IV.gameItems(sg.id) : null,
+            // Team context (team-view.js): both teams' availability and form, what Cover 3 and
+            // BBOC said about this game, earlier notes and the preseason prior. The button shows
+            // once team-brief.js has loaded, and only on the brief's own week.
+            ctxBtn: sg && window.TV ? TV.button(sg, week, String(s.ctxOpen) === String(sg.id),
+              () => this.setState(st => ({ ctxOpen: String(st.ctxOpen) === String(sg.id) ? null : String(sg.id) })),
+              this._tvTick || (this._tvTick = () => this.setState(st => ({ tvData: (st.tvData || 0) + 1 }))),
+              Object.assign(miniSt(String(s.ctxOpen) === String(sg.id)), { marginTop: '9px', marginLeft: hasOdds ? '6px' : '0' })) : null,
+            ctx: sg && window.TV && String(s.ctxOpen) === String(sg.id)
+              ? TV.panel(sg, week, () => this.setState({ ctxOpen: null }), true) : null
           };
           if (toKick !== null && toKick > 0 && idx.length) closeCands.push({ row: row, ko: ko, toKick: toKick, n: idx.length, day: day.label });
           if (phase === 'post') frows.push(row); else rows.push(row);
@@ -2394,7 +2446,7 @@ class Component extends DCLogic {
         + count + (count === 1 ? ' position' : ' positions'),
       tier: s.tier, market: s.market, flag: s.flag, show: s.show,
       week: String(week), weekOpts: this.weekOptions(), gameFilter: s.gameFilter,
-      onWeek: e => this.setState({ week: e.target.value, open: null, oddsOpen: null, date: 'all', colorBy: 'auto' }),
+      onWeek: e => this.setState({ week: e.target.value, open: null, oddsOpen: null, ctxOpen: null, date: 'all', colorBy: 'auto' }),
       onGameFilter: e => this.setState({ gameFilter: e.target.value, open: null }),
       lensTabs: lensTabs, date: s.date, win: s.win, halfTabs: halfTabs,
       pickerLabel: pk.label, pickerOpts: pk.opts, onPickerAll: pk.clear,

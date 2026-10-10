@@ -24,8 +24,9 @@ The board is an observational tracker, not a tipping service. Two rules shape al
 | `Pick Board.dc.html` | Desktop board: every scheduled game for the week, host positions, graded results, markets, props, injuries, the prop card |
 | `Pick Board Mobile.dc.html` | The same board laid out for a phone. Opens on the games; filters are one tap away |
 | `Picker Performance.dc.html` | Each host's record: CLV and win rate with sample sizes and 95% intervals, over time, by stated confidence and by evidence grade. Not a ranking |
+| `Team Context.html` | Every FBS team on its own view (`#team=<School>`): availability and attrition by evidence tier, what Cover 3 and BBOC said week by week with episode and timestamp, form against CLOSE_PROXY, PFF vintages, portal, and the Summer School prior with its falsifiers. The board's Context panel links here |
 
-The two board pages share their data and view logic through `odds-view.js` and `intel-view.js`, but
+The two board pages share their data and view logic through `odds-view.js`, `intel-view.js` and `team-view.js`, but
 each still carries its own copy of the page logic (about 1,000 identical lines). A fix to one has to
 be made to the other; see "Known issues".
 
@@ -41,6 +42,9 @@ be made to the other; see "Known issues".
 | `intel-data.js` | `window.INTEL`: the injury tracker and the prop card for the current week, joined to the schedule. One week at a time: Week 5 replaced Week 4's card on 2 Oct | `make_intel_data.py` |
 | `odds-view.js` | view layer for prices: de-vig, consensus, best price, line move, prop grids | by hand |
 | `intel-view.js` | view layer for the injury tracker and the prop card | by hand |
+| `team-brief.js` | `window.TEAMBRIEF`: the board's team context for the current week only (both teams of every regular game: form, availability rows, portal, host notes on this game, recent notes, the prior's falsifiers). About 520 KB, 136 KB gzipped. Fetched by `team-view.js` about 0.7 s after first paint | `make_team_data.py` |
+| `team-data.js` | `window.TEAMCTX`: every team and every layer, for `Team Context.html` only. About 6.1 MB, 1.4 MB gzipped. Past the 6 MB line in TEAM_CONTEXT_SPEC section 7, so the next change is a per-team fetch | `make_team_data.py` |
+| `team-view.js` | view layer for the board's Context button and panel (`window.TV`). Never computes a number | by hand |
 | `support.js` | the page runtime (loads React from unpkg) | generated, never edit |
 | `host_pick_ledger.csv`, `reasoning.csv`, `market_lines.csv`, `results.csv`, `game_conditions.csv` | the same data as the inlined CSVs, kept for reference. No page fetches them | menu 14 / by hand |
 
@@ -60,6 +64,11 @@ from 15 to 7, and its first-load transfer from about 860 KB to 650 KB gzipped (t
 were re-sent in full in that test; on Vercel they would mostly have been revalidated). The props
 split, when the build makes it, takes about 270 KB more off.
 
+`team-brief.js` is not in the page head either. `team-view.js` (in the head, 17 KB) adds it as an
+async script about 700 ms after the board renders, so the games paint first. The Context buttons
+appear when it lands, and only when the brief's week is the week on screen. If it fails to load the
+buttons never appear and nothing else on the board changes.
+
 ## Weekly refresh
 
 1. Menu **4** (Monday pull and grade), then work `_UNRESOLVED.csv`, then menu **11** (backup).
@@ -73,7 +82,11 @@ split, when the build makes it, takes about 270 KB more off.
    card update: `py -3 Scraper\make_intel_data.py` (week defaults to `current_week`). It reads the
    week's files in `Odds Scraper\cfb_edge\ref\` and `cfb_data\projections_v1\finetune_WKnn\` and writes
    `intel-data.js`. No other step is needed for an injury-only update.
-5. In `cfb2026_upload\`: `git pull` first (the repo may have commits made elsewhere), then
+5. After each injury pass and whenever new podcast extracts land in `cfb_data\podcast_intel\extract\`:
+   `py -3 Scraper\make_team_data.py` (week defaults to `current_week`). It rebuilds the attrition
+   ledger and the team records in `cfb_data\team_context\` and writes `team-brief.js` and
+   `team-data.js`. Spec: `TEAM_CONTEXT_SPEC.md` in the project root.
+6. In `cfb2026_upload\`: `git pull` first (the repo may have commits made elsewhere), then
    `git add -A`, `git commit`, `git push`. Vercel deploys on the push.
 
 ## What the board shows
@@ -150,6 +163,17 @@ yes/no and touchdown markets.
 **Prices as of.** Every markets panel says when its prices were captured, in Eastern time (on a
 Saturday that is usually the night before).
 
+**Team context.** The Context button beside Markets (it reads "N out · N notes") opens a panel under
+the game. For each team: the season so far (record, ATS against CLOSE_PROXY, the last three games
+with their closing number, the first and latest PFF vintages as a pointer, not an edge), availability
+rows and portal counts. Then what Cover 3 and BBOC said about this game, grouped as availability,
+market and picks, and matchup and form; then each team's notes from the last three weeks and the
+preseason prior's falsifiers and confirmers. Host notes are what was said on air, with speaker,
+episode and timestamp; the green or red team tag is the speaker's direction, not a pick. Availability
+tags: OUT, D, Q, GTD and P come from official conference reports or the weekly injury pass; SAID means
+the only source is a podcast; INF means a starter is missing from two or more box scores, a weak
+signal and a prompt to check. No row is not the same as healthy. `Team ↗` opens the full team page.
+
 ## Sportsbook markets (design notes worth keeping)
 
 - **Consensus is rebuilt from the per-book quotes**: the modal line, then the median price in
@@ -204,6 +228,13 @@ Saturday that is usually the night before).
   game shows either no sportsbook panel or the look-ahead prices from the 2 Oct pull until it is.
 - **Week 5 injury tracker.** The injury pass ran on 2 Oct (merged 8:46 PM ET; 102 players tracked in
   51 games). No chip on a game means nothing tracked was listed, not that the team is healthy.
+- **Team context coverage (10 Oct).** 56 podcast episodes extracted, 8,147 claims, through the BBOC
+  Week 6 preview (9 Oct). Not yet extracted: the Cover 3 Week 3 preview (16 Sep) and Upon Further
+  Review (28 Sep); three Cover 3 episodes stop partway (15 Sep and 22 Sep Big Game Breakdowns, Week 4
+  Locks), listed in `cfb_data\podcast_intel\_resume.json`. The 247 composite column is empty until
+  `Scraper\pull_recruits.py` runs. Official injury reports cover SEC, Big Ten, ACC, Big 12 and MAC
+  conference games only; elsewhere availability is news and podcast claims. `team-data.js` (6.5 MB)
+  is past the size line in TEAM_CONTEXT_SPEC section 7; it loads only on Team Context.html.
 - **Two copies of the board logic.** Desktop and phone pages duplicate their data and join functions.
   Moving them into a shared file like `odds-view.js` is the next structural fix.
 - **Still open, small:** the CFBD market chip takes every field from the best-ranked line row, so a
