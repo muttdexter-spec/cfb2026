@@ -99,8 +99,10 @@ as finished whatever the clock says.
 **Positions.** One chip per host position. After the game is graded the chip carries the result
 (W / L / P) from the ledger; the detail panel shows margin, CLV against `CLOSE_PROXY` and the pick id.
 The grid has no `pick_id`, so the join is by picker, game and market signature; 642 of 648 grid
-positions in Weeks 1-5 resolve to exactly one ledger row (all 115 in Week 5; all 74 in Week 6, added
-8 Oct), and the rest show "no ledger row joined".
+positions in Weeks 1-5 resolve to exactly one ledger row (all 115 in Week 5; all 116 in Week 6; all 105
+in Week 7, added 17 Oct), and the rest show "no ledger row joined". Since 17 Oct a picker with two or
+more positions in one market on one game (Stucky's three team totals on Notre Dame at BYU) is matched on
+the number as well.
 The `Δ` beside a position is the ratings model minus the cited number, the game priced by the newest PFF
 vintage published before its week; the detail panel names the vintage. It is not coloured as an edge.
 The `⇄` marker, the Opposed filter and the "split" note pair positions on the same bet: opposite
@@ -221,11 +223,22 @@ signal and a prompt to check. No row is not the same as healthy. `Team ↗` open
   DraftKings app shows that number. The same pattern sits under the Week 4 price plays.
 - **Weather.** `game_conditions.csv` stores `kickoff_iso` in the venue's local time; the board now
   asks Open-Meteo for venue-local hours. Week 3 has no rows. Week 5 rows (44 games) were added on
-  2 Oct with the Week 5 picks, and Week 6 rows (39 games) on 8 Oct with the Week 6 picks.
-- **Week 6 markets and props not built yet (8 Oct).** `odds-data.js`, `odds-props.js`, `model-data.js`
-  and `intel-data.js` are still the Week 5 builds. The Week 6 picks, grades and model constants are
-  current; the Week 6 SportsGameOdds OPEN (8 Oct, 9:52 PM ET) has not been run through menu 16, so a Week 6
-  game shows either no sportsbook panel or the look-ahead prices from the 2 Oct pull until it is.
+  2 Oct with the Week 5 picks, Week 6 rows (39 games) on 8 Oct with the Week 6 picks, and Week 7 rows
+  (43 games) on 17 Oct.
+- **Week 7 build (17 Oct).** 105 positions from BBOC Sixth Gear (14 Oct), Cover 3 LOCKS (15 Oct) and the
+  BBOC Week 7 preview (16 Oct). Sportsbook prices are the SportsGameOdds MID of 16 Oct, 5:23 PM ET (55 of
+  62 games matched, 53 with sportsbook prices; the 7 unmatched games were played Tuesday to Thursday).
+  Arizona State at Texas Tech and TCU at Baylor show no sportsbook prices: SportsGameOdds lists each game
+  twice, and `make_odds_data.py` kept the duplicate that has no sportsbook rows (only an unverified
+  consensus moneyline). The CFBD data is the 8 Oct pull: **Week 6 is not graded yet** (menu 4),
+  and the board's CFBD market chip for Week 7 is the look-ahead line where one exists. `intel-data.js`
+  (injury tracker and prop card) is still the Week 5 build. Market-inferred Week 7 numbers come from
+  DraftKings on that 16 Oct pull (one, W07-101, from the line read on air) and are flagged on the chip.
+- **Corrected 17 Oct: five rows graded against UTEP.** An ASR row added 9 Oct (`Utah` to `UTEP`) made
+  the 10 Oct grading resolve every "Utah" pick to UTEP: W02-092 and W02-115 were scored against UTEP's
+  game, W03-060 showed L instead of W, W04-037 showed ungradeable instead of W, and W06-052 would have
+  graded against Nevada at UTEP. The row is now `TEAM_CONTEXT` in `asr_corrections_v1.csv`, so it is
+  never applied as a global alias, and all five rows are regraded.
 - **Week 5 injury tracker.** The injury pass ran on 2 Oct (merged 8:46 PM ET; 102 players tracked in
   51 games). No chip on a game means nothing tracked was listed, not that the team is healthy.
 - **Team context coverage (10 Oct).** 56 podcast episodes extracted, 8,147 claims, through the BBOC

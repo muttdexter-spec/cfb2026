@@ -1,4 +1,4 @@
-cfb2026 - complete site, 2026-10-10.
+cfb2026 - complete site, 2026-10-17.
 
 Pushed with git from cfb2026_upload (git pull first, then add, commit, push).
 
@@ -6,25 +6,25 @@ Files:
 
   index.html                 3,123 bytes
   support.js                 69,150 bytes
-  board-bundle.js            1,638,681 bytes
+  board-bundle.js            1,906,660 bytes
   ref-data.js                289,785 bytes
-  odds-data.js               204,283 bytes
-  odds-props.js              1,403,500 bytes
+  odds-data.js               211,194 bytes
+  odds-props.js              1,575,972 bytes
   model-data.js              396 bytes
   odds-view.js               53,041 bytes
   intel-data.js              10,496 bytes
   intel-view.js              14,439 bytes
   team-view.js               16,715 bytes
-  team-brief.js              572,610 bytes
-  team-data.js               6,536,163 bytes
+  team-brief.js              345,990 bytes
+  team-data.js               6,536,167 bytes
   Team Context.html          22,145 bytes
-  Pick Board.dc.html         153,353 bytes
-  Pick Board Mobile.dc.html  150,663 bytes
+  Pick Board.dc.html         153,801 bytes
+  Pick Board Mobile.dc.html  151,111 bytes
   Picker Performance.dc.html 59,908 bytes
-  host_pick_ledger.csv       496,431 bytes
-  market_lines.csv           340,915 bytes
-  reasoning.csv              417,236 bytes
-  game_conditions.csv        19,887 bytes
+  host_pick_ledger.csv       604,423 bytes
+  market_lines.csv           342,157 bytes
+  reasoning.csv              515,208 bytes
+  game_conditions.csv        23,574 bytes
   results.csv                46,056 bytes
   README.md                  (documentation, optional)
 
@@ -34,7 +34,7 @@ In this folder but NOT part of the upload (build inputs only):
 23 files total (22 + README). Vercel serves the repo root as-is; no build step.
 
 Sanity check after pushing:
-  board-bundle.js must read 1,638,681 bytes on GitHub. A smaller number means the
+  board-bundle.js must read 1,906,660 bytes on GitHub. A smaller number means the
   upload did not replace it and the site is showing stale data.
   host_pick_ledger.csv must have 61 columns.
   intel-data.js is written by Scraper\make_intel_data.py; without it the board shows

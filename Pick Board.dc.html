@@ -1083,6 +1083,15 @@ function pickEntry(p, matchup, reasonRows, ledgerRows) {
   const sig = pickSig(p[1]);
   const exact = list.filter(x => x.sig === sig);
   if (exact.length === 1) return exact[0];
+  if (exact.length > 1) {
+    // Same picker, game and market more than once (two team totals, say): break the tie on the number (2026-10-17).
+    const m = /([+\-]?\d+(?:\.\d+)?)(?:\s*\[INF\])?\s*$/.exec(String(p[1] || ''));
+    if (m) {
+      const v = Math.abs(parseFloat(m[1]));
+      const byNum = exact.filter(x => Math.abs(parseFloat(x.led.number_cited || x.led.price_cited)) === v);
+      if (byNum.length === 1) return byNum[0];
+    }
+  }
   const mt = sig.split('|')[0];
   const byMt = list.filter(x => x.sig.indexOf(mt + '|') === 0);
   return byMt.length === 1 ? byMt[0] : null;
