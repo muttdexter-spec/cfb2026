@@ -9,12 +9,13 @@ The board is an observational tracker, not a tipping service. Two rules shape al
 - **CLV is measured against `CLOSE_PROXY`**, the last line CFBD recorded, not a verified close. No
   picker is ranked on it until the manual Saturday closes have been compared against it.
 - **The ratings model does not beat the market.** Since 2 Oct each game is priced with the newest PFF
-  export published before its week (vintages 2026W0, 2026W1, 2026W4), each with its own fitted
-  constants. The current vintage (2026W4: home-field 2.63, scale 0.949, fitted on 113 Week 5 and 6
-  games on 8 Oct) misses the market by 5.42 points (sd). On 274 finished games, each priced by the
-  vintage published before it, the model misses real margins by more than the market does (MAE 13.07
-  against 11.45); on its own 56 Week 5 games 2026W4 trails the market by 0.63 points (13.80 against
-  13.18). Its number is shown as a delta, never as an edge.
+  export published before its week (vintages 2026W0, 2026W1, 2026W4, 2026W7), each with its own fitted
+  constants. The current vintage (2026W7: home-field 2.87, scale 0.739, fitted on 24 Oct on the 56
+  Week 8 games it prices) misses the market by 3.10 points (sd), an in-sample fit to those same lines,
+  not a forecast error. On 400 finished games, each priced by the vintage published before it, the
+  model misses real margins by more than the market does (MAE 12.72 against 11.33); on the first 12
+  finished Week 8 games 2026W7 was 9.81 against the market's 10.71, far too few to read. Its number is
+  shown as a delta, never as an edge.
 
 ## Pages
 
@@ -100,7 +101,7 @@ as finished whatever the clock says.
 (W / L / P) from the ledger; the detail panel shows margin, CLV against `CLOSE_PROXY` and the pick id.
 The grid has no `pick_id`, so the join is by picker, game and market signature; 642 of 648 grid
 positions in Weeks 1-5 resolve to exactly one ledger row (all 115 in Week 5; all 116 in Week 6; all 105
-in Week 7, added 17 Oct), and the rest show "no ledger row joined". Since 17 Oct a picker with two or
+in Week 7, added 17 Oct; all 104 in Week 8, added 24 Oct), and the rest show "no ledger row joined". Since 17 Oct a picker with two or
 more positions in one market on one game (Stucky's three team totals on Notre Dame at BYU) is matched on
 the number as well.
 The `Δ` beside a position is the ratings model minus the cited number, the game priced by the newest PFF
@@ -215,7 +216,9 @@ signal and a prompt to check. No row is not the same as healthy. `Team ↗` open
   ratings no longer feed the model: since 2 Oct `calibrate_model.py` reads every vintage in
   `CFB Picks\pff_ratings_vintages.csv` and `make_site_data.py` carries them in `BOARD.META.model`.
 - **`model-data.js` is the original projection run**, not the fine-tuned overlay, and carries no run
-  id or timestamp. Week 5: `prop_projections.py` run `20261003T001701Z`, fitted through Week 4.
+  id or timestamp. Week 5: `prop_projections.py` run `20261003T001701Z`, fitted through Week 4. Week 8:
+  the projection files of 24 Oct (`fact_player_projections_WK08_2026.csv`, 9:00 AM ET), packaged by
+  menu 16; see the doubled look-ahead lines above for four games.
 - **SportsGameOdds' DraftKings main line is not always DraftKings' live line.** In the 2 Oct OPEN
   snapshot, 69 DraftKings mains disagree with DraftKings' own alt ladder in the same file (for example
   Chris Marshall: main 68.5 at -110, ladder 78.5 at -118 and 79.5 at -114). Every "DraftKings below
@@ -223,17 +226,38 @@ signal and a prompt to check. No row is not the same as healthy. `Team ↗` open
   DraftKings app shows that number. The same pattern sits under the Week 4 price plays.
 - **Weather.** `game_conditions.csv` stores `kickoff_iso` in the venue's local time; the board now
   asks Open-Meteo for venue-local hours. Week 3 has no rows. Week 5 rows (44 games) were added on
-  2 Oct with the Week 5 picks, Week 6 rows (39 games) on 8 Oct with the Week 6 picks, and Week 7 rows
-  (43 games) on 17 Oct.
+  2 Oct with the Week 5 picks, Week 6 rows (39 games) on 8 Oct with the Week 6 picks, Week 7 rows
+  (43 games) on 17 Oct, and Week 8 rows (37 games) on 24 Oct.
 - **Week 7 build (17 Oct).** 105 positions from BBOC Sixth Gear (14 Oct), Cover 3 LOCKS (15 Oct) and the
   BBOC Week 7 preview (16 Oct). Sportsbook prices are the SportsGameOdds MID of 16 Oct, 5:23 PM ET (55 of
   62 games matched, 53 with sportsbook prices; the 7 unmatched games were played Tuesday to Thursday).
   Arizona State at Texas Tech and TCU at Baylor show no sportsbook prices: SportsGameOdds lists each game
   twice, and `make_odds_data.py` kept the duplicate that has no sportsbook rows (only an unverified
-  consensus moneyline). The CFBD data is the 8 Oct pull: **Week 6 is not graded yet** (menu 4),
-  and the board's CFBD market chip for Week 7 is the look-ahead line where one exists. `intel-data.js`
+  consensus moneyline). The CFBD data was the 8 Oct pull, so the board's CFBD market chip for Week 7
+  showed the look-ahead line where one existed; CFBD was refreshed on 24 Oct and Weeks 6 and 7 are
+  graded. `intel-data.js`
   (injury tracker and prop card) is still the Week 5 build. Market-inferred Week 7 numbers come from
   DraftKings on that 16 Oct pull (one, W07-101, from the line read on air) and are flagged on the chip.
+- **Week 8 build (24 Oct).** 104 positions from BBOC Sixth Gear (21 Oct), Cover 3 LOCKS (22 Oct) and the
+  BBOC Week 8 preview (23 Oct); `W08-021` is a permanent gap (Danny Kanell's Utah first half came from
+  another outlet's pick-them-all format and was removed at audit). **Segment rule (24 Oct):** a pick a
+  show segment requires (the moneyline sprinkles, the Sixth Gear moneyline parlay and P4 Level-Up, the
+  producer and Club Kids guest picks, BBOC trash and both BBOC parlays) is tier 1 and tagged
+  `SEGMENT_FORCED` in `stated_confidence`, and its chip says so; a segment pick the host had already
+  bet keeps its card tier. 23 Week 8 rows carry the tag. Sportsbook prices are the SportsGameOdds MID
+  of 24 Oct, 8:57 AM ET (44 of 56 games; the 12 unpriced games were played Tuesday to Friday).
+  Market-inferred Week 8 numbers are DraftKings on the CFBD pull of 24 Oct (six are the number read on
+  air by a co-host) and are flagged on the chip. The ratings refit is in the model note above.
+- **Doubled look-ahead lines (found 24 Oct).** For 24 game-book pairs in Weeks 4 to 9 (in Week 8: Texas
+  A&M at Alabama, Ole Miss at Texas, Houston at Utah, Indiana at Michigan) the line data holds a stale
+  DraftKings `CURRENT` row, captured with the 04:00Z placeholder kickoff from 6 Sep to 8 Oct, ahead of
+  the current one. `calibrate_model.py` takes the newest capture and is unaffected. Readers that take
+  the first row are not: the prop projections behind `model-data.js` (for those four games they were
+  built on the summer lines, Indiana-Michigan's total as 52.5 instead of 42.5), the menu 7 gate (it
+  quarantined W08-031 and W08-032 against Alabama -2.5), and the board's CFBD fallback chip (hidden this
+  week, because the sportsbook chip wins on all four). The fix is the newest-capture tie-break
+  `calibrate_model.py` already uses; until it lands, treat the prop projections on those four games as
+  unreliable.
 - **Corrected 17 Oct: five rows graded against UTEP.** An ASR row added 9 Oct (`Utah` to `UTEP`) made
   the 10 Oct grading resolve every "Utah" pick to UTEP: W02-092 and W02-115 were scored against UTEP's
   game, W03-060 showed L instead of W, W04-037 showed ungradeable instead of W, and W06-052 would have
